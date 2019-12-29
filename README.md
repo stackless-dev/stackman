@@ -55,7 +55,7 @@ Other platforms can be easily adapted from both existing implementations for oth
 projects as well as from example code provided.
 
 ## History
-This works is originally inspired by *Stackless Python* by @ctismer, where the original switching code was
+This works is originally inspired by *Stackless Python* by [Christian Tismer](https://github.com/ctismer), where the original switching code was
 developed.
 
 Later projects, like *gevent* have taken that idea and provided additional platform compatibility but
