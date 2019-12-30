@@ -18,19 +18,20 @@ typedef struct ctxt01
 } ctxt01;
 
 /* test retrieval of stack pointer */
-void *test_01_cb(void* context, void *sp, int stage)
+void *test_01_cb(void* context, int _opcode, void *sp)
 {
 	ctxt01 *c = (ctxt01*)context;
-	assert(stage == 0 || stage == 1);
+	stackman_op_t opcode = (stackman_op_t)_opcode;
+	assert(opcode == STACKMAN_OP_SAVE || opcode == STACKMAN_OP_RESTORE);
 
 	/* check that stages are init in order */
 	assert(!c->sp[1]);
-	if (stage)
+	if (opcode == STACKMAN_OP_RESTORE)
 		assert(c->sp[0]);
 	else
 		assert(!c->sp[1]);
-	c->sp[stage] = sp;
-	if (stage == 0)
+	c->sp[opcode] = sp;
+	if (opcode == (int)STACKMAN_OP_SAVE)
 		return sp ;/* no stack switching */
 	return (void*)1; /* test return argument */
 }
@@ -80,13 +81,13 @@ void restore_stack(void *sp, void *buf, size_t size)
 		memcpy((void*)((char*)sp-size), buf, size);
 }
 
-void *test_02_cb(void* context, void *sp, int stage)
+void *test_02_cb(void* context, int opcode, void *sp)
 {
 	ctxt02 *c = (ctxt02*)context;
 	c->log[c->counter++] = c->val;
 	if (c->val == 0) {
 		/* storing stub */
-		if (stage == 0) {
+		if (opcode == (int)STACKMAN_OP_SAVE) {
 			c->stack_near = sp;
 			c->size = STACKMAN_SP_SUB((char*)c->stack_far, (char*)sp);
 			c->buf = malloc(c->size);
@@ -95,7 +96,7 @@ void *test_02_cb(void* context, void *sp, int stage)
 		return sp;
 	}
 	/* now we are jumping.  no need to save old stack */
-	if (stage == 0) {
+	if (opcode == (int)STACKMAN_OP_SAVE) {
 		return c->stack_near;
 	} else {
 		restore_stack(c->stack_near, c->buf, c->size);

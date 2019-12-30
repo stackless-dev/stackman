@@ -64,10 +64,10 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 	/* sp = get stack pointer from assembly code */
 	__asm__ ("mov %[result], sp" : [result] "=r" (sp));
 	/* store stack */
-	sp = callback(context, sp, 0);
+	sp = callback(context, STACKMAN_OP_SAVE, sp);
 	/* set stack pointer from sp using assembly */
 	__asm__ ("mov sp, %[result]" : : [result] "r" (sp));
-	sp = callback(context, sp, 1);
+	sp = callback(context, STACKMAN_OP_RESTORE, sp);
 	/* restore registers */
 	return sp;
 }

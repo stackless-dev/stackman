@@ -28,12 +28,12 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 	__asm__ volatile ("" : : : PRESERVE);
 	/* sp = get stack pointer from assembly code */
 	__asm__ ("movq %%rsp, %[result]" : [result] "=r" (stack_pointer));
-	stack_pointer = callback(context, stack_pointer, 0);
+	stack_pointer = callback(context, STACKMAN_OP_SAVE, stack_pointer);
 
 	/* set stack pointer from sp using assembly */
 	__asm__ ("movq %[result], %%rsp" :: [result] "r" (stack_pointer));
 
-	stack_pointer = callback(context, stack_pointer, 1);
+	stack_pointer = callback(context, STACKMAN_OP_RESTORE, stack_pointer);
 	/* restore non-volatile registers from stack */
 	return stack_pointer;
 }

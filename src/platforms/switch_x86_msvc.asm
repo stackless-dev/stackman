@@ -18,15 +18,15 @@ stackman_switch_raw PROC callback:DWORD, context:DWORD
 
   mov eax, esp
 
-  push 0;                  /* arg 3: stage                       */ 
-  push eax ;               /* arg 2: current (old) stack pointer */
+  push eax ;               /* arg 3: current (old) stack pointer */
+  push 0;                  /* arg 2: opcode STACKMAN_OP_SAVE     */ 
   push edi ;               /* arg 1: context                     */
   call esi ;               /* call callback()                    */
 
   mov esp, eax;            /* change the stack pointer */
 
-  push 1;                  /* arg 3: stage                       */ 
-  push eax ;               /* arg 2: current (new) stack pointer */
+  push eax ;               /* arg 3: current (new) stack pointer */
+  push 1;                  /* arg 2: opcode STACKMAN_OP_RESTORE  */ 
   push edi ;               /* arg 1: context                     */
   call esi ;               /* call callback()                    */
   add esp, 12

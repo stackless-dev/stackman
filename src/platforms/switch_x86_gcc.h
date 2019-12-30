@@ -41,8 +41,8 @@ void *result;
     "movl %[ctx], %%edi\n" /* save 'context' for later         */
 
     /* first call */     
-    "movl $0, 8(%%esp)\n"     /* arg 2 stage */
-    "movl %%esp, 4(%%esp)\n"  /* arg 1 sp */
+    "movl %%esp, 8(%%esp)\n"  /* arg 2 sp */
+    "movl $0, 4(%%esp)\n"     /* arg 1 opcode STACKMAN_OP_SAVE */
     "movl %%edi, 0(%%esp)\n"  /* arg 0 context */
     "call *%%esi\n"
 
@@ -50,8 +50,8 @@ void *result;
     "movl %%eax, %%esp\n"
      
     /* second call */
-    "movl $1, 8(%%esp)\n"     /* arg 2 stage */
-    "movl %%eax, 4(%%esp)\n"  /* arg 1 sp */
+    "movl %%eax, 8(%%esp)\n"  /* arg 2 sp */
+    "movl $1, 4(%%esp)\n"     /* arg 1 opcode STACKMAN_OP_RESTORE */
     "movl %%edi, 0(%%esp)\n"  /* arg 0 context */
     "call *%%esi\n"
 

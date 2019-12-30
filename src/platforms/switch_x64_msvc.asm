@@ -55,16 +55,16 @@ NESTED_ENTRY stackman_switch, _TEXT$00
 	; load stack base that we are saving minus the callee argument
 	; shadow stack.  We don't want that clobbered
 	mov rcx, r13		;arg1, context
-	lea rdx, [rsp+20h]  ;arg2, stack pointer
-	mov r8, 0			;arg3, stage
+	mov rdx, 0			;arg2, opcode STACKMAN_OP_SAVE
+	lea r8, [rsp+20h]   ;arg3, stack pointer
 	call r12 ;
 
 	;actual stack switch (and re-allocating the shadow stack):
 	lea rsp, [rax-20h]
 	
 	mov rcx, r13		;arg1, context
-	mov rdx, rax 		;arg2, new stack pointer
-	mov r8, 1			;arg3, stage
+	mov rdx, 1			;arg2, opcode STACKMAN_OP_RESTORE
+	mov r8, rax 		;arg3, new stack pointer
 	call r12
 	;return the rax
 	

@@ -23,11 +23,11 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 
 	/* sp = get stack pointer from assembly code */
 	/* __asm__("get sp into stack_pointer") */
-	stack_pointer = callback(context, stack_pointer, 0);
+	stack_pointer = callback(context, STACKMAN_OP_SAVE, stack_pointer);
 
 	/* set stack pointer from sp using assembly */
 	/* __asm__("store sp from stack_pointer") */
-	stack_pointer = callback(context, stack_pointer, 1);
+	stack_pointer = callback(context, STACKMAN_OP_RESTORE, stack_pointer);
 	/* restore non-volatile registers from stack */
 	/* __asm__("pop volatile registers") */
 	return stack_pointer;
