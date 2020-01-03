@@ -32,7 +32,8 @@
 #endif
 #endif /* __GNUC__ */
 
-#ifndef STACKMAN_PLATFORM
+/* unless STACKMAN_OPTIONAL is defined, error if platform is not found */
+#if !defined(STACKMAN_OPTIONAL) && !defined(STACKMAN_PLATFORM)
 #error "Unsupported platform!"
 #endif
 
