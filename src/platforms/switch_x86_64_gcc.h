@@ -8,7 +8,12 @@
  * floating point functions is therefore dangerous.
  */
 
-#if defined STACKMAN_SWITCH_IMPL && !STACKMAN_SWITCH_ASM
+#if defined(STACKMAN_SWITCH_ASM_TEST) && !defined (STACKMAN_EXTERNAL_ASM)
+#define STACKMAN_EXTERNAL_ASM "platforms/switch_x86_64_gcc.S"
+#endif
+
+#if defined STACKMAN_SWITCH_IMPL
+#if !defined STACKMAN_EXTERNAL_ASM && !STACKMAN_SWITCH_ASM
 #include "../stackman_switch.h"
 
 #define PRESERVE "rbx", "r12", "r13", "r14", "r15"
@@ -37,3 +42,8 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 	return stack_pointer;
 }
 #endif
+#if STACKMAN_SWITCH_ASM && defined(STACKMAN_EXTERNAL_ASM)
+#include STACKMAN_EXTERNAL_ASM
+#endif
+
+#endif /* STACKMAN_SWITCH_IMPL */
