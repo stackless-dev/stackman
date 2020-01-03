@@ -17,8 +17,7 @@
  * and preserve registers. But we ourselves assemble the 
  * calls and stack pointer changes 
  */
-#undef STACKMAN_SWITCH_IMPL
-#include "../stackman.h"
+#include "../stackman_switch.h"
 
 # define PRESERVED "ebx", "esi", "edi"
 

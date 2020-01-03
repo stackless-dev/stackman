@@ -3,12 +3,12 @@
  * The C function defined here, saves and restores the structured
  * exception handling state.
  */
-#ifdef STACKMAN_SWITCH_IMPL
-
+#ifndef STACKMAN_EXTERNAL_ASM
 #define STACKMAN_EXTERNAL_ASM switch_x86_msvc.asm
+#endif
 
-#undef STACKMAN_SWITCH_IMPL
-#include "../stackman.h"
+#ifdef STACKMAN_SWITCH_IMPL
+#include "../stackman_switch.h"
 
 extern void *stackman_switch_raw(stackman_cb_t callback, void *context);
 

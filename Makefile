@@ -22,11 +22,17 @@ DEBUG = #-DDEBUG_DUMP
 .PHONY: test tests
 
 test: tests
+	@echo "test"
 	bin/test
+	@echo "test_static"
+	bin/test_static
 	@echo "*** All test suites passed ***"
 
 tests: bin/test
+tests: bin/test_static
 tests: LDLIBS := -lstackman
 
 bin/test: tests/test.o bin/libstackman.a
 	$(CC) $(LDFLAGS) -o $@ $< ${DEBUG} $(LDLIBS)
+bin/test_static: tests/test_static.o
+	$(CC) $(LDFLAGS) -o $@ $< ${DEBUG}

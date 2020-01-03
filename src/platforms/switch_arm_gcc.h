@@ -29,8 +29,7 @@
  * aren't stored on the stack.
  */
 
-#undef STACKMAN_SWITCH_IMPL
-#include "../stackman.h"
+#include "../stackman_switch.h"
 
 /* these are the core registers that must be preserved. We save them because
  * we have no idea what happens after the switch, and the caller of this function

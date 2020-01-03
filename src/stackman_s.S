@@ -4,6 +4,5 @@
  * files.
  */
 
-#define STACKMAN_SWITCH_IMPL
 #define STACKMAN_SWITCH_ASM 1
-#include "platforms/platform.h"
+#include "stackman_impl.h"

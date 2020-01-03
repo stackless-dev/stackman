@@ -54,6 +54,16 @@ standardizing the api.  The implementation currently works for:
 Other platforms can be easily adapted from both existing implementations for other
 projects as well as from example code provided.
 
+## Usage
+ - Include `stackman.h` for a decleration of the `stackman_switch()` function
+   and the definition of various platform specific macros.  See the documentation
+   in the header file for the various macros
+ - Include `stackman_impl.h` from a source file to *define* `stackman_switch()`.
+   This can also be an assembler file with the `.S` suffix, see `stackman_impl.h` for
+   details.
+ - Implement switching mechanism via the callback and call `stackman_switch()` from your
+   program as appropriate.
+
 ## History
 This works is originally inspired by *Stackless Python* by [Christian Tismer](https://github.com/ctismer), where the original switching code was
 developed.

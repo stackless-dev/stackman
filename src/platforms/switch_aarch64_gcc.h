@@ -18,8 +18,7 @@
  * option is applied with an __attribute__.
  */
 
-#undef STACKMAN_SWITCH_IMPL
-#include "../stackman.h"
+#include "../stackman_switch.h"
 
 /* these are the core registers that must be preserved. We save them because
  * we have no idea what happens after the switch, and the caller of this function
@@ -34,6 +33,7 @@
 
 
 __attribute__((optimize("O1", "no-omit-frame-pointer")))
+STACKMAN_SWITCH_STORAGE
 void *stackman_switch(stackman_cb_t callback, void *context)
 {
 	void *sp;
@@ -48,7 +48,7 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 	sp = callback(context, STACKMAN_OP_SAVE, sp);
 	/* set stack pointer from sp using assembly */
 	__asm__ ("mov sp, %[result]" : : [result] "r" (sp));
-	sp = callback(context, STACKMAN_OP_RESTORE, sp);
+	sp = callback(context, STACKMAN_OP_RESTORE, sp, 1);
 	return sp;
 }
 #endif

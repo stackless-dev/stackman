@@ -9,8 +9,7 @@
  */
 
 #if defined STACKMAN_SWITCH_IMPL && !STACKMAN_SWITCH_ASM
-#undef STACKMAN_SWITCH_IMPL
-#include "../stackman.h"
+#include "../stackman_switch.h"
 
 #define PRESERVE "rbx", "r12", "r13", "r14", "r15"
 
