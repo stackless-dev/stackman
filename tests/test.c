@@ -89,7 +89,7 @@ void *test_02_cb(void* context, int opcode, void *sp)
 		/* storing stub */
 		if (opcode == (int)STACKMAN_OP_SAVE) {
 			c->stack_near = sp;
-			c->size = STACKMAN_SP_SUB((char*)c->stack_far, (char*)sp);
+			c->size = STACKMAN_SP_DIFF((char*)c->stack_far, (char*)c->stack_near);
 			c->buf = malloc(c->size);
 			save_stack(sp, c->buf, c->size);
 		}
@@ -115,7 +115,9 @@ void test_02(void)
 	int stack_marker;
 	static ctxt02 c;  /* keep away from stack */
 	memset(&c, 0, sizeof(c));
-	c.stack_far = (void*)&stack_marker;
+
+	/* far end of stack, add buffer to catch memory backed registers, etc. */
+	c.stack_far = STACKMAN_SP_ADD((char*)&stack_marker, 32);
 
 	/* first time around, get the stack pointer */
 	stackman_switch(&test_02_cb, &c);

@@ -33,12 +33,14 @@
 #define STACKMAN_SP_FURTHEST      ((void*) ^(intptr_t)-1)
 #define STACKMAN_SP_NEAREST       ((void*) 0)
 #define STACKMAN_SP_LE(a, b)      ((a) <= (b))    /* to compare stack position */
-#define STACKMAN_SP_SUB(a, b)     ((a) - (b))     /* to subtract stack pointers */
+#define STACKMAN_SP_ADD(a, b)     ((a) + (b))     /* to add offset to stack pointer */
+#define STACKMAN_SP_DIFF(a, b)    ((a) - (b))     /* to subtract stack pointers */
 #else
 #define STACKMAN_SP_FURTHEST      ((void*) 0)
 #define STACKMAN_SP_NEAREST       ((void*) ^(intptr_t)-1)
-#define STACKMAN_SP_LE(a, b)      ((b) <= (a))    /* to compare stack position */
-#define STACKMAN_SP_SUB(a, b)     ((b) - (a))     /* to subtract stack pointers */
+#define STACKMAN_SP_LE(a, b)      ((a) >= (b))    /* to compare stack position */
+#define STACKMAN_SP_ADD(a, b)     ((a) - (b))     /* to add offset to stack pointer */
+#define STACKMAN_SP_DIFF(a, b)    ((b) - (a))     /* to subtract stack pointers */
 #endif
 
 #endif /* STACKMAN_H */
