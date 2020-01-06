@@ -23,8 +23,8 @@
  * runs because it does not use fp for restoring the stack pointer
  * 
  * However, for now the optimizer can be instructed to omit frame
- * ponter, so we simply use that method. the -fomit-frame-pointer
- * option is applied with an __attribute__.
+ * pointer, so we simply use that method. the -fomit-frame-pointer
+ * option is applied with an __attribute__, and r11 explicitly pushed.
  * we must also enable optimization level "O" so that intermediates
  * aren't stored on the stack.
  */
@@ -34,15 +34,19 @@
 /* these are the core registers that must be preserved. We save them because
  * we have no idea what happens after the switch, and the caller of this function
  * assumes that they are left in place when we return to him.
- * r11 is not explicitly mentioned, gcc uses it as fp and pushes it
- * implicitly.
+ * If frame pointers are geing generated, gcc disallows us to use r11
+ * since it uses it for that.  It will also restore sp on exit using
+ * r11. But disabling frame pointers for this function allows us to
+ * push it normally and restore it.
  */
-#define NV_REGISTERS "r4", "r5","r6", "r7", "r8", "r9", "r10" /*, "r11"*/
+#define NV_REGISTERS "r4", "r5","r6", "r7", "r8", "r9", "r10" , "r11"
+
 /* These are the floating point extension registers. Same applies, we must preserve them in
- * case the calling function was doing any floating point logic.  Note that we do not
- * preserve the FPSCR and VPR registers since they have complex rules about preservation.
+ * case the calling function was doing any floating point logic.
  * it may be optionally disabled to store these floating point registers by not
  * defining them here.
+ * Note that we do not
+ * preserve the FPSCR and VPR registers since they have complex rules about preservation.
  */
 #ifndef __thumb__
 #define CP_REGISTERS "d8","d9","d10","d11","d12","d13","d14","d15"
