@@ -11,52 +11,84 @@ stackman_switch:
 .LFB0:
 	.cfi_startproc
 	endbr64
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
 	pushq	%r15
+	.cfi_def_cfa_offset 16
+	.cfi_offset 15, -16
 	pushq	%r14
+	.cfi_def_cfa_offset 24
+	.cfi_offset 14, -24
 	pushq	%r13
+	.cfi_def_cfa_offset 32
+	.cfi_offset 13, -32
 	pushq	%r12
+	.cfi_def_cfa_offset 40
+	.cfi_offset 12, -40
+	pushq	%rbp
+	.cfi_def_cfa_offset 48
+	.cfi_offset 6, -48
 	pushq	%rbx
-	subq	$8, %rsp
-	.cfi_offset 15, -24
-	.cfi_offset 14, -32
-	.cfi_offset 13, -40
-	.cfi_offset 12, -48
+	.cfi_def_cfa_offset 56
 	.cfi_offset 3, -56
-	movq	%rdi, %rax
-	movq	%rsi, %rcx
+	subq	$24, %rsp
+	.cfi_def_cfa_offset 80
+	movq	%rdi, %r8
+	movq	%rsi, %rdi
+	movl	$40, %eax
+	movq	%fs:(%rax), %rsi
+	movq	%rsi, 8(%rsp)
+	xorl	%esi, %esi
 #APP
-# 29 "switch_x86_64_gcc.h" 1
+# 39 "switch_x86_64_gcc.h" 1
+	fstcw 2(%rsp)
+	stmxcsr 4(%rsp)
+	
+# 0 "" 2
+# 44 "switch_x86_64_gcc.h" 1
 	movq %rsp, %rdx
 # 0 "" 2
 #NO_APP
-	movl	$0, %esi
-	movq	%rcx, %r14
-	movq	%rcx, %rdi
-	movq	%rax, %rbx
-	call	*%rax
+	movq	%rdi, %r14
+	movq	%r8, %rbx
+	call	*%r8
 	movq	%rax, %rdx
 #APP
-# 33 "switch_x86_64_gcc.h" 1
+# 48 "switch_x86_64_gcc.h" 1
 	movq %rax, %rsp
 # 0 "" 2
 #NO_APP
 	movl	$1, %esi
 	movq	%r14, %rdi
 	call	*%rbx
-	addq	$8, %rsp
+#APP
+# 52 "switch_x86_64_gcc.h" 1
+	ldmxcsr 4(%rsp)
+	fldcw 2(%rsp)
+	
+# 0 "" 2
+#NO_APP
+	movl	$40, %ecx
+	movq	8(%rsp), %rsi
+	xorq	%fs:(%rcx), %rsi
+	jne	.L4
+	addq	$24, %rsp
+	.cfi_remember_state
+	.cfi_def_cfa_offset 56
 	popq	%rbx
-	popq	%r12
-	popq	%r13
-	popq	%r14
-	popq	%r15
+	.cfi_def_cfa_offset 48
 	popq	%rbp
-	.cfi_def_cfa 7, 8
+	.cfi_def_cfa_offset 40
+	popq	%r12
+	.cfi_def_cfa_offset 32
+	popq	%r13
+	.cfi_def_cfa_offset 24
+	popq	%r14
+	.cfi_def_cfa_offset 16
+	popq	%r15
+	.cfi_def_cfa_offset 8
 	ret
+.L4:
+	.cfi_restore_state
+	call	__stack_chk_fail@PLT
 	.cfi_endproc
 .LFE0:
 	.size	stackman_switch, .-stackman_switch
