@@ -1,11 +1,8 @@
 /* This is the System V ABI for x86-64.
  * It is used on linux and other similar systems (other than
  * windows).
- * https://wiki.osdev.org/System_V_ABI
- * Note that we don't preserve the mmx mxcsr register or the
- * fp x87 cw (control word) as is strictly required by the ABI
- * since it requires more custom assembly.  switching between
- * floating point functions is therefore dangerous.
+ * https://wiki.osdev.org/System_V_ABI and 
+ * https://www.uclibc.org/docs/psABI-x86_64.pdf
  */
 
 #if defined(STACKMAN_SWITCH_ASM_TEST) && !defined (STACKMAN_EXTERNAL_ASM)
@@ -16,20 +13,33 @@
 #if !defined STACKMAN_EXTERNAL_ASM && !STACKMAN_SWITCH_ASM
 #include "../stackman_switch.h"
 
-#define PRESERVE "rbx", "r12", "r13", "r14", "r15"
-
+/* 
+ * define registers to save.
+ * x87 control word is callee saved and certain bits of the MXCSR
+ * too, so we save both manually.
+ */
+#define PRESERVE "rbx", "r12", "r13", "r14", "r15", "rbp"
+ 
 /* Need the optimization level to avoid storing 'stack_pointer'
  * and other locals
  * on the stack which would cause the wrong value to be sent to 
  * the second callback call (it would be read from stack).
- * Also, ensure a frame pointer is made, pushing rbp.
+ * We also enforce no frame pointer, so that locals are not
+ * accessessed using rbp (base pointer), and push rbp ourselves.
+ * stack protection code may be generated.  This is normally safe,
+ * but can be forcefully disabled using "no-stack-protector" option.
  */
-__attribute__((optimize("O", "no-omit-frame-pointer")))
+#define OPTIMIZE "O", "omit-frame-pointer"
+__attribute__((optimize(OPTIMIZE)))
 void *stackman_switch(stackman_cb_t callback, void *context)
 {
 	void *stack_pointer;
-	/* assembly to save non-volatile registers */
-	__asm__ volatile ("" : : : PRESERVE);
+	/* assembly to save non-volatile registers, including x87 and mmx */
+	int mxcsr; short x87cw;
+	__asm__ volatile (
+		"fstcw %[cw]\n\t"
+        "stmxcsr %[sr]\n\t"
+		: [cw] "=m" (x87cw), [sr] "=m" (mxcsr) : : PRESERVE);
 	/* sp = get stack pointer from assembly code */
 	__asm__ ("movq %%rsp, %[result]" : [result] "=r" (stack_pointer));
 	stack_pointer = callback(context, STACKMAN_OP_SAVE, stack_pointer);
@@ -39,6 +49,10 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 
 	stack_pointer = callback(context, STACKMAN_OP_RESTORE, stack_pointer);
 	/* restore non-volatile registers from stack */
+	__asm__ volatile (
+        "ldmxcsr %[sr]\n\t"
+        "fldcw %[cw]\n\t"
+        : : [cw] "m" (x87cw), [sr] "m" (mxcsr));
 	return stack_pointer;
 }
 #endif
