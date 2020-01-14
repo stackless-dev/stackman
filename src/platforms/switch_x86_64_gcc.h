@@ -5,12 +5,22 @@
  * https://www.uclibc.org/docs/psABI-x86_64.pdf
  */
 
-#if defined(STACKMAN_SWITCH_ASM_TEST) && !defined (STACKMAN_EXTERNAL_ASM)
+/* clang cannot perform inline assembly using specific __attr__
+ * instructions, and so it may use a base pointer and other
+ * things.  We must force it to use the pre-build assembler
+ * which has been generated previously with a gcc -S pass
+ */
+
+#if !defined(STACKMAN_EXTERNAL_ASM)
+#if defined (__clang__) || defined(STACKMAN_SWITCH_ASM_TEST)
 #define STACKMAN_EXTERNAL_ASM "platforms/switch_x86_64_gcc.S"
 #endif
+#endif
 
-#if defined STACKMAN_SWITCH_IMPL
-#if !defined STACKMAN_EXTERNAL_ASM && !STACKMAN_SWITCH_ASM
+#if defined(STACKMAN_SWITCH_IMPL)
+
+#if !defined(STACKMAN_EXTERNAL_ASM) && !STACKMAN_SWITCH_ASM
+/* inline assembly */
 #include "../stackman_switch.h"
 
 /* 
@@ -29,7 +39,7 @@
  * stack protection code may be generated.  This is normally safe,
  * but can be forcefully disabled using "no-stack-protector" option.
  */
-#define OPTIMIZE "O", "omit-frame-pointer"
+#define OPTIMIZE "O", "omit-frame-pointer", "no-stack-protector"
 __attribute__((optimize(OPTIMIZE)))
 void *stackman_switch(stackman_cb_t callback, void *context)
 {
@@ -40,6 +50,7 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 		"fstcw %[cw]\n\t"
         "stmxcsr %[sr]\n\t"
 		: [cw] "=m" (x87cw), [sr] "=m" (mxcsr) : : PRESERVE);
+	
 	/* sp = get stack pointer from assembly code */
 	__asm__ ("movq %%rsp, %[result]" : [result] "=r" (stack_pointer));
 	stack_pointer = callback(context, STACKMAN_OP_SAVE, stack_pointer);
@@ -53,10 +64,14 @@ void *stackman_switch(stackman_cb_t callback, void *context)
         "ldmxcsr %[sr]\n\t"
         "fldcw %[cw]\n\t"
         : : [cw] "m" (x87cw), [sr] "m" (mxcsr));
+
 	return stack_pointer;
 }
+
 #endif
+
 #if STACKMAN_SWITCH_ASM && defined(STACKMAN_EXTERNAL_ASM)
+/* pre-generated assembly code */
 #include STACKMAN_EXTERNAL_ASM
 #endif
 

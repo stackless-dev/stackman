@@ -16,7 +16,17 @@
 #define _STACKMAN_PLATFORM x64_msvc
 #endif
 
-#ifdef __GNUC__
+
+#ifdef __clang__
+/* clang compiler */
+#if defined(__amd64__)
+#include "switch_x86_64_gcc.h" /* gcc on amd64 */
+#define _STACKMAN_PLATFORM x86_64_clang
+#endif
+#endif /* __clang__ */
+
+#if defined(__GNUC__) && !defined(__clang__)
+/* real gcc */
 #if defined(__amd64__)
 #include "switch_x86_64_gcc.h" /* gcc on amd64 */
 #define _STACKMAN_PLATFORM x86_64_gcc

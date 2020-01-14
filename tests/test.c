@@ -53,7 +53,7 @@ void test_01(void)
 /* a more complex test, performing a long jump out of a subroutine
  * the context now stores a stub that can be jumped to 
  */
-typedef struct ctxt02
+typedef struct jmp
 {
 	void *stack_far, *stack_near;
 	void *buf;
@@ -62,7 +62,7 @@ typedef struct ctxt02
 	int val;
 	int log[10];
 	int counter;
-} ctxt02;
+} jmp;
 
 /* helpers to save and restore stack contents to a buffer */
 void save_stack(void *sp, void *buf, size_t size)
@@ -81,9 +81,9 @@ void restore_stack(void *sp, void *buf, size_t size)
 		memcpy((void*)((char*)sp-size), buf, size);
 }
 
-void *test_02_cb(void* context, int opcode, void *sp)
+void *jmp_cb(void* context, int opcode, void *sp)
 {
-	ctxt02 *c = (ctxt02*)context;
+	jmp *c = (jmp*)context;
 	c->log[c->counter++] = c->val;
 	if (c->val == 0) {
 		/* storing stub */
@@ -103,37 +103,82 @@ void *test_02_cb(void* context, int opcode, void *sp)
 		return sp;
 	}
 }
- 
-void test_02_called(ctxt02 *c)
+
+/* Create a far jump destination. */
+jmp *jmp_save(void *farptr)
+{
+	jmp *res = (jmp*)malloc(sizeof(jmp));
+	memset(res, 0, sizeof(jmp));
+	/* far end of stack, add buffer to catch memory backed registers, etc. */
+	res->stack_far = STACKMAN_SP_ADD((char*)farptr, 32);
+
+	/* first time around, get the stack pointer */
+	stackman_switch(&jmp_cb, (void*) res);
+
+	if (res->val == 0)
+		return res;
+	return 0;
+}
+
+/* execute a far jump */
+void jmp_jmp(jmp *c)
 {
 	/* right, perform the jump to the original stack pointer */
 	c->val = 1;
-	stackman_switch(&test_02_cb, c);
+	stackman_switch(&jmp_cb, c);
 }
+
+void test_02_called(jmp *c)
+{
+	/* right, perform the jump to the original stack pointer */
+	jmp_jmp(c);
+	assert(0);
+}
+
 void test_02(void)
 {
 	int stack_marker;
-	static ctxt02 c;  /* keep away from stack */
-	memset(&c, 0, sizeof(c));
+	static jmp *c;
+	jmp * tmp;
 
-	/* far end of stack, add buffer to catch memory backed registers, etc. */
-	c.stack_far = STACKMAN_SP_ADD((char*)&stack_marker, 32);
-
-	/* first time around, get the stack pointer */
-	stackman_switch(&test_02_cb, &c);
-
-	if (c.val == 0) {
-		assert(c.counter == 2);
+	tmp = jmp_save(&stack_marker);
+	if (tmp) {
+		c = tmp;
+		assert(c->counter == 2);
 		/* first time.  We now have the sp to return to the original one
 		 * lets long jump out of a recursive function here
 		 */
-		assert(c.buf);
-		assert(c.size);
-		test_02_called(&c);
+		assert(c->buf);
+		assert(c->size);
+		test_02_called(c);
 		assert(0); /* never reach this */
 	}
-	assert(c.val == 1);
-	assert(c.counter == 4);
+
+	assert (tmp == 0);
+	
+	assert(c->val == 1);
+	assert(c->counter == 4);
+}
+
+/* test stack stuff not changing */
+void test_03(void)
+{
+	int stack_marker;
+	static jmp *c;
+	jmp * tmp;
+	int foo[2];
+
+	foo[0] = 7;
+	tmp = jmp_save(&stack_marker);
+	if (tmp) {
+		/* saved stack */
+		c = tmp;
+		foo[0] = 11;
+		test_02_called(c);
+		assert(0); /* never reach this */
+	}
+
+	assert (foo[0] == 7);
 }
 
 int main(int argc, char*argv[])
@@ -142,5 +187,8 @@ int main(int argc, char*argv[])
 	printf("test_01 ok\n");
 	test_02();
 	printf("test_02 ok\n");
+
+	test_03();
+	printf("test_03 ok\n");
 	return 0;
 }

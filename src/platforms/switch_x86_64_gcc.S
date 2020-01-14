@@ -1,6 +1,9 @@
 /*
- * this file is provided as a test for the pure
- * assembly include mechanism, on linux x86_64 
+ * this file is provided for where inline assembly is not
+ * dependable, such as with clang on linux x86_64.
+ * The file is generated using
+ * "gcc -DSTACKMAN_SWITCH_IMPL -S test.c" and then copying the code
+ * from test.s into this file.
  * 
  */
 	.file	"switch_x86_64_gcc.S"
@@ -31,28 +34,26 @@ stackman_switch:
 	.cfi_offset 3, -56
 	subq	$24, %rsp
 	.cfi_def_cfa_offset 80
-	movq	%rdi, %r8
-	movq	%rsi, %rdi
-	movl	$40, %eax
-	movq	%fs:(%rax), %rsi
-	movq	%rsi, 8(%rsp)
-	xorl	%esi, %esi
+	movq	%rdi, %rax
+	movq	%rsi, %rcx
 #APP
-# 39 "switch_x86_64_gcc.h" 1
-	fstcw 2(%rsp)
-	stmxcsr 4(%rsp)
+# 49 "switch_x86_64_gcc.h" 1
+	fstcw 10(%rsp)
+	stmxcsr 12(%rsp)
 	
 # 0 "" 2
-# 44 "switch_x86_64_gcc.h" 1
+# 55 "switch_x86_64_gcc.h" 1
 	movq %rsp, %rdx
 # 0 "" 2
 #NO_APP
-	movq	%rdi, %r14
-	movq	%r8, %rbx
-	call	*%r8
+	movl	$0, %esi
+	movq	%rcx, %r14
+	movq	%rcx, %rdi
+	movq	%rax, %rbx
+	call	*%rax
 	movq	%rax, %rdx
 #APP
-# 48 "switch_x86_64_gcc.h" 1
+# 59 "switch_x86_64_gcc.h" 1
 	movq %rax, %rsp
 # 0 "" 2
 #NO_APP
@@ -60,18 +61,13 @@ stackman_switch:
 	movq	%r14, %rdi
 	call	*%rbx
 #APP
-# 52 "switch_x86_64_gcc.h" 1
-	ldmxcsr 4(%rsp)
-	fldcw 2(%rsp)
+# 63 "switch_x86_64_gcc.h" 1
+	ldmxcsr 12(%rsp)
+	fldcw 10(%rsp)
 	
 # 0 "" 2
 #NO_APP
-	movl	$40, %ecx
-	movq	8(%rsp), %rsi
-	xorq	%fs:(%rcx), %rsi
-	jne	.L4
 	addq	$24, %rsp
-	.cfi_remember_state
 	.cfi_def_cfa_offset 56
 	popq	%rbx
 	.cfi_def_cfa_offset 48
@@ -86,9 +82,6 @@ stackman_switch:
 	popq	%r15
 	.cfi_def_cfa_offset 8
 	ret
-.L4:
-	.cfi_restore_state
-	call	__stack_chk_fail@PLT
 	.cfi_endproc
 .LFE0:
 	.size	stackman_switch, .-stackman_switch
