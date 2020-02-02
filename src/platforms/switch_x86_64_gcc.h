@@ -12,14 +12,14 @@
  */
 
 #if !defined(STACKMAN_EXTERNAL_ASM)
-#if defined (__clang__) || defined(STACKMAN_SWITCH_ASM_TEST)
+#if defined (__clang__) || STACKMAN_PREFER_ASM
 #define STACKMAN_EXTERNAL_ASM "platforms/switch_x86_64_gcc.S"
 #endif
 #endif
 
 #if defined(STACKMAN_SWITCH_IMPL)
 
-#if !defined(STACKMAN_EXTERNAL_ASM) && !STACKMAN_SWITCH_ASM
+#if !STACKMAN_SWITCH_IMPL_ASM && !defined(STACKMAN_EXTERNAL_ASM)
 /* inline assembly */
 #include "../stackman_switch.h"
 
@@ -70,7 +70,7 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 
 #endif
 
-#if STACKMAN_SWITCH_ASM && defined(STACKMAN_EXTERNAL_ASM)
+#if STACKMAN_SWITCH_IMPL_ASM && defined(STACKMAN_EXTERNAL_ASM)
 /* pre-generated assembly code */
 #include STACKMAN_EXTERNAL_ASM
 #endif

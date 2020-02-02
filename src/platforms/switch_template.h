@@ -7,11 +7,10 @@
  * and it maintains state inside its context storage.
  * This simplifies the assembly code which has no branching.
  */
-#if defined TEALET_SWITCH_IMPL 
-#if ! STACKMAN_SWITCH_ASM
+#if defined(STACKMAN_SWITCH_IMPL )
+#if !STACKMAN_SWITCH_IMPL_ASM && !defined(STACKMAN_EXTERNAL_ASM)
 
-#undef STACKMAN_SWITCH_IMPL
-#include "../stackman.h"
+#include "../stackman_switch.h"
 
 void *stackman_switch(stackman_cb_t callback, void *context)
 {
@@ -32,7 +31,11 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 	/* __asm__("pop volatile registers") */
 	return stack_pointer;
 }
-#else
-/* assembler code here, if the above cannot be done in in-line assembly */
 #endif
+
+#if STACKMAN_SWITCH_IMPL_ASM && defined(STACKMAN_EXTERNAL_ASM)
+/* pre-generated assembly code */
+#include STACKMAN_EXTERNAL_ASM
 #endif
+
+#endif /* STACKMAN_SWITCH_IMPL */

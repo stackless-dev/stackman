@@ -3,6 +3,6 @@
  * with pure assembly.  Enable this using the following:
  */
 
-#define STACKMAN_SWITCH_ASM_TEST
-#define STACKMAN_SWITCH_ASM 1
+#define STACKMAN_PREFER_ASM 1
+#define STACKMAN_SWITCH_IMPL_ASM 1
 #include "stackman_impl.h"

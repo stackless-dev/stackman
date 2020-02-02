@@ -5,7 +5,7 @@
  *
  */
 #ifdef STACKMAN_SWITCH_IMPL
-#if ! STACKMAN_SWITCH_ASM
+#if !STACKMAN_SWITCH_IMPL_ASM
 
 #ifndef USE_ASSEMBLER
 /* inline assembly does not _by default_ produce code that is usable

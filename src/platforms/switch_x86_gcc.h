@@ -1,6 +1,7 @@
 /* gcc implementationfor X86 (32 bit), inline assembly */
 
-#if defined STACKMAN_SWITCH_IMPL && !STACKMAN_SWITCH_ASM
+#if defined(STACKMAN_SWITCH_IMPL )
+#if !STACKMAN_SWITCH_IMPL_ASM && !defined(STACKMAN_EXTERNAL_ASM)
 
 /* Follow System V i386 abi, including 16 byte stack alignment 
  * https://wiki.osdev.org/System_V_ABI#i386
@@ -63,4 +64,12 @@ void *result;
     );
     return result;
 }
+
+#endif
+
+#if STACKMAN_SWITCH_IMPL_ASM && defined(STACKMAN_EXTERNAL_ASM)
+/* pre-generated assembly code */
+#include STACKMAN_EXTERNAL_ASM
+#endif
+
 #endif /* STACKMAN_SWITCH_IMPL */

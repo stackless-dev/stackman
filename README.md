@@ -38,6 +38,11 @@ that manipulate the C stack.
     1. Save and restore volatile registers on the stack
     2. Adjust stack pointer
     3. Call the callback before and after adjusting the stack pointer.
+- Assembly support
+  The straightforward and application-agnostic switching allows the switching function to be implemented in full assembler.  This removes
+  the risk of inline-assembler doing any sort of unexpected things such
+  as in-lining the function or otherwise change the assumptions that the
+  function makes about its environment.  This assembly code can be created by the in-line assembler in a controlled environment.
    
 ## Supported platforms
 The current code is distilled out of other work, with the aim of simplifying and
