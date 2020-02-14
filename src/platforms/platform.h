@@ -25,6 +25,12 @@
 #elif defined(__i386__)
 #include "switch_x86_gcc.h" /* gcc on X86 */
 #define _STACKMAN_PLATFORM x86_clang
+#elif defined(__arm__)
+#include "switch_arm_gcc.h" /* gcc using arm */
+#define _STACKMAN_PLATFORM arm32_clang
+#elif defined(__ARM_ARCH_ISA_A64)
+#include "switch_aarch64_gcc.h" /* gcc using arm aarch64*/
+#define _STACKMAN_PLATFORM aarch64_clang
 #endif
 #endif /* __clang__ */
 

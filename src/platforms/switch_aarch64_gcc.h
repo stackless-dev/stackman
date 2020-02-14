@@ -5,10 +5,19 @@
  * http://www.ethernut.de/en/documents/arm-inline-asm.html
  *
  */
-#ifdef STACKMAN_SWITCH_IMPL
-#if !STACKMAN_SWITCH_IMPL_ASM
+/* clang cannot perform inline assembly using specific __attr__
+ * instructions, and so it may use a base pointer and other
+ * things.  We must force it to use the pre-build assembler
+ */
+#if !defined(STACKMAN_EXTERNAL_ASM)
+#if defined (__clang__) || STACKMAN_PREFER_ASM
+#define STACKMAN_EXTERNAL_ASM "platforms/switch_aarch64_gcc.S"
+#endif
+#endif
 
-#ifndef USE_ASSEMBLER
+#ifdef STACKMAN_SWITCH_IMPL
+#if !STACKMAN_SWITCH_IMPL_ASM && !defined(STACKMAN_EXTERNAL_ASM)
+
 /* 
  * To test this, #include this file in a file, test.c and
  * gcc -S -DSTACKMAN_SWITCH_IMPL test.c
@@ -52,7 +61,10 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 	return sp;
 }
 #endif
-#else
-/* assembler code here, if the above cannot be done in in-line assembly */
+
+#if STACKMAN_SWITCH_IMPL_ASM && defined(STACKMAN_EXTERNAL_ASM)
+/* pre-generated assembly code */
+#include STACKMAN_EXTERNAL_ASM
 #endif
-#endif
+
+#endif /* STACKMAN_SWITCH_IMPL */

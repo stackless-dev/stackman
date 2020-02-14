@@ -7,6 +7,18 @@
  * and it maintains state inside its context storage.
  * This simplifies the assembly code which has no branching.
  */
+
+/* clang cannot perform inline assembly using specific __attr__
+ * instructions, and so it may use a base pointer and other
+ * things.  We must force it to use the pre-build assembler
+ */
+#if !defined(STACKMAN_EXTERNAL_ASM)
+#if defined (__clang__) || STACKMAN_PREFER_ASM
+#define STACKMAN_EXTERNAL_ASM "platforms/switch_xxx.S"
+#endif
+#endif
+
+
 #if defined(STACKMAN_SWITCH_IMPL )
 #if !STACKMAN_SWITCH_IMPL_ASM && !defined(STACKMAN_EXTERNAL_ASM)
 
