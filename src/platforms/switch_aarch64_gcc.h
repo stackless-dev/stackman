@@ -48,7 +48,7 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 	sp = callback(context, STACKMAN_OP_SAVE, sp);
 	/* set stack pointer from sp using assembly */
 	__asm__ ("mov sp, %[result]" : : [result] "r" (sp));
-	sp = callback(context, STACKMAN_OP_RESTORE, sp, 1);
+	sp = callback(context, STACKMAN_OP_RESTORE, sp);
 	return sp;
 }
 #endif
