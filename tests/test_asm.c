@@ -7,7 +7,7 @@
 #ifdef STACKMAN_EXTERNAL_ASM
 #include "test.c"
 #else
-int main(int *argc, char*argv[])
+int main(int argc, char*argv[])
 {
 	return 0;
 }
