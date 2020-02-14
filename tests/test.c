@@ -6,6 +6,9 @@
 #include <stdlib.h>
 
 
+#ifndef STACKMAN_SWITCH
+#define STACKMAN_SWITCH stackman_switch
+#endif
 
 /* simple test ithout modifying stack pointers.
  * test that the callback is called wiht valid
@@ -42,7 +45,7 @@ void test_01(void)
 	void *sp;
 	memset(&c, 0, sizeof(c));
 
-	sp = stackman_switch(&test_01_cb, &c);
+	sp = STACKMAN_SWITCH(&test_01_cb, &c);
 
 	assert(sp == (void*)1);
 	assert(c.sp[0] == c.sp[1]);
@@ -113,7 +116,7 @@ jmp *jmp_save(void *farptr)
 	res->stack_far = STACKMAN_SP_ADD((char*)farptr, 32);
 
 	/* first time around, get the stack pointer */
-	stackman_switch(&jmp_cb, (void*) res);
+	STACKMAN_SWITCH(&jmp_cb, (void*) res);
 
 	if (res->val == 0)
 		return res;
@@ -125,7 +128,7 @@ void jmp_jmp(jmp *c)
 {
 	/* right, perform the jump to the original stack pointer */
 	c->val = 1;
-	stackman_switch(&jmp_cb, c);
+	STACKMAN_SWITCH(&jmp_cb, c);
 }
 
 void test_02_called(jmp *c)

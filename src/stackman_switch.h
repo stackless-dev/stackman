@@ -73,4 +73,11 @@ typedef void *(*stackman_cb_t)(
 STACKMAN_SWITCH_STORAGE
 void *stackman_switch(stackman_cb_t callback, void *context);
 
+/* a separate function which wraps the c function with in-line assembly
+ * in a way to ensure tht it won't be inlined in other code.
+ * This is a temporary hack until we can do it more nicely
+ */
+void *stackman_switch_noinline(stackman_cb_t callback, void *context);
+
+
 #endif /* STACKMAN_SWITCH_H */

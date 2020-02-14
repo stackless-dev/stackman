@@ -15,3 +15,23 @@
 #define STACKMAN_SWITCH_IMPL
 #include "platforms/platform.h"
 #endif
+
+#if !STACKMAN_SWITCH_IMPL_ASM
+#include "stackman_switch.h"
+STACKMAN_SWITCH_STORAGE
+void *stackman_switch_noinline(stackman_cb_t callback, void *context)
+{
+	/* Use a volatile pointer to prevent inlining of stackman_switch().
+     * See Stackless issue 183 
+     * https://github.com/stackless-dev/stackless/issues/183
+     */
+#ifndef STACKMAN_EXTERNAL_ASM
+    static void *(*volatile stackman_switch_ptr)(stackman_cb_t callback, void *context) = stackman_switch;
+    return stackman_switch_ptr(callback, context);
+#else
+    /*external assembler cannot be inlined */
+    return stackman_switch(callback, context);
+#endif
+}
+
+#endif
