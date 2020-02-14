@@ -22,6 +22,9 @@
 #if defined(__amd64__)
 #include "switch_x86_64_gcc.h" /* gcc on amd64 */
 #define _STACKMAN_PLATFORM x86_64_clang
+#elif defined(__i386__)
+#include "switch_x86_gcc.h" /* gcc on X86 */
+#define _STACKMAN_PLATFORM x86_clang
 #endif
 #endif /* __clang__ */
 

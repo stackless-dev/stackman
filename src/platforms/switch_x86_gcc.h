@@ -1,5 +1,15 @@
 /* gcc implementationfor X86 (32 bit), inline assembly */
 
+/* clang cannot perform inline assembly using specific __attr__
+ * instructions, and so it may use a base pointer and other
+ * things.  We must force it to use the pre-build assembler
+ */
+#if !defined(STACKMAN_EXTERNAL_ASM)
+#if defined (__clang__) || STACKMAN_PREFER_ASM
+#define STACKMAN_EXTERNAL_ASM "platforms/switch_x86_gcc.S"
+#endif
+#endif
+
 #if defined(STACKMAN_SWITCH_IMPL )
 #if !STACKMAN_SWITCH_IMPL_ASM && !defined(STACKMAN_EXTERNAL_ASM)
 
@@ -16,7 +26,10 @@
  * ruining everything.
  * So, we use C to set up frame, pass arguments in and out,
  * and preserve registers. But we ourselves assemble the 
- * calls and stack pointer changes 
+ * calls and stack pointer changes
+ *
+ * This file can be excercised on 64 bit linux by adding -m32 to
+ * the gcc command line.
  */
 #include "../stackman_switch.h"
 

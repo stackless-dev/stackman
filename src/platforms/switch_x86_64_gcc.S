@@ -6,7 +6,7 @@
  * from test.s into this file.
  * 
  */
-	.file	"switch_x86_64_gcc.S"
+	.file	"test.c"
 	.text
 	.globl	stackman_switch
 	.type	stackman_switch, @function
@@ -37,12 +37,12 @@ stackman_switch:
 	movq	%rdi, %rax
 	movq	%rsi, %rcx
 #APP
-# 49 "switch_x86_64_gcc.h" 1
+# 48 "switch_x86_64_gcc.h" 1
 	fstcw 10(%rsp)
 	stmxcsr 12(%rsp)
 	
 # 0 "" 2
-# 55 "switch_x86_64_gcc.h" 1
+# 54 "switch_x86_64_gcc.h" 1
 	movq %rsp, %rdx
 # 0 "" 2
 #NO_APP
@@ -53,7 +53,7 @@ stackman_switch:
 	call	*%rax
 	movq	%rax, %rdx
 #APP
-# 59 "switch_x86_64_gcc.h" 1
+# 58 "switch_x86_64_gcc.h" 1
 	movq %rax, %rsp
 # 0 "" 2
 #NO_APP
@@ -61,7 +61,7 @@ stackman_switch:
 	movq	%r14, %rdi
 	call	*%rbx
 #APP
-# 63 "switch_x86_64_gcc.h" 1
+# 62 "switch_x86_64_gcc.h" 1
 	ldmxcsr 12(%rsp)
 	fldcw 10(%rsp)
 	

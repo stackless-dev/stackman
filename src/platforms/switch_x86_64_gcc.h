@@ -8,7 +8,6 @@
 /* clang cannot perform inline assembly using specific __attr__
  * instructions, and so it may use a base pointer and other
  * things.  We must force it to use the pre-build assembler
- * which has been generated previously with a gcc -S pass
  */
 
 #if !defined(STACKMAN_EXTERNAL_ASM)
