@@ -63,6 +63,7 @@
 #endif
 
 __attribute__((optimize("O", "omit-frame-pointer")))
+STACKMAN_LINKAGE_SWITCH
 void *stackman_switch(stackman_cb_t callback, void *context)
 {
 	void *sp;

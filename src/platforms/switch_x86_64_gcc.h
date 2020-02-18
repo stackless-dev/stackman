@@ -40,6 +40,7 @@
  */
 #define OPTIMIZE "O", "omit-frame-pointer", "no-stack-protector"
 __attribute__((optimize(OPTIMIZE)))
+STACKMAN_LINKAGE_SWITCH
 void *stackman_switch(stackman_cb_t callback, void *context)
 {
 	void *stack_pointer;

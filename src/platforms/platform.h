@@ -4,7 +4,27 @@
  * This file can be included multiple times.  Once typically to test
  * if an implementaition exists, and once (defining STACKMAN_SWITCH_IMPL)
  * to define the implementation.
+ * This results in the definition of STACKMAN_PLATFORM
+ * and possibly STACKMAN_EXTERNAL_ASM if the implentation is assembler
+ * based and not in-line c.
  */
+
+/* include once for non-impl, one additional include for impl */
+#ifndef STACKMAN_PLATFORM_H_1
+#define STACKMAN_PLATFORM_H_1
+#define DO_STACKMAN_PLATFORM_H
+#endif
+
+#if defined(STACKMAN_SWITCH_IMPL) && !defined(STACKMAN_PLATFORM_H_2)
+#define STACKMAN_PLATFORM_H_2
+#ifndef DO_STACKMAN_PLATFORM_H
+#define DO_STACKMAN_PLATFORM_H
+#endif
+#endif
+
+#ifdef DO_STACKMAN_PLATFORM_H
+#undef DO_STACKMAN_PLATFORM_H
+
 
 #undef _STACKMAN_PLATFORM
 /* Microsoft platforms */
@@ -65,3 +85,5 @@
 #if !defined(STACKMAN_OPTIONAL) && !defined(STACKMAN_PLATFORM)
 #error "Unsupported platform!"
 #endif
+
+#endif /* DO_STACKMAN_PLATFORM_H */

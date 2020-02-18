@@ -36,6 +36,7 @@
 # define PRESERVED "ebx", "esi", "edi"
 
 __attribute__((optimize("O1", "no-omit-frame-pointer")))
+STACKMAN_LINKAGE_SWITCH
 void *stackman_switch(stackman_cb_t callback, void *context)
 {
 void *result;

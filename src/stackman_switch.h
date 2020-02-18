@@ -2,11 +2,26 @@
 #ifndef STACKMAN_SWITCH_H
 #define STACKMAN_SWITCH_H
 
-#ifdef STACKMAN_SWITCH_STATIC
-#define STACKMAN_SWITCH_STORAGE static
+/* Must include the platform here to know if the switch function
+ * is implemented in assembler or nt
+ */
+#include "platforms/platform.h"
+
+/* we can request that C functions be implemented with static linkage
+ * when including in other libraries
+ */
+#if defined(STACKMAN_LINKAGE_STATIC)
+#if !defined(STACKMAN_EXTERNAL_ASM)
+#define STACKMAN_LINKAGE_SWITCH static
 #else
-#define STACKMAN_SWITCH_STORAGE
+#define STACKMAN_LINKAGE_SWITCH
 #endif
+#define STACKMAN_LINKAGE_SWITCH_NOINLINE static
+#else
+#define STACKMAN_LINKAGE_SWITCH
+#define STACKMAN_LINKAGE_SWITCH_NOINLINE
+#endif
+
 
 /* raw stack switching function. The caller supplies a callback
  * and context to perform determine the new stack pointer and
@@ -70,13 +85,14 @@ typedef void *(*stackman_cb_t)(
 /* The actual stack switching function.
  * It saves state, switches stack pointer, and restores state
  */
-STACKMAN_SWITCH_STORAGE
+STACKMAN_LINKAGE_SWITCH
 void *stackman_switch(stackman_cb_t callback, void *context);
 
 /* a separate function which wraps the c function with in-line assembly
  * in a way to ensure tht it won't be inlined in other code.
  * This is a temporary hack until we can do it more nicely
  */
+STACKMAN_LINKAGE_SWITCH_NOINLINE
 void *stackman_switch_noinline(stackman_cb_t callback, void *context);
 
 
