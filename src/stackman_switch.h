@@ -11,15 +11,15 @@
  * when including in other libraries
  */
 #if defined(STACKMAN_LINKAGE_STATIC)
-#if !defined(STACKMAN_EXTERNAL_ASM)
+#if !defined(STACKMAN_EXTERNAL_ASM) && !STACKMAN_SWITCH_C
 #define STACKMAN_LINKAGE_SWITCH static
 #else
-#define STACKMAN_LINKAGE_SWITCH
+#define STACKMAN_LINKAGE_SWITCH extern
 #endif
 #define STACKMAN_LINKAGE_SWITCH_NOINLINE static
 #else
-#define STACKMAN_LINKAGE_SWITCH
-#define STACKMAN_LINKAGE_SWITCH_NOINLINE
+#define STACKMAN_LINKAGE_SWITCH extern
+#define STACKMAN_LINKAGE_SWITCH_NOINLINE extern
 #endif
 
 

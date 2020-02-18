@@ -3,8 +3,9 @@
  * The C function defined here, saves and restores the structured
  * exception handling state.
  */
-#ifndef STACKMAN_EXTERNAL_ASM
-#define STACKMAN_EXTERNAL_ASM switch_x86_msvc.asm
+#ifndef STACKMAN_EXTERNAL_ASM#define
+#define STACKMAN_EXTERNAL_ASM switch_x86_msvc.asm#define
+#define STACKMAN_SWITCH_C 1 /* contains a C implementation */
 #endif
 
 #ifdef STACKMAN_SWITCH_IMPL
@@ -19,6 +20,7 @@ extern void *stackman_switch_raw(stackman_cb_t callback, void *context);
 #pragma optimize("", off) /* so that autos are stored on the stack */
 #pragma warning(disable:4733) /* disable warning about modifying FS[0] */
 
+STACKMAN_LINKAGE_SWITCH
 void *stackman_switch(vtackman_cb_t callback, void *context)
 {
     /* store the structured exception state for this stack */
