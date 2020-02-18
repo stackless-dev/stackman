@@ -11,7 +11,7 @@
 #endif
 
 #if defined(STACKMAN_SWITCH_IMPL )
-#if !STACKMAN_SWITCH_IMPL_ASM && !defined(STACKMAN_EXTERNAL_ASM)
+#if !__ASSEMBLER__ && !defined(STACKMAN_EXTERNAL_ASM)
 
 /* Follow System V i386 abi, including 16 byte stack alignment 
  * https://wiki.osdev.org/System_V_ABI#i386
@@ -81,7 +81,7 @@ void *result;
 
 #endif
 
-#if STACKMAN_SWITCH_IMPL_ASM && defined(STACKMAN_EXTERNAL_ASM)
+#if __ASSEMBLER__ && defined(STACKMAN_EXTERNAL_ASM)
 /* pre-generated assembly code */
 #include STACKMAN_EXTERNAL_ASM
 #endif

@@ -18,7 +18,7 @@
 
 #if defined(STACKMAN_SWITCH_IMPL)
 
-#if !STACKMAN_SWITCH_IMPL_ASM && !defined(STACKMAN_EXTERNAL_ASM)
+#if !__ASSEMBLER__ && !defined(STACKMAN_EXTERNAL_ASM)
 /* inline assembly */
 #include "../stackman_switch.h"
 
@@ -70,7 +70,7 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 
 #endif
 
-#if STACKMAN_SWITCH_IMPL_ASM && defined(STACKMAN_EXTERNAL_ASM)
+#if __ASSEMBLER__ && defined(STACKMAN_EXTERNAL_ASM)
 /* pre-generated assembly code */
 #include STACKMAN_EXTERNAL_ASM
 #endif

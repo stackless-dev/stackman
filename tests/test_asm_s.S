@@ -4,5 +4,4 @@
  */
 
 #define STACKMAN_PREFER_ASM 1
-#define STACKMAN_SWITCH_IMPL_ASM 1
 #include "stackman_impl.h"
