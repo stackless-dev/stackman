@@ -29,19 +29,24 @@ DEBUG = #-DDEBUG_DUMP
 
 test: tests
 	bin/test
+	bin/test_cc
 	bin/test_static
 	bin/test_asm
 	bin/test_noinline
 	@echo "*** All test suites passed ***"
 
 tests: bin/test
+tests: bin/test_cc
 tests: bin/test_static
 tests: bin/test_asm
 tests: bin/test_noinline
 tests: LDLIBS := -lstackman
 
-bin/test: tests/test.o bin/libstackman.a
+bin/test: tests/test.o $(LIB)/libstackman.a
 	$(CC) $(LDFLAGS) -o $@ $< ${DEBUG} $(LDLIBS)
+
+bin/test_cc: tests/test_cc.o $(LIB)/libstackman.a
+	$(CXX) $(LDFLAGS) -o $@ $< ${DEBUG} $(LDLIBS)
 
 bin/test_static: tests/test_static.o
 	$(CC) $(LDFLAGS) -o $@ $^ ${DEBUG}
