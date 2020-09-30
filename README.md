@@ -23,6 +23,9 @@ implementations have to be maintained for each of them.
 This library aims to provide a simple api that can be shared among all projects
 that manipulate the C stack.
 
+Additionally, it provides a set of pre-assembled libraries for the most common
+platforms so that no assembly steps are required by users.
+
 ## Features
 - Simple api
   - `stackman_switch()` is the only function.
@@ -43,18 +46,31 @@ that manipulate the C stack.
   the risk of inline-assembler doing any sort of unexpected things such
   as in-lining the function or otherwise change the assumptions that the
   function makes about its environment.  This assembly code can be created by the in-line assembler in a controlled environment.
+- No dependencies
+  The library merely provides stack switching.  It consist only of a couple of functions with no dependencies.
+- Stable
+  There is no need to add or modify functionality.
+- Libraries provided.
+  The aim is to provide pre-assembled libraries for the most popular platforms. This relieves other tools that want to do stack
+  manipulation from doing any sort of assembly or complex linkage.  Just include the headers and link to the appropriate library.
+
    
 ## Supported platforms
 The current code is distilled out of other work, with the aim of simplifying and
-standardizing the api.  The implementation currently works for:
+standardizing the api.  A number of ABI specifications is supported, meaning architecture and
+calling convention, plus archive format:
+ - microsoft_cdecl (32 bits)
+ - microsoft_x64
+ - sysv_i386 (linux)
+ - sysv_amd64 (linux)
+ - arm32 (32 bit arm)
+ - aarch64 (64 bit arm)
+
+Supported toolchains:
  - Gnu C
-   - x86
-   - x86-64
-   - ARM
-   - AARCH64
- - Microsoft Visual Studio:
-   - x86
-   - x64
+ - clang
+ - Microsoft Visual Studio
+ 
    
 Other platforms can be easily adapted from both existing implementations for other
 projects as well as from example code provided.
@@ -66,6 +82,7 @@ projects as well as from example code provided.
  - Include `stackman_impl.h` from a source file to *define* `stackman_switch()`.
    This can also be an assembler file with the `.S` suffix, see `stackman_impl.h` for
    details.
+ - Alternatively, link with libstackman.a or libstackman.lib for your platform.
  - Implement switching semantics via the callback and call `stackman_switch()` from your
    program as appropriate.
 
