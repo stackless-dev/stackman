@@ -13,7 +13,6 @@
 stackman_switch:
 .LFB0:
 	.cfi_startproc
-	endbr64
 	pushq	%r15
 	.cfi_def_cfa_offset 16
 	.cfi_offset 15, -16
@@ -37,12 +36,12 @@ stackman_switch:
 	movq	%rdi, %rax
 	movq	%rsi, %rcx
 #APP
-# 48 "switch_x86_64_gcc.h" 1
+# 52 "switch_x86_64_gcc.h" 1
 	fstcw 10(%rsp)
 	stmxcsr 12(%rsp)
 	
 # 0 "" 2
-# 54 "switch_x86_64_gcc.h" 1
+# 58 "switch_x86_64_gcc.h" 1
 	movq %rsp, %rdx
 # 0 "" 2
 #NO_APP
@@ -51,17 +50,17 @@ stackman_switch:
 	movq	%rcx, %rdi
 	movq	%rax, %rbx
 	call	*%rax
-	movq	%rax, %rdx
 #APP
-# 58 "switch_x86_64_gcc.h" 1
+# 62 "switch_x86_64_gcc.h" 1
 	movq %rax, %rsp
 # 0 "" 2
 #NO_APP
+	movq	%rax, %rdx
 	movl	$1, %esi
 	movq	%r14, %rdi
 	call	*%rbx
 #APP
-# 62 "switch_x86_64_gcc.h" 1
+# 66 "switch_x86_64_gcc.h" 1
 	ldmxcsr 12(%rsp)
 	fldcw 10(%rsp)
 	
@@ -85,21 +84,43 @@ stackman_switch:
 	.cfi_endproc
 .LFE0:
 	.size	stackman_switch, .-stackman_switch
-	.ident	"GCC: (Ubuntu 9.2.1-9ubuntu2) 9.2.1 20191008"
+	.globl	stackman_call
+	.type	stackman_call, @function
+stackman_call:
+.LFB1:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	pushq	%rbx
+	subq	$8, %rsp
+	.cfi_offset 3, -24
+	movq	%rdi, %rax
+	movq	%rsi, %rdi
+#APP
+# 86 "switch_x86_64_gcc.h" 1
+	movq %rsp, %rbx
+# 0 "" 2
+# 89 "switch_x86_64_gcc.h" 1
+	movq %rdx, %rsp
+# 0 "" 2
+#NO_APP
+	movl	$2, %esi
+	call	*%rax
+#APP
+# 93 "switch_x86_64_gcc.h" 1
+	movq %rbx, %rsp
+# 0 "" 2
+#NO_APP
+	addq	$8, %rsp
+	popq	%rbx
+	popq	%rbp
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE1:
+	.size	stackman_call, .-stackman_call
+	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
 	.section	.note.GNU-stack,"",@progbits
-	.section	.note.gnu.property,"a"
-	.align 8
-	.long	 1f - 0f
-	.long	 4f - 1f
-	.long	 5
-0:
-	.string	 "GNU"
-1:
-	.align 8
-	.long	 0xc0000002
-	.long	 3f - 2f
-2:
-	.long	 0x3
-3:
-	.align 8
-4:

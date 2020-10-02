@@ -63,15 +63,17 @@
  * Note that the callback and context are _not_ guaranteed
  * to be stack local.  That is, even if the stack pointer is modified
  * according to the first call to the callback, the same callback and
- * context will be used during the second callback, in the new stack * Thus, both stacks must really belong to the same program.  This
+ * context may be used during the second callback, in the new stack.
+ * Therefore, the same callback and context pointers should always be used
+ * when switching between stacks.  This
  * restriction could be lifted by pushing both values onto the stack
  * before switching but the added complexity of platform implementations
  * doesn't seem to warrant that for such an exotic use case.
  *
- * an appropriate implementation is included b
- * platf_tealet/tealet_platformselect.h
+ * an appropriate implementation is included by
+ * platforms/platform.h
  * A template implementation is available in
- * platf_tealet/switch_template.h
+ * platforms/switch_template.h
  */
 
 /* Opcodes for the callback function */
@@ -87,6 +89,12 @@ typedef enum stackman_op_t {
 	 * what it returns will be the return value from stackman_switch().
 	 */
 	STACKMAN_OP_RESTORE = 1,
+
+	/* The callback is being invoked from a stackman_call() invokation.
+	 * Stack_pointer is the pointer that was provided to stackman_call()
+	 */
+	STACKMAN_OP_CALL = 2,
+	
 } stackman_op_t;
 
 
@@ -109,6 +117,20 @@ void *stackman_switch(stackman_cb_t callback, void *context);
  */
 STACKMAN_LINKAGE_SWITCH_NOINLINE
 void *stackman_switch_noinline(stackman_cb_t callback, void *context);
+
+
+
+/* A function to call a function with a different stack location.
+ * Instead of a normal function call, where the return address and arguments
+ * are pushed on the current stack, first the stack pointer is changed to
+ * a new location. This is useful for example to move the stack into heap memory.
+ * 'callback' will be invoked with the
+ * stack already set to the new position as specified by 'stack'.
+ * The callback can then proceed to 'save' the new stack for future switching.
+ * Returning from callback will work normally.
+ */
+STACKMAN_LINKAGE_SWITCH
+void *stackman_call(stackman_cb_t callback, void *context, void *stack);
 
 
 #endif /* STACKMAN_SWITCH_H */

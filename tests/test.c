@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 
 #ifndef STACKMAN_SWITCH
@@ -70,7 +71,7 @@ typedef struct jmp
 /* helpers to save and restore stack contents to a buffer */
 void save_stack(void *sp, void *buf, size_t size)
 {
-	if (STACKMAN_DIRECTION == 0)
+	if (STACKMAN_STACK_DIR == 0)
 		memcpy(buf, sp, size);
 	else
 		memcpy(buf, (void*)((char*)sp-size), size);
@@ -78,7 +79,7 @@ void save_stack(void *sp, void *buf, size_t size)
 
 void restore_stack(void *sp, void *buf, size_t size)
 {
-	if (STACKMAN_DIRECTION == 0)
+	if (STACKMAN_STACK_DIR == 0)
 		memcpy(sp, buf, size);
 	else
 		memcpy((void*)((char*)sp-size), buf, size);
@@ -184,6 +185,65 @@ void test_03(void)
 	assert (foo[0] == 7);
 }
 
+
+#if defined(STACKMAN_HAVE_CALL)
+#define TEST_04
+#endif
+#ifdef TEST_04
+/* test retrieval of stack pointer */
+void *test_04_cb(void* context, int _opcode, void *sp)
+{
+
+	ctxt01 *c = (ctxt01*)context;
+	stackman_op_t opcode = (stackman_op_t)_opcode;
+	assert(opcode == STACKMAN_OP_CALL || opcode == 100);
+	if (opcode == STACKMAN_OP_CALL)
+		return test_04_cb(context, 100, sp);
+
+	return sp; /* test return argument */
+}
+void test_04(void)
+{
+	char *block, *stack, *stack2;
+	int stacksize=1024;
+	int i, cnt;
+	void *res;
+
+	assert(STACKMAN_STACK_FULL_DESCENDING);
+
+	block = (char*)malloc(stacksize);
+	stack = block + stacksize;
+	/* clear it all to a certain value */
+	memset(block, '\x7f', stacksize);
+
+	/* align stack properly */
+	stack = (void*)STACKMAN_SP_ALIGN(stack);
+	stacksize = stack-block;
+	/* allocate some guard memory at the stack top */
+	stack2 = stack-64;
+
+	/* perform the call */
+	res = stackman_call(test_04_cb, 0, stack2);
+	assert(res==stack2);
+
+	/* verify that the guard memory is correct */
+	cnt = 0;
+	for(i=0; i<64; i++)
+		cnt += stack2[i] == '\x7f';
+	assert(cnt == 64);
+	/* verify that the memory below the stack is something else */
+	cnt = 0;
+	for(i=0; i<64; i++)
+		cnt += stack2[-i] == '\x7f';
+	assert(cnt != 64);
+
+
+
+}
+
+#endif
+
+
 int main(int argc, char*argv[])
 {
 	test_01();
@@ -193,5 +253,9 @@ int main(int argc, char*argv[])
 
 	test_03();
 	printf("test_03 ok\n");
+#ifdef TEST_04
+	test_04();
+	printf("test_04 ok\n");
+#endif
 	return 0;
 }

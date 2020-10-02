@@ -25,23 +25,62 @@
  * to describe stack boundaries.  In a typical architecture
  * with descending stacks, "near" corresponds to a low
  * address and "far" to a high address.
+ * Also provide defaults for stack "fullness" and alignment.  The most
+ * common stacks are "full" "descending"
  */
-#ifndef STACKMAN_DIRECTION
-#define STACKMAN_DIRECTION 0 
-#endif  
+#ifndef STACKMAN_STACK_DIR
+#define STACKMAN_STACK_DIR 0 	/* stack pointer grows "downwards" in memory. */
+#endif
+#ifndef STACKMAN_STACK_FULL
+#define STACKMAN_STACK_FULL 1	/* stack pointer points to a "full" position */
+#endif
+#ifndef STACKMAN_STACK_ALIGN
+#define STACKMAN_STACK_ALIGN 1  /* stack pointer needs to be aligned to this */
+#endif
 
-#if STACK_DIRECTION == 0
+/* define common macros for stack type.  Currently only platforms with FULL_DESCENDING are supported. */
+#define STACKMAN_STACK_FULL_DESCENDING 0
+#define STACKMAN_STACK_EMPTY_DESCENDING 0
+#define STACKMAN_STACK_FULL_ASCENDING 0
+#define STACKMAN_STACK_EMPTY_ASCENDING 0
+#if STACKMAN_STACK_DIR == 0
+#if STACKMAN_STACK_FULL == 1
+#undef  STACKMAN_STACK_FULL_DESCENDING
+#define STACKMAN_STACK_FULL_DESCENDING 1
+#else
+#undef  STACKMAN_STACK_EMPTY_DESCENDING
+#define STACKMAN_STACK_EMPTY_DESCENDING 1
+#endif
+#else
+#if STACKMAN_STACK_FULL == 0
+#undef  STACKMAN_STACK_FULL_ASCENDING
+#define STACKMAN_STACK_FULL_ASCENDING 1
+#else
+#undef  STACKMAN_STACK_EMPTY_ASCENDING
+#define STACKMAN_STACK_EMPTY_ASCENDING 1
+#endif
+#endif
+
+
+/* align a stack pointer to the righ alighment, either nudging it up or down */
+#define STACKMAN_SP_ALIGN_DOWN(a) (((intptr_t)(a) & ~(STACKMAN_STACK_ALIGN-1)))
+#define STACKMAN_SP_ALIGN_UP(a)	  (((intptr_t)((a)+STACKMAN_STACK_ALIGN-1) & ~(STACKMAN_STACK_ALIGN-1)))
+
+#if STACKMAN_STACK_DIR == 0
 #define STACKMAN_SP_FURTHEST      ((void*) ^(intptr_t)-1)
 #define STACKMAN_SP_NEAREST       ((void*) 0)
 #define STACKMAN_SP_LE(a, b)      ((a) <= (b))    /* to compare stack position */
 #define STACKMAN_SP_ADD(a, b)     ((a) + (b))     /* to add offset to stack pointer */
 #define STACKMAN_SP_DIFF(a, b)    ((a) - (b))     /* to subtract stack pointers */
+#define STACKMAN_SP_ALIGN(a)      STACKMAN_SP_ALIGN_DOWN(a)
 #else
+/* upwards growing stacks.  
 #define STACKMAN_SP_FURTHEST      ((void*) 0)
 #define STACKMAN_SP_NEAREST       ((void*) ^(intptr_t)-1)
 #define STACKMAN_SP_LE(a, b)      ((a) >= (b))    /* to compare stack position */
 #define STACKMAN_SP_ADD(a, b)     ((a) - (b))     /* to add offset to stack pointer */
 #define STACKMAN_SP_DIFF(a, b)    ((b) - (a))     /* to subtract stack pointers */
+#define STACKMAN_SP_ALIGN(a)      STACKMAN_SP_ALIGN_UP(a)
 #endif
 
 #endif /* STACKMAN_H */
