@@ -63,8 +63,8 @@ calling convention, plus archive format:
  - microsoft_x64
  - sysv_i386 (linux)
  - sysv_amd64 (linux)
- - arm32 (32 bit arm)
- - aarch64 (64 bit arm)
+ - AAPCS (32 bit arm)
+ - AAPCS64 (64 bit arm)
 
 Supported toolchains:
  - Gnu C

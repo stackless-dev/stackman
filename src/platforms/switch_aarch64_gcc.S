@@ -7,7 +7,7 @@
  * from test.s into this file.
  * 
  */
- 	.arch armv8-a
+	.arch armv8-a
 	.file	"test.c"
 	.text
 	.align	2
@@ -51,7 +51,7 @@ stackman_switch:
 	mov	x3, x0
 	mov	x0, x1
 #APP
-// 55 "switch_aarch64_gcc.h" 1
+// 57 "switch_aarch64_gcc.h" 1
 	mov x2, sp
 // 0 "" 2
 #NO_APP
@@ -61,7 +61,7 @@ stackman_switch:
 	blr	x3
 	mov	x2, x0
 #APP
-// 59 "switch_aarch64_gcc.h" 1
+// 61 "switch_aarch64_gcc.h" 1
 	mov sp, x0
 // 0 "" 2
 #NO_APP
@@ -103,5 +103,45 @@ stackman_switch:
 	.cfi_endproc
 .LFE0:
 	.size	stackman_switch, .-stackman_switch
-	.ident	"GCC: (Ubuntu 9.2.1-9ubuntu2) 9.2.1 20191008"
+	.align	2
+	.global	stackman_call
+	.type	stackman_call, %function
+stackman_call:
+.LFB1:
+	.cfi_startproc
+	stp	x29, x30, [sp, -32]!
+	.cfi_def_cfa_offset 32
+	.cfi_offset 29, -32
+	.cfi_offset 30, -24
+	mov	x29, sp
+	str	x19, [sp, 16]
+	.cfi_offset 19, -16
+	mov	x3, x0
+	mov	x0, x1
+#APP
+// 77 "switch_aarch64_gcc.h" 1
+	movl x19, sp
+// 0 "" 2
+// 80 "switch_aarch64_gcc.h" 1
+	movl sp, x2
+// 0 "" 2
+#NO_APP
+	mov	w1, 2
+	blr	x3
+#APP
+// 84 "switch_aarch64_gcc.h" 1
+	movl sp, x19
+// 0 "" 2
+#NO_APP
+	ldr	x19, [sp, 16]
+	ldp	x29, x30, [sp], 32
+	.cfi_restore 30
+	.cfi_restore 29
+	.cfi_restore 19
+	.cfi_def_cfa_offset 0
+	ret
+	.cfi_endproc
+.LFE1:
+	.size	stackman_call, .-stackman_call
+	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu1) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits

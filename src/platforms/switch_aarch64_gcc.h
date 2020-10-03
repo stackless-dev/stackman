@@ -1,6 +1,5 @@
 /* Switch function for Aarch64 and GCC compiler
- * for Aarch64 abi, see
- * https://developer.arm.com/docs/ihi0055/d/procedure-call-standard-for-the-arm-64-bit-architecture
+ * for AAPCS64 abi, see https://developer.arm.com/documentation/ihi0055/b/
  * and additional information for gcc inline arm assembly:
  * http://www.ethernut.de/en/documents/arm-inline-asm.html
  *
@@ -15,10 +14,11 @@
 #endif
 #endif
 
+#define STACKMAN_HAVE_CALL 1
 #define STACKMAN_STACK_ALIGN 16
 
 #ifdef STACKMAN_SWITCH_IMPL
-#if ! && !defined(STACKMAN_EXTERNAL_ASM)
+#if !__ASSEMBLER__ && !defined(STACKMAN_EXTERNAL_ASM)
 
 /* 
  * To test this, #include this file in a file, test.c and
@@ -63,6 +63,28 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 	return sp;
 }
 #endif
+
+/* 
+ * Similar, but we want the frame pointer so that a debugger
+ * can follow the stack.  x19 is callee saved local var register.
+ */
+__attribute__((optimize("O", "no-omit-frame-pointer")))
+STACKMAN_LINKAGE_SWITCH
+void *stackman_call(stackman_cb_t callback, void *context, void *stack_pointer)
+{
+  void *sp;
+  /* sp = store stack pointer in rbx */
+  __asm__ ("movl x19, sp" : : : "x19");
+
+  /* set stack pointer from provided using assembly */
+  __asm__ ("movl sp, %[result]" :: [result] "r" (stack_pointer));
+
+  sp = callback(context, STACKMAN_OP_CALL, stack_pointer);
+  /* restore stack pointer */
+  __asm__ ("movl sp, x19" :::);
+  
+  return sp;
+}
 
 #if __ASSEMBLER__ && defined(STACKMAN_EXTERNAL_ASM)
 /* pre-generated assembly code */

@@ -1,5 +1,5 @@
 /* Switch function for arm 32 as seen on RaspberryPi2
- * for ARM abi, see http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ihi0042f/index.html
+ * for ARM abi (AAPCS), see https://developer.arm.com/documentation/ihi0042/e/
  * and additional information for gcc inline arm assembly:
  * http://www.ethernut.de/en/documents/arm-inline-asm.html
  *
