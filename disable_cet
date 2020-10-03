@@ -1,0 +1,10 @@
+#!/bin/sh
+# disable Intel's CET support.
+# the Shadow Stack is fundamentally incompatible with our stack manipulation.
+# We mustn't generate object code that indicates that CET is supported.  Modern GCC
+# creates CET flagged code by default, we must remove that when creating
+# the inline assembly.
+# simply test if the passed in compiler suports the flag
+if $1 -fcf-protection=none -E - < /dev/null > /dev/null 2>&1; then
+	echo -fcf-protection=none
+fi

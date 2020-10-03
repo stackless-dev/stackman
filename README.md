@@ -70,11 +70,17 @@ Supported toolchains:
  - Gnu C
  - clang
  - Microsoft Visual Studio
- 
    
 Other platforms can be easily adapted from both existing implementations for other
 projects as well as from example code provided.
 
+### Intel CET
+Intel's Conontrol-Flow Enforcement Technology is incompatible with stack switching
+because it imploys a secondary Shadow Stack, that the user-mode program cannot
+modify.  Unexpected return flow after a stack switch would cause the processor
+to fault.  Because of this, we need to mark any assembly code as not CET compatible.  Modern compilers are beginning to generate CET compatible objects and
+once supporting CPUs start to arrive, processes which consist entirely of CET compatible code may be run in such a protected environment.  See https://software.intel.com/content/www/us/en/develop/articles/technical-look-control-flow-enforcement-technology.html for more information
+ 
 ## Usage
  - Include `stackman.h` for a decleration of the `stackman_switch()` function
    and the definition of various platform specific macros.  See the documentation
