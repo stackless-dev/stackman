@@ -1,10 +1,19 @@
 
-CPPFLAGS += -Isrc
-ABI := $(shell cc $(CPPFLAGS) -o bin/get_abi get_abi.c && bin/get_abi)
-LIB := lib/$(ABI)
 
-CFLAGS += -fPIC
-LDFLAGS += -L$(LIB)
+CPPFLAGS += -Isrc $(PLATFORM)
+CFLAGS += -fPIC -g $(PLATFORM)
+CXXFLAGS += -fPIC -g $(PLATFORM)
+LDFLAGS += -L$(LIB) -g $(PLATFORM)
+
+# run c preprocessor with any cflags to get cross compilation result, then run regular compile in native
+ABI := $(shell mkdir -p bin; $(CC) -E $(CFLAGS) $(CPPFLAGS) -o bin/get_abi.c get_abi.c && $(CC) -o bin/get_abi bin/get_abi.c && bin/get_abi)
+ifndef ABI
+$(error Could not determine platform)
+else
+$(info ABI is $(ABI))
+endif
+
+LIB := lib/$(ABI)
 
 all: $(LIB)/libstackman.a
 
@@ -14,10 +23,9 @@ obj = src/stackman.o src/stackman_s.o
 $(LIB)/libstackman.a: lib $(obj)
 	$(AR) $(ARFLAGS) -s $@ $(obj)
 
+.PHONY: lib clean
 lib:
 	mkdir -p $(LIB)
-bin:
-	mkdir bin
 
 clean:
 	rm -f src/*.o tests/*.o
@@ -26,6 +34,9 @@ clean:
 DEBUG = #-DDEBUG_DUMP
 
 .PHONY: test tests
+
+tt: bin/test_static
+	bin/test_static
 
 test: tests
 	bin/test

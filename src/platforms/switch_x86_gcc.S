@@ -14,7 +14,6 @@
 stackman_switch:
 .LFB0:
 	.cfi_startproc
-	endbr32
 	pushl	%ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
@@ -29,7 +28,7 @@ stackman_switch:
 	movl	8(%ebp), %eax
 	movl	12(%ebp), %edx
 #APP
-# 44 "switch_x86_gcc.h" 1
+# 48 "switch_x86_gcc.h" 1
 	subl $12, %esp
 movl %eax, %esi
 movl %edx, %edi
@@ -60,21 +59,45 @@ addl $12, %esp
 	.cfi_endproc
 .LFE0:
 	.size	stackman_switch, .-stackman_switch
-	.ident	"GCC: (Ubuntu 9.2.1-9ubuntu2) 9.2.1 20191008"
+	.globl	stackman_call
+	.type	stackman_call, @function
+stackman_call:
+.LFB1:
+	.cfi_startproc
+	pushl	%ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	movl	%esp, %ebp
+	.cfi_def_cfa_register 5
+	pushl	%ebx
+	subl	$8, %esp
+	.cfi_offset 3, -12
+	movl	16(%ebp), %eax
+#APP
+# 95 "switch_x86_gcc.h" 1
+	movl %esp, %ebx
+# 0 "" 2
+# 98 "switch_x86_gcc.h" 1
+	movl %eax, %esp
+# 0 "" 2
+#NO_APP
+	pushl	%eax
+	pushl	$2
+	pushl	12(%ebp)
+	call	*8(%ebp)
+#APP
+# 102 "switch_x86_gcc.h" 1
+	movl %ebx, %esp
+# 0 "" 2
+#NO_APP
+	movl	-4(%ebp), %ebx
+	leave
+	.cfi_restore 5
+	.cfi_restore 3
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE1:
+	.size	stackman_call, .-stackman_call
+	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
 	.section	.note.GNU-stack,"",@progbits
-	.section	.note.gnu.property,"a"
-	.align 4
-	.long	 1f - 0f
-	.long	 4f - 1f
-	.long	 5
-0:
-	.string	 "GNU"
-1:
-	.align 4
-	.long	 0xc0000002
-	.long	 3f - 2f
-2:
-	.long	 0x3
-3:
-	.align 4
-4:

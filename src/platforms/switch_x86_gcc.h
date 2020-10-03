@@ -10,6 +10,9 @@
 #endif
 #endif
 
+#define STACKMAN_HAVE_CALL 1
+#define STACKMAN_STACK_ALIGN 16
+
 #if defined(STACKMAN_SWITCH_IMPL )
 #if !__ASSEMBLER__ && !defined(STACKMAN_EXTERNAL_ASM)
 
@@ -77,6 +80,28 @@ void *result;
       [ctx] "r" (context)
     );
     return result;
+}
+
+/* 
+ * Similar, but we want the base pointer so that a debugger
+ * can follow the stack
+ */
+__attribute__((optimize("O1", "no-omit-frame-pointer")))
+STACKMAN_LINKAGE_SWITCH
+void *stackman_call(stackman_cb_t callback, void *context, void *stack_pointer)
+{
+  void *sp;
+  /* sp = store stack pointer in rbx */
+  __asm__ ("movl %%esp, %%ebx" : : : "ebx");
+
+  /* set stack pointer from provided using assembly */
+  __asm__ ("movl %[result], %%esp" :: [result] "r" (stack_pointer));
+
+  sp = callback(context, STACKMAN_OP_CALL, stack_pointer);
+  /* restore stack pointer */
+  __asm__ ("movl %%ebx, %%esp" :::);
+  
+  return sp;
 }
 
 #endif
