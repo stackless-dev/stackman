@@ -15,6 +15,8 @@
 #endif
 #endif
 
+#define STACKMAN_STACK_ALIGN 16
+
 #ifdef STACKMAN_SWITCH_IMPL
 #if ! && !defined(STACKMAN_EXTERNAL_ASM)
 

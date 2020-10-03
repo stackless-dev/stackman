@@ -32,7 +32,7 @@ stackman_switch:
 	mov	r3, r0
 	mov	r0, r1
 	.syntax divided
-@ 78 "switch_arm_gcc.h" 1
+@ 82 "switch_arm_gcc.h" 1
 	mov r2, sp
 @ 0 "" 2
 	.arm
@@ -43,7 +43,7 @@ stackman_switch:
 	blx	r3
 	mov	r2, r0
 	.syntax divided
-@ 82 "switch_arm_gcc.h" 1
+@ 86 "switch_arm_gcc.h" 1
 	mov sp, r0
 @ 0 "" 2
 	.arm
@@ -53,5 +53,37 @@ stackman_switch:
 	blx	r4
 	pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, pc}
 	.size	stackman_switch, .-stackman_switch
-	.ident	"GCC: (Ubuntu 9.2.1-9ubuntu2) 9.2.1 20191008"
+	.align	2
+	.global	stackman_call
+	.syntax unified
+	.arm
+	.fpu softvfp
+	.type	stackman_call, %function
+stackman_call:
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 1, uses_anonymous_args = 0
+	push	{r4, r5, fp, lr}
+	add	fp, sp, #12
+	mov	r3, r0
+	mov	r0, r1
+	.syntax divided
+@ 102 "switch_arm_gcc.h" 1
+	movl r4, sp
+@ 0 "" 2
+@ 105 "switch_arm_gcc.h" 1
+	movl sp, r2
+@ 0 "" 2
+	.arm
+	.syntax unified
+	mov	r1, #2
+	blx	r3
+	.syntax divided
+@ 109 "switch_arm_gcc.h" 1
+	movl sp, r4
+@ 0 "" 2
+	.arm
+	.syntax unified
+	pop	{r4, r5, fp, pc}
+	.size	stackman_call, .-stackman_call
+	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu1) 9.3.0"
 	.section	.note.GNU-stack,"",%progbits

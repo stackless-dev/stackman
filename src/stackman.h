@@ -36,7 +36,7 @@
 #define STACKMAN_STACK_FULL 1	/* stack pointer points to a "full" position */
 #endif
 #ifndef STACKMAN_STACK_ALIGN
-#define STACKMAN_STACK_ALIGN 1  /* stack pointer needs to be aligned to this */
+#define STACKMAN_STACK_ALIGN 4  /* stack pointer needs to be aligned to this */
 #endif
 
 /* define common macros for stack type.  Currently only platforms with FULL_DESCENDING are supported. */
