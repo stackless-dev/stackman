@@ -28,7 +28,7 @@ platforms so that no assembly steps are required by users.
 
 ## Features
 - Simple api
-  - `stackman_switch()` is the only function.
+  - `stackman_switch()` is the main function.
   - The caller provides a callback and context pointer to customize behaviour.
   - The callback can save the stack and provide the new stack pointer.
   - After the switch, the callback can restore contents of new stack.
@@ -38,19 +38,19 @@ platforms so that no assembly steps are required by users.
     straightforward implementation on most platforms.
   - Complex logic and branching is delegated to the C callback.
   - Custom platform code must only do three things:
-    1. Save and restore volatile registers on the stack
-    2. Adjust stack pointer
-    3. Call the callback before and after adjusting the stack pointer.
-- Assembly support
+    1. Save and restore volatile registers and stack state on the stack
+    2. Call the callback twice with the current stack pointer
+    3. Set the stack pointer to the value returned by the first callback.
+- Assembly support  
   The straightforward and application-agnostic switching allows the switching function to be implemented in full assembler.  This removes
   the risk of inline-assembler doing any sort of unexpected things such
   as in-lining the function or otherwise change the assumptions that the
   function makes about its environment.  This assembly code can be created by the in-line assembler in a controlled environment.
-- No dependencies
+- No dependencies  
   The library merely provides stack switching.  It consist only of a couple of functions with no dependencies.
-- Stable
+- Stable  
   There is no need to add or modify functionality.
-- Libraries provided.
+- Libraries provided.  
   The aim is to provide pre-assembled libraries for the most popular platforms. This relieves other tools that want to do stack
   manipulation from doing any sort of assembly or complex linkage.  Just include the headers and link to the appropriate library.
 
@@ -90,7 +90,7 @@ once supporting CPUs start to arrive, processes which consist entirely of CET co
    details.
  - Alternatively, link with libstackman.a or libstackman.lib for your platform.
  - Implement switching semantics via the callback and call `stackman_switch()` from your
-   program as appropriate.
+   program as appropriate.  See tests/test.c for examples.
 
 ## History
 This works was originally inspired by *Stackless Python* by [Christian Tismer](https://github.com/ctismer), where the original switching code was

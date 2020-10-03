@@ -9,7 +9,8 @@
  *
  * After include, the following may be defined
  * STACKMAN_PLATFORM - If defined, the platform in use
- *    STACKMAN_PLATFORM_ASM - If pure assembler, the filename of the assembly code.
+ * STACKMAN_ABI - the ABI being used.
+ * STACKMAN_PLATFORM_ASM - If pure assembler, the filename of the assembly code.
  *
  * For the file providing the implementation of stackman_switch(), include
  * "stackman_impl.h" instead.
