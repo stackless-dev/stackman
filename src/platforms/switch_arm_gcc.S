@@ -66,20 +66,24 @@ stackman_call:
 	add	fp, sp, #12
 	mov	r3, r0
 	mov	r0, r1
+	mov	r1, r2
 	.syntax divided
 @ 102 "switch_arm_gcc.h" 1
-	movl r4, sp
+	mov r4, sp
 @ 0 "" 2
-@ 105 "switch_arm_gcc.h" 1
-	movl sp, r2
+@ 103 "switch_arm_gcc.h" 1
+	mov r2, sp
+@ 0 "" 2
+@ 106 "switch_arm_gcc.h" 1
+	mov sp, r1
 @ 0 "" 2
 	.arm
 	.syntax unified
 	mov	r1, #2
 	blx	r3
 	.syntax divided
-@ 109 "switch_arm_gcc.h" 1
-	movl sp, r4
+@ 110 "switch_arm_gcc.h" 1
+	mov sp, r4
 @ 0 "" 2
 	.arm
 	.syntax unified

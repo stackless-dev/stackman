@@ -1,10 +1,12 @@
 /*
  * this file is provided for where inline assembly is not
- * dependable, such as with clang on linux or if
- * STACKMAN_PREFER_ASM is defined.
+ * dependable, such as with clang or if
+ * STACKMAN_PREFER_ASM is defined. It provides a stable
+ * implementation that is independent of subtleties of inline
+ * assembly code which may change with compiler versions.
  * The file is generated using
- * "aarch64-linux-gnu-gcc -DSTACKMAN_SWITCH_IMPL -S test.c" and then copying the code
- * from test.s into this file.
+ * "aarch64-linux-gnu-gcc -DSTACKMAN_SWITCH_IMPL -S test.c"
+ * and then copying the code from test.s into this file.
  * 
  */
 	.arch armv8-a
@@ -118,19 +120,23 @@ stackman_call:
 	.cfi_offset 19, -16
 	mov	x3, x0
 	mov	x0, x1
+	mov	x1, x2
 #APP
 // 77 "switch_aarch64_gcc.h" 1
-	movl x19, sp
+	mov x19, sp
 // 0 "" 2
-// 80 "switch_aarch64_gcc.h" 1
-	movl sp, x2
+// 78 "switch_aarch64_gcc.h" 1
+	mov x2, sp
+// 0 "" 2
+// 82 "switch_aarch64_gcc.h" 1
+	mov sp, x1
 // 0 "" 2
 #NO_APP
 	mov	w1, 2
 	blr	x3
 #APP
-// 84 "switch_aarch64_gcc.h" 1
-	movl sp, x19
+// 86 "switch_aarch64_gcc.h" 1
+	mov sp, x19
 // 0 "" 2
 #NO_APP
 	ldr	x19, [sp, 16]
