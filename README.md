@@ -103,3 +103,13 @@ Our work on additional stack-manipulating libraries prompted us to try to distil
 rawest form into a separate, low-level, library.  Such that any project, withing to implement *co-routine*-like
 behaviour on the C-stack level, could make use of simple, stable code, that can be easily extended for additional
 platforms as they come along.
+
+## Cross-compilation
+Linux on x86-64 can be used to cross compile for x86 and ARM targets.  This is most useful to generate assembly code, e.g. when compiling src/platform/test.c
+ - x86 requires the -m32 flag to compilers and linkers.
+ - arm32 requires to use the arm-linux-gnueabi-* tools, including cc and linker
+ - aarch64 requires the aarch64-linux-gnu-* tools.
+
+The x86 tools require the **gcc-multilib** and **g++-multilib** packages to be installed.  They, however, can't co-exist with the **gcc-arm-linux-gnueabi** or
+**gcc-aarch64-linux-gnu** packages on some distributions, and so development for these
+platforms may need to be done independently.

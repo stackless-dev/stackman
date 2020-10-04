@@ -70,14 +70,16 @@
 #if STACKMAN_STACK_DIR == 0
 #define STACKMAN_SP_FURTHEST      ((void*) ^(intptr_t)-1)
 #define STACKMAN_SP_NEAREST       ((void*) 0)
+#define STACKMAN_SP_LS(a, b)      ((a) < (b))     /* to compare stack position */
 #define STACKMAN_SP_LE(a, b)      ((a) <= (b))    /* to compare stack position */
 #define STACKMAN_SP_ADD(a, b)     ((a) + (b))     /* to add offset to stack pointer */
 #define STACKMAN_SP_DIFF(a, b)    ((a) - (b))     /* to subtract stack pointers */
 #define STACKMAN_SP_ALIGN(a)      STACKMAN_SP_ALIGN_DOWN(a)
 #else
-/* upwards growing stacks.  
+/* upwards growing stacks */
 #define STACKMAN_SP_FURTHEST      ((void*) 0)
 #define STACKMAN_SP_NEAREST       ((void*) ^(intptr_t)-1)
+#define STACKMAN_SP_LS(a, b)      ((a) > (b))     /* to compare stack position */
 #define STACKMAN_SP_LE(a, b)      ((a) >= (b))    /* to compare stack position */
 #define STACKMAN_SP_ADD(a, b)     ((a) - (b))     /* to add offset to stack pointer */
 #define STACKMAN_SP_DIFF(a, b)    ((b) - (a))     /* to subtract stack pointers */

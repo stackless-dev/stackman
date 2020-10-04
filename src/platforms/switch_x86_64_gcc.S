@@ -1,9 +1,12 @@
 /*
- * this file is provided for where inline assembly is not
- * dependable, such as with clang on linux x86_64.
+ * This file is provided for where inline assembly is not
+ * dependable, such as with clang on linux x86_64 or if
+ * STACKMAN_PREFER_ASM is defined. It provides a stable
+ * implementation that is independent of subtleties of inline
+ * assembly code which may change with compiler versions.
  * The file is generated using
- * "gcc -DSTACKMAN_SWITCH_IMPL -S test.c" and then copying the code
- * from test.s into this file.
+ * "gcc -DSTACKMAN_SWITCH_IMPL -S -fcf-protection=none test.c"
+ * and then copying the code from test.s into this file.
  * 
  */
 	.file	"test.c"
@@ -50,12 +53,12 @@ stackman_switch:
 	movq	%rcx, %rdi
 	movq	%rax, %rbx
 	call	*%rax
+	movq	%rax, %rdx
 #APP
 # 62 "switch_x86_64_gcc.h" 1
 	movq %rax, %rsp
 # 0 "" 2
 #NO_APP
-	movq	%rax, %rdx
 	movl	$1, %esi
 	movq	%r14, %rdi
 	call	*%rbx
@@ -103,14 +106,18 @@ stackman_call:
 # 86 "switch_x86_64_gcc.h" 1
 	movq %rsp, %rbx
 # 0 "" 2
-# 89 "switch_x86_64_gcc.h" 1
+# 87 "switch_x86_64_gcc.h" 1
+	movq %rsp, %rcx
+# 0 "" 2
+# 90 "switch_x86_64_gcc.h" 1
 	movq %rdx, %rsp
 # 0 "" 2
 #NO_APP
+	movq	%rcx, %rdx
 	movl	$2, %esi
 	call	*%rax
 #APP
-# 93 "switch_x86_64_gcc.h" 1
+# 94 "switch_x86_64_gcc.h" 1
 	movq %rbx, %rsp
 # 0 "" 2
 #NO_APP
@@ -122,5 +129,5 @@ stackman_call:
 	.cfi_endproc
 .LFE1:
 	.size	stackman_call, .-stackman_call
-	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
+	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits

@@ -73,26 +73,27 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 
 
 /* 
- * Similar, but we want the base pointer so that a debugger
+ * Similar, but we want the frame pointer so that a debugger
  * can follow the stack
  */
-#define OPTIMIZE_CALL "O"
+#define OPTIMIZE_CALL "O", "no-omit-frame-pointer"
 __attribute__((optimize(OPTIMIZE_CALL)))
 STACKMAN_LINKAGE_SWITCH
 void *stackman_call(stackman_cb_t callback, void *context, void *stack_pointer)
 {
-	void *sp;
+	void *old_sp, *result;
 	/* sp = store stack pointer in rbx */
 	__asm__ ("movq %%rsp, %%rbx" : : : "rbx");
-
+	__asm__ ("movq %%rsp, %[sp]" : [sp] "=r" (old_sp));
+	
 	/* set stack pointer from provided using assembly */
-	__asm__ ("movq %[result], %%rsp" :: [result] "r" (stack_pointer));
+	__asm__ ("movq %[sp], %%rsp" :: [sp] "r" (stack_pointer));
 
-	sp = callback(context, STACKMAN_OP_CALL, stack_pointer);
+	result = callback(context, STACKMAN_OP_CALL, old_sp);
 	/* restore stack pointer */
 	__asm__ ("movq %%rbx, %%rsp" :::);
 	
-	return sp;
+	return result;
 }
 
 

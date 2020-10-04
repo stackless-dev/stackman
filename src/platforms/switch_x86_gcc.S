@@ -1,10 +1,12 @@
 /*
  * this file is provided for where inline assembly is not
- * dependable, such as with clang on linux x86_64 or if
- * STACKNAN_PREFER_ASM is defined.
+ * dependable, such as with clang on linux x86 or if
+ * STACKMAN_PREFER_ASM is defined. It provides a stable
+ * implementation that is independent of subtleties of inline
+ * assembly code which may change with compiler versions.
  * The file is generated using
- * "gcc -DSTACKMAN_SWITCH_IMPL -S -m32 test.c" and then copying the code
- * from test.s into this file.
+ * "gcc -DSTACKMAN_SWITCH_IMPL -S -m32 -fcf-protection=none test.c"
+ * and then copying the code from test.s into this file.
  * 
  */
 	.file	"test.c"
@@ -72,13 +74,18 @@ stackman_call:
 	pushl	%ebx
 	subl	$8, %esp
 	.cfi_offset 3, -12
-	movl	16(%ebp), %eax
 #APP
-# 95 "switch_x86_gcc.h" 1
+# 96 "switch_x86_gcc.h" 1
 	movl %esp, %ebx
 # 0 "" 2
-# 98 "switch_x86_gcc.h" 1
-	movl %eax, %esp
+# 97 "switch_x86_gcc.h" 1
+	movl %esp, %eax
+# 0 "" 2
+#NO_APP
+	movl	16(%ebp), %edx
+#APP
+# 100 "switch_x86_gcc.h" 1
+	movl %edx, %esp
 # 0 "" 2
 #NO_APP
 	pushl	%eax
@@ -86,7 +93,7 @@ stackman_call:
 	pushl	12(%ebp)
 	call	*8(%ebp)
 #APP
-# 102 "switch_x86_gcc.h" 1
+# 104 "switch_x86_gcc.h" 1
 	movl %ebx, %esp
 # 0 "" 2
 #NO_APP
@@ -99,5 +106,5 @@ stackman_call:
 	.cfi_endproc
 .LFE1:
 	.size	stackman_call, .-stackman_call
-	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
+	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits

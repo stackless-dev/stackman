@@ -191,16 +191,19 @@ void test_03(void)
 #endif
 #ifdef TEST_04
 /* test retrieval of stack pointer */
-void *test_04_cb(void* context, int _opcode, void *sp)
+void *test_04_cb(void* context, int _opcode, void *old_sp)
 {
 
 	ctxt01 *c = (ctxt01*)context;
 	stackman_op_t opcode = (stackman_op_t)_opcode;
 	assert(opcode == STACKMAN_OP_CALL || opcode == 100);
+	/* one level of recursion here so that we actually use some of the new stack */
 	if (opcode == STACKMAN_OP_CALL)
-		return test_04_cb(context, 100, sp);
+		test_04_cb(context, 100, old_sp);
 
-	return sp; /* test return argument */
+	c->sp[0] = &c;
+	c->sp[1] = old_sp;
+	return 0;
 }
 void test_04(void)
 {
@@ -208,6 +211,7 @@ void test_04(void)
 	int stacksize=1024;
 	int i, cnt;
 	void *res;
+	ctxt01 ctxt;
 
 	assert(STACKMAN_STACK_FULL_DESCENDING);
 
@@ -223,8 +227,14 @@ void test_04(void)
 	stack2 = stack-64;
 
 	/* perform the call */
-	res = stackman_call(test_04_cb, 0, stack2);
-	assert(res==stack2);
+	stackman_call(test_04_cb, &ctxt, stack2);
+
+	/* verify that the called function saw stack in the right range */
+	assert(STACKMAN_SP_LE(block, ctxt.sp[0]));
+	assert(STACKMAN_SP_LS(ctxt.sp[0], stack2));
+
+	/* verify that old stack was outside the stack we allocated */
+	assert(STACKMAN_SP_LE(stack2, ctxt.sp[1]) || STACKMAN_SP_LS(ctxt.sp[1], block));
 
 	/* verify that the guard memory is correct */
 	cnt = 0;

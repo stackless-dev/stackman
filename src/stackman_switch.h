@@ -125,9 +125,10 @@ void *stackman_switch_noinline(stackman_cb_t callback, void *context);
  * are pushed on the current stack, first the stack pointer is changed to
  * a new location. This is useful for example to move the stack into heap memory.
  * 'callback' will be invoked with the
- * stack already set to the new position as specified by 'stack'.
+ * stack already set to the new position as specified by 'stack'. The third
+ * argument to the callback is the *previous* stack pointer.
  * The callback can then proceed to 'save' the new stack for future switching.
- * Returning from callback will work normally.
+ * Returning from the callback will work normally.
  */
 STACKMAN_LINKAGE_SWITCH
 void *stackman_call(stackman_cb_t callback, void *context, void *stack);

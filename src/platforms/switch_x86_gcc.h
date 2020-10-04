@@ -90,18 +90,20 @@ __attribute__((optimize("O1", "no-omit-frame-pointer")))
 STACKMAN_LINKAGE_SWITCH
 void *stackman_call(stackman_cb_t callback, void *context, void *stack_pointer)
 {
-  void *sp;
-  /* sp = store stack pointer in rbx */
+  void *old_sp, *result;
+  
+  /* sp = store stack pointer in ebx */
   __asm__ ("movl %%esp, %%ebx" : : : "ebx");
-
+  __asm__ ("movl %%esp, %[sp]" : [sp] "=r" (old_sp));
+  
   /* set stack pointer from provided using assembly */
-  __asm__ ("movl %[result], %%esp" :: [result] "r" (stack_pointer));
+  __asm__ ("movl %[sp], %%esp" :: [sp] "r" (stack_pointer));
 
-  sp = callback(context, STACKMAN_OP_CALL, stack_pointer);
+  result = callback(context, STACKMAN_OP_CALL, old_sp);
   /* restore stack pointer */
   __asm__ ("movl %%ebx, %%esp" :::);
   
-  return sp;
+  return result;
 }
 
 #endif
