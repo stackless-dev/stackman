@@ -9,14 +9,14 @@
  * instructions, and so it may use a base pointer and other
  * things.  We must force it to use the pre-build assembler
  */
-#if !defined(STACKMAN_EXTERNAL_ASM)
+#if !defined(STACKMAN_ASSEMBLY_SRC)
 #if defined (__clang__) || ! STACKMAN_INLINE_ASM
-#define STACKMAN_EXTERNAL_ASM "platforms/switch_arm_gcc.S"
+#define STACKMAN_ASSEMBLY_SRC "platforms/switch_arm_gcc.S"
 #endif
 #endif
 
 #ifdef STACKMAN_SWITCH_IMPL
-#if !__ASSEMBLER__ && !defined(STACKMAN_EXTERNAL_ASM)
+#if !__ASSEMBLER__ && !defined(STACKMAN_ASSEMBLY_SRC)
 
 /* inline assembly does not _by default_ produce code that is usable
  * because depending
@@ -88,9 +88,9 @@ void *stackman_switch(stackman_cb_t callback, void *context)
 
 #endif
 
-#if __ASSEMBLER__ && defined(STACKMAN_EXTERNAL_ASM)
+#if __ASSEMBLER__ && defined(STACKMAN_ASSEMBLY_SRC)
 /* pre-generated assembly code */
-#include STACKMAN_EXTERNAL_ASM
+#include STACKMAN_ASSEMBLY_SRC
 #endif
 
 #endif /* STACKMAN_SWITCH_IMPL */

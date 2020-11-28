@@ -12,7 +12,7 @@
  */
 #if defined(STACKMAN_LINKAGE_STATIC)
 
-#if !defined(STACKMAN_EXTERNAL_ASM) && !STACKMAN_SWITCH_C
+#if !defined(STACKMAN_ASSEMBLY_SRC) && !STACKMAN_SWITCH_C
 #define STACKMAN_LINKAGE_SWITCH static
 #else
 /* stackman_switch is defined in external assembler, static not possible */

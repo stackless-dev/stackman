@@ -4,14 +4,14 @@
  * instructions, and so it may use a base pointer and other
  * things.  We must force it to use the pre-build assembler
  */
-#if !defined(STACKMAN_EXTERNAL_ASM)
+#if !defined(STACKMAN_ASSEMBLY_SRC)
 #if defined (__clang__) || ! STACKMAN_INLINE_ASM
-#define STACKMAN_EXTERNAL_ASM "platforms/switch_x86_gcc.S"
+#define STACKMAN_ASSEMBLY_SRC "platforms/switch_x86_gcc.S"
 #endif
 #endif
 
 #if defined(STACKMAN_SWITCH_IMPL )
-#if !__ASSEMBLER__ && !defined(STACKMAN_EXTERNAL_ASM)
+#if !__ASSEMBLER__ && !defined(STACKMAN_ASSEMBLY_SRC)
 
 /* Follow System V i386 abi, including 16 byte stack alignment 
  * https://wiki.osdev.org/System_V_ABI#i386
@@ -81,9 +81,9 @@ void *result;
 
 #endif
 
-#if __ASSEMBLER__ && defined(STACKMAN_EXTERNAL_ASM)
+#if __ASSEMBLER__ && defined(STACKMAN_ASSEMBLY_SRC)
 /* pre-generated assembly code */
-#include STACKMAN_EXTERNAL_ASM
+#include STACKMAN_ASSEMBLY_SRC
 #endif
 
 #endif /* STACKMAN_SWITCH_IMPL */

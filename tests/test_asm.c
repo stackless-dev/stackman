@@ -4,7 +4,7 @@
 #include "stackman.h"
 #include "stackman_impl.h"
 
-#ifndef STACKMAN_EXTERNAL_ASM
+#ifndef STACKMAN_ASSEMBLY_SRC
 #include "test.c"
 #else
 int main(int argc, char*argv[])

@@ -4,7 +4,7 @@
  */
 #define STACKMAN_LINKAGE_STATIC
 #include "stackman.h"
-#ifndef STACKMAN_EXTERNAL_ASM
+#ifndef STACKMAN_ASSEMBLY_SRC
 #include "test.c"
 #define STACKMAN_SWITCH_IMPL
 #include "platforms/platform.h"

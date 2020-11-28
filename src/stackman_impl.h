@@ -20,8 +20,10 @@
 STACKMAN_LINKAGE_SWITCH_NOINLINE
 void *stackman_switch_noinline(stackman_cb_t callback, void *context)
 {
-#ifndef STACKMAN_EXTERNAL_ASM
-	/* Use a volatile pointer to prevent inlining of stackman_switch().
+#ifndef STACKMAN_ASSEMBLY_SRC
+	/* Call through a volatile pointer to prevent inlining of stackman_switch().
+	 * if stackman_switch() is implemented with in-line assembler, inlining the
+	 * function may change assumptions made in the assembly code.
      * See Stackless issue 183 
      * https://github.com/stackless-dev/stackless/issues/183
      */
