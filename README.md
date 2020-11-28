@@ -14,7 +14,7 @@ appropriate customization for it to work.
 
 Various projects perform stack manipulation to provide _co-routine_ functionality:
 
-- [gevent](https://github.com/gevent/gevent)
+- [greenlet](https://github.com/python-greenlet/greenlet)
 - [Stackless Python](https://github.com/stackless-dev/stackless/)
 
 However, each of these perform things slightly differently and individual platform
