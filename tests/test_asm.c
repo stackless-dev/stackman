@@ -1,10 +1,10 @@
-/* testing of asm functionality on x86_64_gcc */
+/* testing of inline asm functionality */
 
-#define STACKMAN_PREFER_ASM 1
+#define STACKMAN_INLINE_ASM 1
 #include "stackman.h"
 #include "stackman_impl.h"
 
-#ifdef STACKMAN_EXTERNAL_ASM
+#ifndef STACKMAN_EXTERNAL_ASM
 #include "test.c"
 #else
 int main(int argc, char*argv[])

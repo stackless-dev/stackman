@@ -1,7 +1,7 @@
 /*
  * this file is provided for where inline assembly is not
  * dependable, such as with clang on linux x86_64 or if
- * STACKNAN_PREFER_ASM is defined.
+ * STACKMAN_INLINE_ASM is false
  * The file is generated using
  * "gcc -DSTACKMAN_SWITCH_IMPL -S -m32 test.c" and then copying the code
  * from test.s into this file.

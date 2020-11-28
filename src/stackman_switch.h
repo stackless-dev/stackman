@@ -104,7 +104,7 @@ STACKMAN_LINKAGE_SWITCH
 void *stackman_switch(stackman_cb_t callback, void *context);
 
 /* a separate function which wraps the c function with in-line assembly
- * in a way to ensure tht it won't be inlined in other code.
+ * in a way to ensure that it won't be inlined in other code.
  * This is a temporary hack until we can do it more nicely
  */
 STACKMAN_LINKAGE_SWITCH_NOINLINE

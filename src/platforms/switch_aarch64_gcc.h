@@ -10,7 +10,7 @@
  * things.  We must force it to use the pre-build assembler
  */
 #if !defined(STACKMAN_EXTERNAL_ASM)
-#if defined (__clang__) || STACKMAN_PREFER_ASM
+#if defined (__clang__) || ! STACKMAN_INLINE_ASM
 #define STACKMAN_EXTERNAL_ASM "platforms/switch_aarch64_gcc.S"
 #endif
 #endif
