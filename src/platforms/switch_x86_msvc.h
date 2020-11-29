@@ -3,8 +3,8 @@
  * The C function defined here, saves and restores the structured
  * exception handling state.
  */
-#ifndef STACKMAN_EXTERNAL_ASM#define
-#define STACKMAN_EXTERNAL_ASM switch_x86_msvc.asm#define
+#ifndef STACKMAN_ASSEMBLY_SRC
+#define STACKMAN_ASSEMBLY_SRC switch_x86_msvc.asm
 #define STACKMAN_SWITCH_C 1 /* contains a C implementation */
 #endif
 
