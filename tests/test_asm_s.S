@@ -3,5 +3,5 @@
  * with pure assembly.  Enable this using the following:
  */
 
-#define STACKMAN_PREFER_ASM 1
+#define STACKMAN_INLINE_ASM 1
 #include "stackman_impl.h"
