@@ -42,8 +42,8 @@
 
 
 __attribute__((optimize("O1", "no-omit-frame-pointer")))
-STACKMAN_LINKAGE_SWITCH
-void *stackman_switch(stackman_cb_t callback, void *context)
+STACKMAN_LINKAGE_SWITCH_INASM
+void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 {
 	void *sp;
 	/* have gcc save/restore registers for us on the stack */

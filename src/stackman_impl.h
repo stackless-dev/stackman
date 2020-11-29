@@ -17,22 +17,20 @@
 
 #if !__ASSEMBLER__
 #include "stackman_switch.h"
-STACKMAN_LINKAGE_SWITCH_NOINLINE
-void *stackman_switch_noinline(stackman_cb_t callback, void *context)
+
+#if STACKMAN_SWITCH_NEED_INDIRECT
+STACKMAN_LINKAGE_SWITCH
+void *stackman_switch(stackman_cb_t callback, void *context)
 {
-#ifndef STACKMAN_ASSEMBLY_SRC
 	/* Call through a volatile pointer to prevent inlining of stackman_switch().
 	 * if stackman_switch() is implemented with in-line assembler, inlining the
 	 * function may change assumptions made in the assembly code.
      * See Stackless issue 183 
      * https://github.com/stackless-dev/stackless/issues/183
      */
-    static void *(*volatile stackman_switch_ptr)(stackman_cb_t callback, void *context) = stackman_switch;
+    static void *(*volatile stackman_switch_ptr)(stackman_cb_t callback, void *context) =
+    	STACKMAN_SWITCH_INASM_NAME;
     return stackman_switch_ptr(callback, context);
-#else
-    /*external assembler object cannot be inlined */
-    return stackman_switch(callback, context);
-#endif
 }
-
+#endif
 #endif

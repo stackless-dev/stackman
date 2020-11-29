@@ -24,7 +24,8 @@
 
 #include "../stackman_switch.h"
 
-void *stackman_switch(stackman_cb_t callback, void *context)
+STACKMAN_LINKAGE_SWITCH_INASM
+void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 {
 	void *stack_pointer;
 	/* assembly to save non-volatile registers

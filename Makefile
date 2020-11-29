@@ -32,14 +32,12 @@ test: tests
 	bin/test_cc
 	bin/test_static
 	bin/test_asm
-	bin/test_noinline
 	@echo "*** All test suites passed ***"
 
 tests: bin/test
 tests: bin/test_cc
 tests: bin/test_static
 tests: bin/test_asm
-tests: bin/test_noinline
 tests: LDLIBS := -lstackman
 
 bin/test: tests/test.o $(LIB)/libstackman.a
@@ -53,7 +51,3 @@ bin/test_static: tests/test_static.o
 
 bin/test_asm: tests/test_asm.o tests/test_asm_s.o
 	$(CC) $(LDFLAGS) -o $@ $^ ${DEBUG}
-
-bin/test_noinline: tests/test_noinline.o
-	$(CC) $(LDFLAGS) -o $@ $^ ${DEBUG} $(LDLIBS)
-
