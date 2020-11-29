@@ -5,7 +5,11 @@
 /* the main include file.  The following macros can be defined before including
  * STACKMAN_OPTIONAL - Do not error if the platform isn't supported
  * STACKMAN_VERBOSE  - Emit the found platform to output
- * STACKMAN_PREFER_ASM - define as 1 to prefer assembly code to inline-assembly
+ * STACKMAN_INLINE_ASM 
+ *	- leave undefined or define as 0 to prefer assembly code to inline-assembly (default)
+ *	- define as 1 to prefer inline-assembly.  This is recommended only for
+ *    development since compiler versions and implementation details may
+ *    create assembly that is incorrect.
  *
  * After include, the following may be defined
  * STACKMAN_PLATFORM - If defined, the platform in use

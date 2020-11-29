@@ -14,7 +14,7 @@ appropriate customization for it to work.
 
 Various projects perform stack manipulation to provide _co-routine_ functionality:
 
-- [gevent](https://github.com/gevent/gevent)
+- [greenlet](https://github.com/python-greenlet/greenlet)
 - [Stackless Python](https://github.com/stackless-dev/stackless/)
 
 However, each of these perform things slightly differently and individual platform
@@ -54,7 +54,6 @@ platforms so that no assembly steps are required by users.
   The aim is to provide pre-assembled libraries for the most popular platforms. This relieves other tools that want to do stack
   manipulation from doing any sort of assembly or complex linkage.  Just include the headers and link to the appropriate library.
 
-   
 ## Supported platforms
 The current code is distilled out of other work, with the aim of simplifying and
 standardizing the api.  A number of ABI specifications is supported, meaning architecture and
@@ -85,18 +84,25 @@ once supporting CPUs start to arrive, processes which consist entirely of CET co
  - Include `stackman.h` for a decleration of the `stackman_switch()` function
    and the definition of various platform specific macros.  See the documentation
    in the header file for the various macros.
- - Include `stackman_impl.h` from a source file to *define* `stackman_switch()`.
-   This can also be an assembler file with the `.S` suffix, see `stackman_impl.h` for
-   details.
- - Alternatively, link with libstackman.a or libstackman.lib for your platform.
  - Implement switching semantics via the callback and call `stackman_switch()` from your
    program as appropriate.  See tests/test.c for examples.
+
+There are two basic ways to add the library to your project:
+### static library (preferred)
+ - You link with the  `libstackman.a` or `stackman.lib` libraries provided for your platform.
+
+### inlined code
+ - You inlude `stackman_impl.h` in one of your .c source files to provide inline assembly.
+ - You include `stackman_impl.h` in an assembly (.S) file in your project to include assembly code.
+ - (windows) You include `stackman_s.asm` in an assemby (.asm) file in your project.
+ In the case of inlined code, it can be specified to prefer in-line assembly and static linkage
+ over separate assembly language source.
 
 ## History
 This works was originally inspired by *Stackless Python* by [Christian Tismer](https://github.com/ctismer), where the original switching code was
 developed.
 
-Later projects, like *gevent* have taken that idea and provided additional platform compatibility but
+Later projects, like *gevent/greenlet* have taken that idea and provided additional platform compatibility but
 with a different implementation, making the switching code itself incompatible.
 
 Our work on additional stack-manipulating libraries prompted us to try to distill this functionality in its

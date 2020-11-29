@@ -11,30 +11,34 @@
  * when including in other libraries
  */
 #if defined(STACKMAN_LINKAGE_STATIC)
-
-#if !defined(STACKMAN_EXTERNAL_ASM) && !STACKMAN_SWITCH_C
+#if !defined(STACKMAN_ASSEMBLY_SRC) && !STACKMAN_SWITCH_C
 #define STACKMAN_LINKAGE_SWITCH static
-#else
-/* stackman_switch is defined in external assembler, static not possible */
+#endif
+#endif
+
+#if !defined(STACKMAN_LINKAGE_SWITCH)
+/* then it is extern */
 #if defined(__cplusplus)
 #define STACKMAN_LINKAGE_SWITCH extern "C"
 #else
 #define STACKMAN_LINKAGE_SWITCH extern
 #endif
 #endif
-#define STACKMAN_LINKAGE_SWITCH_NOINLINE static
 
-#else  /* !defined (STACKMAN_LINKAGE_STATIC) */
+/* do we need to have indirection for stackman_switch?
+ * we do, if the implementation is inline and we are not
+ * building a library, because an optimizing compiler may
+ * decide to inline functions that contain in-line assembler
+ */
+#define STACKMAN_SWITCH_NEED_INDIRECT \
+	(!defined(STACKMAN_ASSEMBLY_SRC) && !defined(STACKMAN_BUILD_LIB))
 
-#if defined(__cplusplus)
-#define STACKMAN_LINKAGE_SWITCH extern "C"
-#define STACKMAN_LINKAGE_SWITCH_NOINLINE extern "C"
+#if STACKMAN_SWITCH_NEED_INDIRECT
+#define STACKMAN_SWITCH_INASM_NAME _stackman_switch_inasm
+#define STACKMAN_LINKAGE_SWITCH_INASM static
 #else
-#define STACKMAN_LINKAGE_SWITCH extern
-#define STACKMAN_LINKAGE_SWITCH_NOINLINE extern
-#endif
-
-
+#define STACKMAN_SWITCH_INASM_NAME stackman_switch
+#define STACKMAN_LINKAGE_SWITCH_INASM STACKMAN_LINKAGE_SWITCH
 #endif
 
 
@@ -110,14 +114,6 @@ typedef void *(*stackman_cb_t)(
  */
 STACKMAN_LINKAGE_SWITCH
 void *stackman_switch(stackman_cb_t callback, void *context);
-
-/* a separate function which wraps the c function with in-line assembly
- * in a way to ensure tht it won't be inlined in other code.
- * This is a temporary hack until we can do it more nicely
- */
-STACKMAN_LINKAGE_SWITCH_NOINLINE
-void *stackman_switch_noinline(stackman_cb_t callback, void *context);
-
 
 
 /* A function to call a function with a different stack location.

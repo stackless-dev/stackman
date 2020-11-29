@@ -1,7 +1,7 @@
 /*
  * this file is provided for where inline assembly is not
  * dependable, such as with clang on linux x86 or if
- * STACKMAN_PREFER_ASM is defined. It provides a stable
+ * STACKMAN_INLINE_ASM is false. It provides a stable
  * implementation that is independent of subtleties of inline
  * assembly code which may change with compiler versions.
  * The file is generated using

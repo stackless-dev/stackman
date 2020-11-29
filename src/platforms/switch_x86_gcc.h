@@ -4,9 +4,9 @@
  * instructions, and so it may use a base pointer and other
  * things.  We must force it to use the pre-build assembler
  */
-#if !defined(STACKMAN_EXTERNAL_ASM)
-#if defined (__clang__) || STACKMAN_PREFER_ASM
-#define STACKMAN_EXTERNAL_ASM "platforms/switch_x86_gcc.S"
+#if !defined(STACKMAN_ASSEMBLY_SRC)
+#if defined (__clang__) || ! STACKMAN_INLINE_ASM
+#define STACKMAN_ASSEMBLY_SRC "platforms/switch_x86_gcc.S"
 #endif
 #endif
 
@@ -14,7 +14,7 @@
 #define STACKMAN_STACK_ALIGN 16
 
 #if defined(STACKMAN_SWITCH_IMPL )
-#if !__ASSEMBLER__ && !defined(STACKMAN_EXTERNAL_ASM)
+#if !__ASSEMBLER__ && !defined(STACKMAN_ASSEMBLY_SRC)
 
 /* Follow System V i386 abi, including 16 byte stack alignment 
  * https://wiki.osdev.org/System_V_ABI#i386
@@ -39,8 +39,8 @@
 # define PRESERVED "ebx", "esi", "edi"
 
 __attribute__((optimize("O1", "no-omit-frame-pointer")))
-STACKMAN_LINKAGE_SWITCH
-void *stackman_switch(stackman_cb_t callback, void *context)
+STACKMAN_LINKAGE_SWITCH_INASM
+void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 {
 void *result;
   /* push registers, set up stack pointer on boundary */
@@ -108,9 +108,9 @@ void *stackman_call(stackman_cb_t callback, void *context, void *stack_pointer)
 
 #endif
 
-#if __ASSEMBLER__ && defined(STACKMAN_EXTERNAL_ASM)
+#if __ASSEMBLER__ && defined(STACKMAN_ASSEMBLY_SRC)
 /* pre-generated assembly code */
-#include STACKMAN_EXTERNAL_ASM
+#include STACKMAN_ASSEMBLY_SRC
 #endif
 
 #endif /* STACKMAN_SWITCH_IMPL */
