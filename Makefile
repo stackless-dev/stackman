@@ -1,6 +1,6 @@
 
 CPPFLAGS += -Isrc
-ABI := $(shell cc $(CPPFLAGS) -o bin/get_abi get_abi.c && bin/get_abi)
+ABI := $(shell mkdir -p bin && cc $(CPPFLAGS) -o bin/get_abi get_abi.c && bin/get_abi)
 LIB := lib/$(ABI)
 
 CFLAGS += -fPIC
@@ -14,6 +14,7 @@ obj = src/stackman.o src/stackman_s.o
 $(LIB)/libstackman.a: lib $(obj)
 	$(AR) $(ARFLAGS) -s $@ $(obj)
 
+.PHONY: lib bin
 lib:
 	mkdir -p $(LIB)
 bin:
