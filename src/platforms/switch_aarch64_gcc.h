@@ -16,7 +16,7 @@
 #endif
 
 #ifdef STACKMAN_SWITCH_IMPL
-#if ! && !defined(STACKMAN_ASSEMBLY_SRC)
+#if !__ASSEMBLER__ && !defined(STACKMAN_ASSEMBLY_SRC)
 
 /* 
  * To test this, #include this file in a file, test.c and
