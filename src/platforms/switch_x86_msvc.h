@@ -3,7 +3,7 @@
  * The C function defined here, saves and restores the structured
  * exception handling state.
  */
-#ifndef STACKMAN_ASSEMBLY_SRC
+#if !defined(STACKMAN_ASSEMBLY_SRC)
 #define STACKMAN_ASSEMBLY_SRC switch_x86_msvc.asm
 #define STACKMAN_SWITCH_C 1 /* contains a C implementation */
 #endif
@@ -21,11 +21,11 @@ extern void *stackman_switch_raw(stackman_cb_t callback, void *context);
 #pragma warning(disable:4733) /* disable warning about modifying FS[0] */
 
 STACKMAN_LINKAGE_SWITCH
-void *stackman_switch(vtackman_cb_t callback, void *context)
+void *stackman_switch(stackman_cb_t callback, void *context)
 {
     /* store the structured exception state for this stack */
     DWORD seh_state = __readfsdword(FIELD_OFFSET(NT_TIB, ExceptionList));
-    void * result = sta_switchckman_raw(callback, context);
+    void * result = stackman_switch_raw(callback, context);
     __writefsdword(FIELD_OFFSET(NT_TIB, ExceptionList), seh_state);
     return result;
 }

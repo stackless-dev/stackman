@@ -53,3 +53,10 @@ dkms.conf
 
 # custom
 bin/
+
+# Visual Studio noise
+# Visual Studio 2015/2017 cache/options directory
+.vs/
+*.user
+# Build results
+[Dd]ebug/

@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BF7D0638-AC4F-4206-B426-66CDDD468281} = {BF7D0638-AC4F-4206-B426-66CDDD468281}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stackman", "stackman\stackman.vcxproj", "{BF7D0638-AC4F-4206-B426-66CDDD468281}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|x64.ActiveCfg = Debug|x64
+		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|x64.Build.0 = Debug|x64
+		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|x86.ActiveCfg = Debug|Win32
+		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|x86.Build.0 = Debug|Win32
+		{BF7D0638-AC4F-4206-B426-66CDDD468281}.Debug|x64.ActiveCfg = Debug|x64
+		{BF7D0638-AC4F-4206-B426-66CDDD468281}.Debug|x64.Build.0 = Debug|x64
+		{BF7D0638-AC4F-4206-B426-66CDDD468281}.Debug|x86.ActiveCfg = Debug|Win32
+		{BF7D0638-AC4F-4206-B426-66CDDD468281}.Debug|x86.Build.0 = Debug|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A71982F0-A89C-45AB-9F23-149A1983A11B}
+	EndGlobalSection
+EndGlobal

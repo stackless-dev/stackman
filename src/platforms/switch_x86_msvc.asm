@@ -13,8 +13,8 @@ stackman_switch_raw PROC callback:DWORD, context:DWORD
   push edi
   push ebp
   
-  mov esi, callback ; /* save 'callback' for later */
-  mov edi, extra ;         /* save 'context' for later         */
+  mov esi, callback ;      /* save 'callback' for later */
+  mov edi, context ;       /* save 'context' for later         */
 
   mov eax, esp
 
