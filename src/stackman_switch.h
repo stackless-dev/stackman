@@ -30,8 +30,11 @@
  * building a library, because an optimizing compiler may
  * decide to inline functions that contain in-line assembler
  */
-#define STACKMAN_SWITCH_NEED_INDIRECT \
-	(!defined(STACKMAN_ASSEMBLY_SRC) && !defined(STACKMAN_BUILD_LIB))
+#if (!defined(STACKMAN_ASSEMBLY_SRC) && !defined(STACKMAN_BUILD_LIB))
+#define STACKMAN_SWITCH_NEED_INDIRECT 1
+#else
+#define STACKMAN_SWITCH_NEED_INDIRECT 0
+#endif
 
 #if STACKMAN_SWITCH_NEED_INDIRECT
 #define STACKMAN_SWITCH_INASM_NAME _stackman_switch_inasm
