@@ -2,6 +2,7 @@
 ; stack switching code for MASM on x64
 ; Kristjan Valur Jonsson, apr 2011
 ; Modified for stackman, dec 2019
+; Added stackman_call, dec 2020
 ;
 
 include macamd64.inc
@@ -95,4 +96,36 @@ NESTED_ENTRY stackman_switch, _TEXT$00
 NESTED_END stackman_switch, _TEXT$00
 ;stackman_switch ENDP 
 	
+; based on template from https://docs.microsoft.com/en-us/cpp/build/exception-handling-x64?view=msvc-160
+stackman_call PROC FRAME
+    push rbp
+    .pushreg rbp
+	; now our stack is 16 byte aligned.  don't need additional spacle
+    ;sub rsp, 040h
+    ;.allocstack 040h
+    lea rbp, [rsp+00h]
+    .setframe rbp, 00h
+    .endprolog
+
+	; suffle arguments into volatile registers
+	mov rax, rcx ; callback
+	mov rcx, rdx ; context into first arg
+	mov r9, r8   ; and stack pointer in volatile registers
+
+	; set up call	
+	mov r8, rsp
+	mov	edx, 2
+	; rcx already set up with context
+	
+	; modify stack pointer before call
+	mov rsp, r9
+	sub rsp, 32 ;pre-allocate parameter stack for the callee
+	call rax
+
+	; officialepilog
+	lea rsp, [rbp+0h]
+	pop rbp
+	ret	0
+stackman_call ENDP
+
 END

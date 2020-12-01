@@ -205,7 +205,7 @@ void *test_04_cb(void* context, int _opcode, void *old_sp)
 void test_04(void)
 {
 	char *block, *stack, *stack2;
-	int stacksize=1024;
+	intptr_t stacksize=1024;
 	int i, cnt;
 	ctxt01 ctxt;
 

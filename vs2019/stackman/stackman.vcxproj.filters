@@ -38,6 +38,9 @@
     <ClCompile Include="..\..\src\stackman.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="template.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="..\..\src\platforms\switch_x64_msvc.asm">
