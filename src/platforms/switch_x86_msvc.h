@@ -8,6 +8,9 @@
 #define STACKMAN_SWITCH_C 1 /* contains a C implementation */
 #endif
 
+#define STACKMAN_HAVE_CALL 1
+#define STACKMAN_STACK_ALIGN 4
+
 #ifdef STACKMAN_SWITCH_IMPL
 #include "../stackman_switch.h"
 

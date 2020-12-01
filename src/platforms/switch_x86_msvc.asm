@@ -38,4 +38,22 @@ stackman_switch_raw PROC callback:DWORD, context:DWORD
   ret
 stackman_switch_raw ENDP
 
+
+stackman_call PROC callback:DWORD, context:DWORD, stack_pointer:DWORD
+  ;enter prolog has pushed ebp and saved esp in ebp
+
+  mov eax, callback
+  mov ecx, context
+  mov edx, stack_pointer
+
+  ; switch stack pointer
+  mov esp, stack_pointer
+  push ebp  ;old stack pointer
+  push 2	;STACKMAN_OP_CALL
+  push ecx  ;context
+  call eax  ;callback
+  ret	; this assembles a LEAVE instruction which restores esp to ebp, then pops the ebp
+stackman_call ENDP
+
+
 end
