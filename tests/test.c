@@ -110,6 +110,8 @@ jmp *jmp_save(void *farptr)
 	jmp *res = (jmp*)malloc(sizeof(jmp));
 	assert(res);
 	memset(res, 0, sizeof(jmp));
+
+	/* add safety margin */
 	/* far end of stack, add buffer to catch memory backed registers, etc. */
 	res->stack_far = STACKMAN_SP_ADD((char*)farptr, 32);
 
@@ -136,13 +138,12 @@ void test_02_called(jmp *c)
 	assert(0);
 }
 
-void test_02(void)
+void test_02(void *stack_marker)
 {
-	int stack_marker;
 	static jmp *c;
 	jmp * tmp;
 
-	tmp = jmp_save(&stack_marker);
+	tmp = jmp_save(stack_marker);
 	if (tmp) {
 		c = tmp;
 		assert(c->counter == 2);
@@ -162,9 +163,8 @@ void test_02(void)
 }
 
 /* test stack stuff not changing */
-void test_03(void)
+void test_03(void *stack_marker)
 {
-	int stack_marker;
 	static jmp *c;
 	jmp * tmp;
 	int foo[2];
@@ -253,12 +253,13 @@ void test_04(void)
 
 int main(int argc, char*argv[])
 {
+	int stack_marker = 0;
 	test_01();
 	printf("test_01 ok\n");
-	test_02();
+	test_02((void*)&stack_marker);
 	printf("test_02 ok\n");
 
-	test_03();
+	test_03((void*)&stack_marker);
 	printf("test_03 ok\n");
 #ifdef TEST_04
 	test_04();
