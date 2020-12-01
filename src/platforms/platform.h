@@ -32,11 +32,11 @@
 #if defined(_M_IX86)
 #include "switch_x86_msvc.h" /* MS Visual Studio on X86 */
 #define _STACKMAN_PLATFORM x86_msvc
-#define _STACKMAN_ABI microsoft_cdecl
+#define _STACKMAN_ABI win_x86
 #elif defined(_M_X64)
-#include "switch_x86_msvc.h" /* MS Visual Studio on X64 */
+#include "switch_x64_msvc.h" /* MS Visual Studio on X64 */
 #define _STACKMAN_PLATFORM x64_msvc
-#define _STACKMAN_ABI microsoft_x64
+#define _STACKMAN_ABI win_x64
 #endif
 
 

@@ -58,8 +58,8 @@ platforms so that no assembly steps are required by users.
 The current code is distilled out of other work, with the aim of simplifying and
 standardizing the api.  A number of ABI specifications is supported, meaning architecture and
 calling convention, plus archive format:
- - microsoft_cdecl (32 bits)
- - microsoft_x64
+ - win_x86 (32 bits)
+ - win_x64
  - sysv_i386 (linux)
  - sysv_amd64 (linux)
  - AAPCS (32 bit arm)

@@ -60,3 +60,7 @@ bin/
 *.user
 # Build results
 [Dd]ebug/
+
+# Allow our release libraries
+!lib/**/*.lib
+!lib/**/*.a
