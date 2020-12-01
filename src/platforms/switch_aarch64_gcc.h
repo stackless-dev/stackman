@@ -14,8 +14,10 @@
 #endif
 #endif
 
+#ifndef STACKMAN_HAVE_CALL
 #define STACKMAN_HAVE_CALL 1
 #define STACKMAN_STACK_ALIGN 16
+#endif
 
 #ifdef STACKMAN_SWITCH_IMPL
 #if !__ASSEMBLER__ && !defined(STACKMAN_ASSEMBLY_SRC)
