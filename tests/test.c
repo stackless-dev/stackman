@@ -108,6 +108,7 @@ void *jmp_cb(void* context, int opcode, void *sp)
 jmp *jmp_save(void *farptr)
 {
 	jmp *res = (jmp*)malloc(sizeof(jmp));
+	assert(res);
 	memset(res, 0, sizeof(jmp));
 	/* far end of stack, add buffer to catch memory backed registers, etc. */
 	res->stack_far = STACKMAN_SP_ADD((char*)farptr, 32);
@@ -206,12 +207,12 @@ void test_04(void)
 	char *block, *stack, *stack2;
 	int stacksize=1024;
 	int i, cnt;
-	void *res;
 	ctxt01 ctxt;
 
 	assert(STACKMAN_STACK_FULL_DESCENDING);
 
 	block = (char*)malloc(stacksize);
+	assert(block);
 	stack = block + stacksize;
 	/* clear it all to a certain value */
 	memset(block, '\x7f', stacksize);
