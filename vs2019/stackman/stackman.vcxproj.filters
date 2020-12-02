@@ -33,6 +33,9 @@
     <ClInclude Include="..\..\src\stackman_switch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\platforms\switch_arm_msvc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\stackman.c">
@@ -49,5 +52,10 @@
     <MASM Include="..\..\src\platforms\switch_x86_msvc.asm">
       <Filter>Source Files</Filter>
     </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <MARMASM Include="..\..\src\platforms\switch_arm_msvc.asm">
+      <Filter>Source Files</Filter>
+    </MARMASM>
   </ItemGroup>
 </Project>

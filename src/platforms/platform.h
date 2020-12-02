@@ -37,6 +37,10 @@
 #include "switch_x64_msvc.h" /* MS Visual Studio on X64 */
 #define _STACKMAN_PLATFORM x64_msvc
 #define _STACKMAN_ABI win_x64
+#elif defined(_M_ARM)
+#include "switch_arm_msvc.h" /* MS Visual Studio on ARM */
+#define _STACKMAN_PLATFORM arm_msvc
+#define _STACKMAN_ABI win_arm
 #endif
 
 
