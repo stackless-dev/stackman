@@ -58,10 +58,14 @@ NESTED_ENTRY stackman_switch, _TEXT$00
 	mov rcx, r13		;arg1, context
 	mov rdx, 0			;arg2, opcode STACKMAN_OP_SAVE
 	lea r8, [rsp+20h]   ;arg3, stack pointer
+	mov rbx, rsp;		; keep old stack pointer
 	call r12 ;
 
 	;actual stack switch (and re-allocating the shadow stack):
 	lea rsp, [rax-20h]
+	;re-adjust base pointer
+	sub rbx, rsp;
+	sub rbp, rbx;
 	
 	mov rcx, r13		;arg1, context
 	mov rdx, 1			;arg2, opcode STACKMAN_OP_RESTORE
