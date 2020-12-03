@@ -1,11 +1,16 @@
 /* function to test the generation
  * of assembly code under e.g. Gcc.
  * use by calling, for example:
- *  cc -DSTACKMAN_SWITCH_IMPL -S -m32 -fcf-protection=none test.c
- * and examinine the generated test.s assembly code.  The fcf-protection
+ *  cc -S -m32 -fcf-protection=none test.c
+ * and examinine the generated test.s assembly code.
+ * -m32 selects 32 bit mode, use other directives to select a different platform.
+ * The -fcf-protection
  * flag disables generation of intel CET compatible code, but stack switching
  * is not compatible with the proposed shadow stack.
  */
 
 #define STACKMAN_VERBOSE
+#define STACKMAN_SWITCH_IMPL
+#define STACKMAN_INLINE_ASM 1
+#define STACKMAN_BUILD_LIB /* so that we don´t generate indirection shims */
 #include "platform.h"
