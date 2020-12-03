@@ -36,6 +36,9 @@
     <ClInclude Include="..\..\src\platforms\switch_arm_msvc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\platforms\switch_arm64_msvc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\stackman.c">
@@ -55,6 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <MARMASM Include="..\..\src\platforms\switch_arm_msvc.asm">
+      <Filter>Source Files</Filter>
+    </MARMASM>
+    <MARMASM Include="..\..\src\platforms\switch_arm64_msvc.asm">
       <Filter>Source Files</Filter>
     </MARMASM>
   </ItemGroup>

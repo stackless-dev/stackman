@@ -13,18 +13,23 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
+		Debug|ARM64 = Debug|ARM64
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|ARM.ActiveCfg = Debug|ARM
 		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|ARM.Build.0 = Debug|ARM
+		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|ARM64.Build.0 = Debug|ARM64
 		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|x64.ActiveCfg = Debug|x64
 		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|x64.Build.0 = Debug|x64
 		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|x86.ActiveCfg = Debug|Win32
 		{CAFDBD3E-9D0D-4E90-BB6D-6C2A19F5EF53}.Debug|x86.Build.0 = Debug|Win32
 		{BF7D0638-AC4F-4206-B426-66CDDD468281}.Debug|ARM.ActiveCfg = Debug|ARM
 		{BF7D0638-AC4F-4206-B426-66CDDD468281}.Debug|ARM.Build.0 = Debug|ARM
+		{BF7D0638-AC4F-4206-B426-66CDDD468281}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{BF7D0638-AC4F-4206-B426-66CDDD468281}.Debug|ARM64.Build.0 = Debug|ARM64
 		{BF7D0638-AC4F-4206-B426-66CDDD468281}.Debug|x64.ActiveCfg = Debug|x64
 		{BF7D0638-AC4F-4206-B426-66CDDD468281}.Debug|x64.Build.0 = Debug|x64
 		{BF7D0638-AC4F-4206-B426-66CDDD468281}.Debug|x86.ActiveCfg = Debug|Win32
