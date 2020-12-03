@@ -2,6 +2,7 @@
  * rather than linking in an object file.  Only possible if the
  * implementation is inline asm.  Real assembler must be linked
  */
+#undef STACKMAN_INLINE_ASM
 #define STACKMAN_INLINE_ASM 1
 #define STACKMAN_LINKAGE_STATIC
 #include "stackman.h"

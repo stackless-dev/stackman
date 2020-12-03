@@ -1,5 +1,6 @@
 /* testing of inline asm functionality */
 
+#undef STACKMAN_INLINE_ASM
 #define STACKMAN_INLINE_ASM 1
 #include "stackman.h"
 #include "stackman_impl.h"
