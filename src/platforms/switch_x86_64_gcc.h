@@ -25,6 +25,7 @@
 
 #if !__ASSEMBLER__ && !defined(STACKMAN_ASSEMBLY_SRC)
 /* inline assembly */
+#include <stddef.h>
 #include "../stackman_switch.h"
 
 /* 
@@ -48,7 +49,8 @@ __attribute__((optimize(OPTIMIZE)))
 STACKMAN_LINKAGE_SWITCH_INASM
 void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 {
-	void *stack_pointer;
+	void *stack_pointer, *stack_pointer2;
+	ptrdiff_t diff;
 	/* assembly to save non-volatile registers, including x87 and mmx */
 	int mxcsr; short x87cw;
 	__asm__ volatile (
@@ -58,10 +60,12 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 	
 	/* sp = get stack pointer from assembly code */
 	__asm__ ("movq %%rsp, %[result]" : [result] "=r" (stack_pointer));
-	stack_pointer = callback(context, STACKMAN_OP_SAVE, stack_pointer);
+	stack_pointer2 = callback(context, STACKMAN_OP_SAVE, stack_pointer);
+	diff = stack_pointer2 - stack_pointer;
 
 	/* set stack pointer from sp using assembly */
-	__asm__ ("movq %[result], %%rsp" :: [result] "r" (stack_pointer));
+	__asm__ ("movq %[result], %%rsp" :: [result] "r" (stack_pointer2));
+	__asm__ ("addq %[arg],  %%rbp" :: [arg] "r" (diff));
 
 	stack_pointer = callback(context, STACKMAN_OP_RESTORE, stack_pointer);
 	/* restore non-volatile registers from stack */

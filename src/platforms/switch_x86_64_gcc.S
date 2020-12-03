@@ -39,31 +39,38 @@ stackman_switch:
 	movq	%rdi, %rax
 	movq	%rsi, %rcx
 #APP
-# 52 "switch_x86_64_gcc.h" 1
+# 56 "switch_x86_64_gcc.h" 1
 	fstcw 10(%rsp)
 	stmxcsr 12(%rsp)
 	
 # 0 "" 2
-# 58 "switch_x86_64_gcc.h" 1
-	movq %rsp, %rdx
+# 62 "switch_x86_64_gcc.h" 1
+	movq %rsp, %rbx
 # 0 "" 2
 #NO_APP
+	movq	%rbx, %rdx
 	movl	$0, %esi
-	movq	%rcx, %r14
+	movq	%rcx, %r15
 	movq	%rcx, %rdi
-	movq	%rax, %rbx
+	movq	%rax, %r14
 	call	*%rax
-	movq	%rax, %rdx
 #APP
-# 62 "switch_x86_64_gcc.h" 1
+# 67 "switch_x86_64_gcc.h" 1
 	movq %rax, %rsp
 # 0 "" 2
 #NO_APP
-	movl	$1, %esi
-	movq	%r14, %rdi
-	call	*%rbx
+	subq	%rbx, %rax
 #APP
-# 66 "switch_x86_64_gcc.h" 1
+# 68 "switch_x86_64_gcc.h" 1
+	addq %rax,  %rbp
+# 0 "" 2
+#NO_APP
+	movq	%rbx, %rdx
+	movl	$1, %esi
+	movq	%r15, %rdi
+	call	*%r14
+#APP
+# 72 "switch_x86_64_gcc.h" 1
 	ldmxcsr 12(%rsp)
 	fldcw 10(%rsp)
 	
@@ -103,13 +110,13 @@ stackman_call:
 	movq	%rdi, %rax
 	movq	%rsi, %rdi
 #APP
-# 86 "switch_x86_64_gcc.h" 1
+# 92 "switch_x86_64_gcc.h" 1
 	movq %rsp, %rbx
 # 0 "" 2
-# 87 "switch_x86_64_gcc.h" 1
+# 93 "switch_x86_64_gcc.h" 1
 	movq %rsp, %rcx
 # 0 "" 2
-# 90 "switch_x86_64_gcc.h" 1
+# 96 "switch_x86_64_gcc.h" 1
 	movq %rdx, %rsp
 # 0 "" 2
 #NO_APP
@@ -117,7 +124,7 @@ stackman_call:
 	movl	$2, %esi
 	call	*%rax
 #APP
-# 94 "switch_x86_64_gcc.h" 1
+# 100 "switch_x86_64_gcc.h" 1
 	movq %rbx, %rsp
 # 0 "" 2
 #NO_APP
@@ -129,5 +136,5 @@ stackman_call:
 	.cfi_endproc
 .LFE1:
 	.size	stackman_call, .-stackman_call
-	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
+	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
 	.section	.note.GNU-stack,"",@progbits
