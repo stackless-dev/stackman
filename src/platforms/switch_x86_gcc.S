@@ -30,21 +30,25 @@ stackman_switch:
 	movl	8(%ebp), %eax
 	movl	12(%ebp), %edx
 #APP
-# 48 "switch_x86_gcc.h" 1
-	subl $12, %esp
+# 50 "switch_x86_gcc.h" 1
+	subl $0x1a, %esp
 movl %eax, %esi
 movl %edx, %edi
-movl %esp, 8(%esp)
+leal 0x10(%esp), %ebx
+movl %ebx, 8(%esp)
 movl $0, 4(%esp)
 movl %edi, 0(%esp)
 call *%esi
-movl %eax, %esp
+leal -0x10(%eax), %esp
+subl %ebx, %eax
+addl %eax, %ebp
+leal 0x10(%esp), %eax
 movl %eax, 8(%esp)
 movl $1, 4(%esp)
 movl %edi, 0(%esp)
 call *%esi
 movl %eax, %eax
-addl $12, %esp
+addl $0x1a, %esp
 
 # 0 "" 2
 #NO_APP
@@ -75,16 +79,16 @@ stackman_call:
 	subl	$8, %esp
 	.cfi_offset 3, -12
 #APP
-# 96 "switch_x86_gcc.h" 1
+# 108 "switch_x86_gcc.h" 1
 	movl %esp, %ebx
 # 0 "" 2
-# 97 "switch_x86_gcc.h" 1
+# 109 "switch_x86_gcc.h" 1
 	movl %esp, %eax
 # 0 "" 2
 #NO_APP
 	movl	16(%ebp), %edx
 #APP
-# 100 "switch_x86_gcc.h" 1
+# 112 "switch_x86_gcc.h" 1
 	movl %edx, %esp
 # 0 "" 2
 #NO_APP
@@ -93,7 +97,7 @@ stackman_call:
 	pushl	12(%ebp)
 	call	*8(%ebp)
 #APP
-# 104 "switch_x86_gcc.h" 1
+# 116 "switch_x86_gcc.h" 1
 	movl %ebx, %esp
 # 0 "" 2
 #NO_APP
@@ -106,5 +110,5 @@ stackman_call:
 	.cfi_endproc
 .LFE1:
 	.size	stackman_call, .-stackman_call
-	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
+	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
 	.section	.note.GNU-stack,"",@progbits
