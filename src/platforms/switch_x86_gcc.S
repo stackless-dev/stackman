@@ -82,14 +82,17 @@ stackman_call:
 # 108 "switch_x86_gcc.h" 1
 	movl %esp, %ebx
 # 0 "" 2
-# 109 "switch_x86_gcc.h" 1
-	movl %esp, %eax
+# 110 "switch_x86_gcc.h" 1
+	leal 4(%esp), %eax
 # 0 "" 2
 #NO_APP
 	movl	16(%ebp), %edx
 #APP
-# 112 "switch_x86_gcc.h" 1
+# 113 "switch_x86_gcc.h" 1
 	movl %edx, %esp
+# 0 "" 2
+# 115 "switch_x86_gcc.h" 1
+	subl $4, %esp
 # 0 "" 2
 #NO_APP
 	pushl	%eax
@@ -97,7 +100,7 @@ stackman_call:
 	pushl	12(%ebp)
 	call	*8(%ebp)
 #APP
-# 116 "switch_x86_gcc.h" 1
+# 119 "switch_x86_gcc.h" 1
 	movl %ebx, %esp
 # 0 "" 2
 #NO_APP
