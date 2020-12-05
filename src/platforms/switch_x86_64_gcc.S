@@ -39,12 +39,12 @@ stackman_switch:
 	movq	%rdi, %rax
 	movq	%rsi, %rcx
 #APP
-# 56 "switch_x86_64_gcc.h" 1
+# 56 "../platforms/switch_x86_64_gcc.h" 1
 	fstcw 10(%rsp)
 	stmxcsr 12(%rsp)
 	
 # 0 "" 2
-# 62 "switch_x86_64_gcc.h" 1
+# 62 "../platforms/switch_x86_64_gcc.h" 1
 	movq %rsp, %rbx
 # 0 "" 2
 #NO_APP
@@ -55,13 +55,13 @@ stackman_switch:
 	movq	%rax, %r14
 	call	*%rax
 #APP
-# 67 "switch_x86_64_gcc.h" 1
+# 67 "../platforms/switch_x86_64_gcc.h" 1
 	movq %rax, %rsp
 # 0 "" 2
 #NO_APP
 	subq	%rbx, %rax
 #APP
-# 68 "switch_x86_64_gcc.h" 1
+# 68 "../platforms/switch_x86_64_gcc.h" 1
 	addq %rax,  %rbp
 # 0 "" 2
 #NO_APP
@@ -70,7 +70,7 @@ stackman_switch:
 	movq	%r15, %rdi
 	call	*%r14
 #APP
-# 72 "switch_x86_64_gcc.h" 1
+# 72 "../platforms/switch_x86_64_gcc.h" 1
 	ldmxcsr 12(%rsp)
 	fldcw 10(%rsp)
 	
@@ -110,13 +110,13 @@ stackman_call:
 	movq	%rdi, %rax
 	movq	%rsi, %rdi
 #APP
-# 92 "switch_x86_64_gcc.h" 1
+# 92 "../platforms/switch_x86_64_gcc.h" 1
 	movq %rsp, %rbx
 # 0 "" 2
-# 93 "switch_x86_64_gcc.h" 1
+# 93 "../platforms/switch_x86_64_gcc.h" 1
 	movq %rsp, %rcx
 # 0 "" 2
-# 96 "switch_x86_64_gcc.h" 1
+# 96 "../platforms/switch_x86_64_gcc.h" 1
 	movq %rdx, %rsp
 # 0 "" 2
 #NO_APP
@@ -124,7 +124,7 @@ stackman_call:
 	movl	$2, %esi
 	call	*%rax
 #APP
-# 100 "switch_x86_64_gcc.h" 1
+# 100 "../platforms/switch_x86_64_gcc.h" 1
 	movq %rbx, %rsp
 # 0 "" 2
 #NO_APP
