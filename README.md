@@ -132,7 +132,7 @@ platforms may need to be done independently.
  - install __gcc-arm-linux-gnueabi__ and __g++-arm-linux-gnueabi__
  - install __qemu-user__ for hardware emulation 
  - *compile* **gen_asm.c** using `arm-linux-gnueabi-gcc`
- - *make* using  `make PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-armhf test`
+ - *make* using  `make PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-arm test`
 
 ### Cross compiling for Arm64 on Linux
  - install **gcc-aarch64-linux-gnu** and **g++-aarch64-linux-gnu**
