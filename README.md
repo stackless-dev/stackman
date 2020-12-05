@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/kristjanvalur/stackman.svg?branch=master)](https://travis-ci.org/kristjanvalur/stackman)
+
 # stackman
 Simple low-level stack manipulation API and implementation for common platforms
 
