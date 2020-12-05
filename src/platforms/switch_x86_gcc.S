@@ -30,8 +30,8 @@ stackman_switch:
 	movl	8(%ebp), %eax
 	movl	12(%ebp), %edx
 #APP
-# 50 "switch_x86_gcc.h" 1
-	subl $0x1a, %esp
+# 50 "../platforms/switch_x86_gcc.h" 1
+	subl $0x1c, %esp
 movl %eax, %esi
 movl %edx, %edi
 leal 0x10(%esp), %ebx
@@ -48,7 +48,7 @@ movl $1, 4(%esp)
 movl %edi, 0(%esp)
 call *%esi
 movl %eax, %eax
-addl $0x1a, %esp
+addl $0x1c, %esp
 
 # 0 "" 2
 #NO_APP
@@ -79,19 +79,19 @@ stackman_call:
 	subl	$8, %esp
 	.cfi_offset 3, -12
 #APP
-# 108 "switch_x86_gcc.h" 1
+# 108 "../platforms/switch_x86_gcc.h" 1
 	movl %esp, %ebx
 # 0 "" 2
-# 110 "switch_x86_gcc.h" 1
+# 110 "../platforms/switch_x86_gcc.h" 1
 	leal 4(%esp), %eax
 # 0 "" 2
 #NO_APP
 	movl	16(%ebp), %edx
 #APP
-# 113 "switch_x86_gcc.h" 1
+# 113 "../platforms/switch_x86_gcc.h" 1
 	movl %edx, %esp
 # 0 "" 2
-# 115 "switch_x86_gcc.h" 1
+# 115 "../platforms/switch_x86_gcc.h" 1
 	subl $4, %esp
 # 0 "" 2
 #NO_APP
@@ -100,7 +100,7 @@ stackman_call:
 	pushl	12(%ebp)
 	call	*8(%ebp)
 #APP
-# 119 "switch_x86_gcc.h" 1
+# 119 "../platforms/switch_x86_gcc.h" 1
 	movl %ebx, %esp
 # 0 "" 2
 #NO_APP

@@ -52,14 +52,14 @@ void *result;
       /* adjust stack pointer to be 16 byte (4 quad) aligned with 
        * room for call args
        * since the call instruction, 5 quads have
-       * been pushed (ip, bp, bx, si, di), need extra 3 quads (0xa)
+       * been pushed (ip, bp, bx, si, di), need extra 3 quads (0xc)
        * for alignment, which fits our three quad call args.
        * Add another 16 (0x10) bytes, so that we can pass to the callbacks
        * a 16 byte boundary that lies above the pushed arguments
        * so that the call arguments of the functions aren't clobbered
        * by memory transfer.
        */
-    "subl $0x1a, %%esp\n"
+    "subl $0x1c, %%esp\n"
     "movl %[cb], %%esi\n"  /* save 'callback' for later */
     "movl %[ctx], %%edi\n" /* save 'context' for later         */
 
@@ -86,7 +86,7 @@ void *result;
 
     "movl %%eax, %[result]\n"
 
-    "addl $0x1a, %%esp\n"
+    "addl $0x1c, %%esp\n"
     : [result] "=r" (result)              /* output variables */
     : [cb] "r" (callback),       /* input variables  */
       [ctx] "r" (context)
