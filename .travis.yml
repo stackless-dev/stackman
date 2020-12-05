@@ -8,3 +8,10 @@ jobs:
       before_install: sudo apt install -y gcc-multilib g++-multilib
       env: PLATFORMFLAGS=-m32
     - arch: arm64
+    - name: arm32_xcompile
+      before_install:
+        - sudo apt install -y gcc-arm-linux-gnueabi g++-aarch64-linux-gnu
+        - sudo apt install -y qemu-user
+      env: 
+        - PLATFORM_PREFIX=aarch64-linux-gnu-
+        - EMULATOR=qemu-armhf
