@@ -1,3 +1,9 @@
 language: c
 dist: bionic
 script: make && make test
+jobs:
+  include:
+    - name: x86_64_gcc
+    - name: x86_gcc
+      before_install: sudo apt install -y gcc-multilib g++-multilib
+      env: PLATFORMFLAGS=-m32
