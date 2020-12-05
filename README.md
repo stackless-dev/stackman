@@ -111,7 +111,8 @@ behaviour on the C-stack level, could make use of simple, stable code, that can 
 platforms as they come along.
 
 ## Cross-compilation
-Linux on x86-64 can be used to cross compile for x86 and ARM targets.  This is most useful to generate assembly code, e.g. when compiling src/platform/test.c
+Linux on x86-64 can be used to cross compile for x86 and ARM targets.  This is most useful to generate assembly code, e.g. when compiling
+src/platform/gen_asm.c
  - x86 requires the -m32 flag to compilers and linkers.
  - arm32 requires to use the arm-linux-gnueabi-* tools, including cc and linker
  - aarch64 requires the aarch64-linux-gnu-* tools.

@@ -53,6 +53,7 @@ dkms.conf
 
 # custom
 bin/
+gen_asm.s
 
 # Visual Studio noise
 # Visual Studio 2015/2017 cache/options directory

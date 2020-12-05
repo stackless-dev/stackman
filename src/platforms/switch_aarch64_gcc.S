@@ -5,12 +5,12 @@
  * implementation that is independent of subtleties of inline
  * assembly code which may change with compiler versions.
  * The file is generated using
- * "aarch64-linux-gnu-gcc -DSTACKMAN_SWITCH_IMPL -S test.c"
- * and then copying the code from test.s into this file.
+ * "aarch64-linux-gnu-gcc -S gen_asm.c"
+ * and then copying the code from gen_asm.s into this file.
  * 
  */
 	.arch armv8-a
-	.file	"test.c"
+	.file	"gen_asm.c"
 	.text
 	.align	2
 	.global	stackman_switch

@@ -29,10 +29,10 @@
  * stack pointer on function exit, thereby invalidating our changes
  * to the stack pointer.
  * To arrive at reasonable assembler, follow some approach similar to:
- * cp switch_arm_gcc.h test.c
- * gcc -S -O -DSTACKMAN_SWITCH_IMPL test.c
- * mv test.s switch_arm_gcc.s
- * assembly code which can then be modified for actual use.  Simple optimized
+ * "gcc -S gen_asm.c"
+ *  to generate gen_asm.s which can then be 
+ * modified for actual use.
+ * Simple optimized
  * version is better than no-optimized because the latter uses stack
  * variables for arguments.  And it turns out that this version actually
  * runs because it does not use fp for restoring the stack pointer

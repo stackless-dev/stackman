@@ -3,8 +3,8 @@
  * dependable, such as with clang on linux x86_64 or if
  * STACKMAN_INLINE_ASM is false
  * The file is generated using
- * "arm-linux-gnueabi-gcc -DSTACKMAN_SWITCH_IMPL -S test.c" and then copying the code
- * from test.s into this file.
+ * "arm-linux-gnueabi-gcc -S gen_asm.c" and then copying the code
+ * from gen_asm.s into this file.
  * 
  */
 	.arch armv5t
@@ -17,7 +17,7 @@
 	.eabi_attribute 30, 6
 	.eabi_attribute 34, 0
 	.eabi_attribute 18, 4
-	.file	"test.c"
+	.file	"gen_asm.c"
 	.text
 	.align	2
 	.global	stackman_switch

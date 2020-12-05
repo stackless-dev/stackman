@@ -5,11 +5,11 @@
  * implementation that is independent of subtleties of inline
  * assembly code which may change with compiler versions.
  * The file is generated using
- * "gcc -DSTACKMAN_SWITCH_IMPL -S -m32 -fcf-protection=none test.c"
- * and then copying the code from test.s into this file.
+ * "gcc -S -m32 -fcf-protection=none gen_asm.c"
+ * and then copying the code from gen_asm.s into this file.
  * 
  */
-	.file	"test.c"
+	.file	"gen_asm.c"
 	.text
 	.globl	stackman_switch
 	.type	stackman_switch, @function

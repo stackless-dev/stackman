@@ -23,9 +23,9 @@
 #if !__ASSEMBLER__ && !defined(STACKMAN_ASSEMBLY_SRC)
 
 /* 
- * To test this, #include this file in a file, test.c and
- * gcc -S -DSTACKMAN_SWITCH_IMPL test.c
- * then examine test.s for the result.
+ * To test this, compile with appropriate cross platform flags, e.g.
+ * "arm-linux-gnueabi-gcc -S gen_asm.c"
+ * then examine gen_asm.s for the result.
  * We instruct optimizer to not omit frame pointers, -fno-omit_frame_pointer
  * and not use local stack vars, -O1.
  * option is applied with an __attribute__.
