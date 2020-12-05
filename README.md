@@ -120,3 +120,20 @@ src/platform/gen_asm.c
 The x86 tools require the **gcc-multilib** and **g++-multilib** packages to be installed.  They, however, can't co-exist with the **gcc-arm-linux-gnueabi** or
 **gcc-aarch64-linux-gnu** packages on some distributions, and so development for these
 platforms may need to be done independently.
+
+### Cross compiling for x86 (32 bit) on Linux
+ - install __gcc-multilib__ and __g++-multilib__
+ - *compile* **gen_asm.c** using `gcc -m32`
+ - *make* using  `make PLATFORMFLAGS=-m32  test`
+
+### Cross compiling for ARM (32 bit) on Linux
+ - install __gcc-arm-linux-gnueabi__ and __g++-arm-linux-gnueabi__
+ - install __qemu-user__ for hardware emulation 
+ - *compile* **gen_asm.c** using `arm-linux-gnueabi-gcc`
+ - *make* using  `make PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-armhf test`
+
+### Cross compiling for Arm64 on Linux
+ - install **gcc-aarch64-linux-gnu** and **g++-aarch64-linux-gnu**
+ - install __qemu-user__ for hardware emulation 
+ - *compile* using `aarch64-linux-gnu-gcc`
+ - *make* using `make PLATFORM_PREFIX=aarch64-linux-gnu- EMULATOR=qemu-arm64 test`

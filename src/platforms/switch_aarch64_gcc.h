@@ -64,7 +64,6 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 	sp = callback(context, STACKMAN_OP_RESTORE, sp);
 	return sp;
 }
-#endif
 
 /* 
  * Similar, but we want the frame pointer so that a debugger
@@ -89,6 +88,8 @@ void *stackman_call(stackman_cb_t callback, void *context, void *stack_pointer)
   
   return result;
 }
+
+#endif
 
 #if __ASSEMBLER__ && defined(STACKMAN_ASSEMBLY_SRC)
 /* pre-generated assembly code */
