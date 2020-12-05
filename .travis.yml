@@ -7,3 +7,4 @@ jobs:
     - name: x86_gcc
       before_install: sudo apt install -y gcc-multilib g++-multilib
       env: PLATFORMFLAGS=-m32
+    - arch: arm64
