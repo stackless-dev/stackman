@@ -10,8 +10,9 @@ jobs:
     - arch: arm64
     - name: arm32_xcompile
       before_install:
-        - sudo apt install -y gcc-arm-linux-gnueabi g++-aarch64-linux-gnu
+        - sudo apt update
+        - sudo apt install -y gcc-arm-linux-gnueabi g++-arm-linux-gnueabi
         - sudo apt install -y qemu-user
       env: 
-        - PLATFORM_PREFIX=aarch64-linux-gnu-
+        - PLATFORM_PREFIX=arm-linux-gnueabi-
         - EMULATOR=qemu-armhf
