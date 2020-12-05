@@ -7,6 +7,8 @@
 #include <stdint.h>
 
 
+#define assert_align(p) assert((intptr_t)(p) == STACKMAN_SP_ALIGN(p))
+
 /* simple test ithout modifying stack pointers.
  * test that the callback is called wiht valid
  * stackpoiners and the stage member in the 
@@ -83,6 +85,7 @@ void restore_stack(void *sp, void *buf, size_t size)
 
 void *jmp_cb(void* context, int opcode, void *sp)
 {
+	assert_align(sp);
 	jmp *c = (jmp*)context;
 	c->log[c->counter++] = c->val;
 	if (c->val == 0) {
@@ -191,6 +194,7 @@ void test_03(void *stack_marker)
 void *test_04_cb(void* context, int _opcode, void *old_sp)
 {
 
+	assert_align(old_sp);
 	ctxt01 *c = (ctxt01*)context;
 	stackman_op_t opcode = (stackman_op_t)_opcode;
 	assert(opcode == STACKMAN_OP_CALL || opcode == 100);
