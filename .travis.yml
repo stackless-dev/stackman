@@ -19,12 +19,12 @@ jobs:
     - os: windows
       name: x64_msvc
       script:
-        - '"/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/Common7/Tools/VsDevCmd.bat"'
-        - msbuild.exe vs2019/stackman.sln /p:Platform=x64
-        - vs2019/x64/Debug/test.exe
+        - cd vs2019
+        - build_x64.cmd
+        - x64/Debug/test.exe
     - os: windows
       name: x86_msvc
       script:
-        - '"/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/Common7/Tools/VsDevCmd.bat"'
-        - msbuild.exe vs2019/stackman.sln /p:Platform=x86
-        - vs2019/win32/Debug/test.exe
+        - cd vs2019
+        - build_x86.cmd
+        - Win32/Debug/test.exe
