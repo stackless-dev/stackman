@@ -26,3 +26,15 @@ jobs:
       script:
         - cd vs2017
         - ./build_x86.cmd && Win32/Debug/test.exe
+    - os: windows
+      name: arm_msvc
+      before_install: choco install --force VisualStudio2017-workload-vctools --params"--add Microsoft.VisualStudio.Component.VC.Tools.ARM"
+      script:
+        - cd vs2017
+        - ./build.cmd ARM
+    - os: windows
+      name: arm64_msvc
+      before_install: choco install --force VisualStudio2017-workload-vctools --params"--add Microsoft.VisualStudio.Component.VC.Tools.ARM64"
+      script:
+        - cd vs2017
+        - ./build.cmd ARM64
