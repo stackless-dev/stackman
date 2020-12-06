@@ -19,10 +19,10 @@ jobs:
     - os: windows
       name: x64_msvc
       script:
-        - cd vs2019
+        - cd vs2017
         - ./build_x64.cmd && x64/Debug/test.exe
     - os: windows
       name: x86_msvc
       script:
-        - cd vs2019
+        - cd vs2017
         - ./build_x86.cmd && Win32/Debug/test.exe
