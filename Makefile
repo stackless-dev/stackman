@@ -37,7 +37,7 @@ $(LIB)/libstackman.a: lib $(obj)
 
 .PHONY: lib clean
 lib:
-	mkdir -p $(LIB)
+	mkdir -p $(LIB) bin
 
 clean:
 	rm -f src/*.o tests/*.o
