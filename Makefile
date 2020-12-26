@@ -11,7 +11,7 @@ CFLAGS += $(NO_CET)
 CXXFLAGS += $(NO_CET)
 
 # run c preprocessor with any cflags to get cross compilation result, then run regular compile in native
-ABI := $(shell mkdir -p bin; $(CC) -E $(CFLAGS) $(CPPFLAGS) -o bin/get_abi.c get_abi.c && $(CC) -o bin/get_abi bin/get_abi.c && bin/get_abi)
+ABI := $(shell ./abiname.sh "$(CC)" "$(CFLAGS)")
 ifndef ABI
 $(error Could not determine platform)
 else
@@ -34,7 +34,7 @@ lib:
 
 clean:
 	rm -f src/*.o tests/*.o
-	rm -f bin/*
+	rm -f bin/* tmp
 
 DEBUG = #-DDEBUG_DUMP
 
