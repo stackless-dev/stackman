@@ -45,6 +45,7 @@
 
 # custom
 bin/
+tmp/
 gen_asm.s
 
 # Visual Studio noise
@@ -57,3 +58,6 @@ gen_asm.s
 # Allow our release libraries
 !lib/**/*.lib
 !lib/**/*.a
+
+# vs code
+.vscode/
