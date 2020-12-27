@@ -254,6 +254,24 @@ void test_04(void)
 
 #endif
 
+/* Test our various macros */
+void test_05()
+{
+
+	int local=0;
+	void *away = STACKMAN_SP_FURTHEST;
+	void *close = STACKMAN_SP_NEAREST;
+	assert(STACKMAN_SP_LE(&local, away));
+	assert(STACKMAN_SP_LS(&local, away));
+	assert(STACKMAN_SP_LE(close, &local));
+	assert(STACKMAN_SP_LS(close, &local));
+
+	assert(STACKMAN_SP_LE(&local, &local));
+	assert(!STACKMAN_SP_LS(&local, &local));
+
+	assert((void*)STACKMAN_SP_ALIGN(away) == away);
+
+}
 
 int main(int argc, char*argv[])
 {
@@ -269,5 +287,7 @@ int main(int argc, char*argv[])
 	test_04();
 	printf("test_04 ok\n");
 #endif
+	test_05();
+	printf("test_05 ok\n");
 	return 0;
 }
