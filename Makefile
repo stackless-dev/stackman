@@ -41,7 +41,8 @@ lib:
 
 clean:
 	rm -f src/*.o tests/*.o
-	rm -f bin/* tmp
+	rm -f bin/* 
+	rm -rf tmp
 
 DEBUG = #-DDEBUG_DUMP
 
