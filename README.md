@@ -108,7 +108,7 @@ Later projects, like *gevent/greenlet* have taken that idea and provided additio
 with a different implementation, making the switching code itself incompatible.
 
 Our work on additional stack-manipulating libraries prompted us to try to distill this functionality in its
-rawest form into a separate, low-level, library.  Such that any project, withing to implement *co-routine*-like
+rawest form into a separate, low-level, library.  Such that any project, wishing to implement *co-routine*-like
 behaviour on the C-stack level, could make use of simple, stable code, that can be easily extended for additional
 platforms as they come along.
 
