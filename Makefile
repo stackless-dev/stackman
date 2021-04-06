@@ -1,6 +1,6 @@
 
 
-CPPFLAGS += -Isrc $(PLATFORMFLAGS)
+CPPFLAGS += -Istackman $(PLATFORMFLAGS)
 CFLAGS += -fPIC -g $(PLATFORMFLAGS)
 CXXFLAGS += -fPIC -g $(PLATFORMFLAGS)
 LDFLAGS += -L$(LIB) -g $(PLATFORMFLAGS)
@@ -29,7 +29,7 @@ LIB := lib/$(ABI)
 
 all: $(LIB)/libstackman.a
 
-obj = src/stackman.o src/stackman_s.o
+obj = stackman/stackman.o stackman/stackman_s.o
 
 
 $(LIB)/libstackman.a: lib $(obj)
@@ -40,7 +40,7 @@ lib:
 	mkdir -p $(LIB) bin
 
 clean:
-	rm -f src/*.o tests/*.o
+	rm -f stackman/*.o tests/*.o
 	rm -f bin/* 
 	rm -rf tmp
 

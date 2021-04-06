@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# this script compiles and runs src/abiname.c which merely prints
+# this script compiles and runs stackman/abiname.c which merely prints
 # out the name of the abi.  This can be used by makefiles to identify
 # the correct library path to use to link the library
 # Instead of just compiling and running, we will use the provided compiler
@@ -16,7 +16,7 @@ tmp=$(mktemp "${here}/tmp/abinameXXX.c")
 #1 create the preprocessed file
 CC=${1:-cc}
 CFLAGS=${2:-}
-${CC} ${CFLAGS} -E -I "${here}/src" -o "${tmp}" "${here}/src/abiname.c"
+${CC} ${CFLAGS} -E -o "${tmp}" "${here}/stackman/abiname.c"
 #2 compile resulting file
 cc -o "${tmp}.out" "${tmp}"
 #3 run it

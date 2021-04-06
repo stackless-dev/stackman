@@ -165,17 +165,17 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\platforms\platform.h" />
-    <ClInclude Include="..\..\src\platforms\switch_arm64_msvc.h" />
-    <ClInclude Include="..\..\src\platforms\switch_arm_msvc.h" />
-    <ClInclude Include="..\..\src\platforms\switch_x64_msvc.h" />
-    <ClInclude Include="..\..\src\platforms\switch_x86_msvc.h" />
-    <ClInclude Include="..\..\src\stackman.h" />
-    <ClInclude Include="..\..\src\stackman_impl.h" />
-    <ClInclude Include="..\..\src\stackman_switch.h" />
+    <ClInclude Include="..\..\stackman\platforms\platform.h" />
+    <ClInclude Include="..\..\stackman\platforms\switch_arm64_msvc.h" />
+    <ClInclude Include="..\..\stackman\platforms\switch_arm_msvc.h" />
+    <ClInclude Include="..\..\stackman\platforms\switch_x64_msvc.h" />
+    <ClInclude Include="..\..\stackman\platforms\switch_x86_msvc.h" />
+    <ClInclude Include="..\..\stackman\stackman.h" />
+    <ClInclude Include="..\..\stackman\stackman_impl.h" />
+    <ClInclude Include="..\..\stackman\stackman_switch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\stackman.c">
+    <ClCompile Include="..\..\stackman\stackman.c">
       <SupportJustMyCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</SupportJustMyCode>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</BasicRuntimeChecks>
     </ClCompile>
@@ -199,24 +199,24 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <MARMASM Include="..\..\src\platforms\switch_arm_msvc.asm">
+    <MARMASM Include="..\..\stackman\platforms\switch_arm_msvc.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </MARMASM>
-    <MARMASM Include="..\..\src\platforms\switch_arm64_msvc.asm">
+    <MARMASM Include="..\..\stackman\platforms\switch_arm64_msvc.asm">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </MARMASM>
-    <MASM Include="..\..\src\platforms\switch_x64_msvc.asm">
+    <MASM Include="..\..\stackman\platforms\switch_x64_msvc.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</ExcludedFromBuild>
     </MASM>
-    <MASM Include="..\..\src\platforms\switch_x86_msvc.asm">
+    <MASM Include="..\..\stackman\platforms\switch_x86_msvc.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</ExcludedFromBuild>
