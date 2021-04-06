@@ -1,0 +1,6 @@
+# use unix lf line ending for everything except windows bat files
+* text=auto eol=lf
+*.asm text eol=lf
+*.h text eol=lf
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf

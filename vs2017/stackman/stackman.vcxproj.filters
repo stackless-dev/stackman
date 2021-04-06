@@ -15,33 +15,33 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\stackman.h">
+    <ClInclude Include="..\..\stackman\stackman.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\platforms\platform.h">
+    <ClInclude Include="..\..\stackman\platforms\platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\platforms\switch_x64_msvc.h">
+    <ClInclude Include="..\..\stackman\platforms\switch_x64_msvc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\platforms\switch_x86_msvc.h">
+    <ClInclude Include="..\..\stackman\platforms\switch_x86_msvc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\stackman_impl.h">
+    <ClInclude Include="..\..\stackman\stackman_impl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\stackman_switch.h">
+    <ClInclude Include="..\..\stackman\stackman_switch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\platforms\switch_arm_msvc.h">
+    <ClInclude Include="..\..\stackman\platforms\switch_arm_msvc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\platforms\switch_arm64_msvc.h">
+    <ClInclude Include="..\..\stackman\platforms\switch_arm64_msvc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\stackman.c">
+    <ClCompile Include="..\..\stackman\stackman.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="template.c">
@@ -49,18 +49,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="..\..\src\platforms\switch_x64_msvc.asm">
+    <MASM Include="..\..\stackman\platforms\switch_x64_msvc.asm">
       <Filter>Source Files</Filter>
     </MASM>
-    <MASM Include="..\..\src\platforms\switch_x86_msvc.asm">
+    <MASM Include="..\..\stackman\platforms\switch_x86_msvc.asm">
       <Filter>Source Files</Filter>
     </MASM>
   </ItemGroup>
   <ItemGroup>
-    <MARMASM Include="..\..\src\platforms\switch_arm_msvc.asm">
+    <MARMASM Include="..\..\stackman\platforms\switch_arm_msvc.asm">
       <Filter>Source Files</Filter>
     </MARMASM>
-    <MARMASM Include="..\..\src\platforms\switch_arm64_msvc.asm">
+    <MARMASM Include="..\..\stackman\platforms\switch_arm64_msvc.asm">
       <Filter>Source Files</Filter>
     </MARMASM>
   </ItemGroup>
