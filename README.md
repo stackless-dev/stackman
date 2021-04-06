@@ -114,7 +114,7 @@ platforms as they come along.
 
 ## Cross-compilation
 Linux on x86-64 can be used to cross compile for x86 and ARM targets.  This is most useful to generate assembly code, e.g. when compiling
-src/platform/gen_asm.c
+stackman/platform/gen_asm.c
  - x86 requires the -m32 flag to compilers and linkers.
  - arm32 requires to use the arm-linux-gnueabi-* tools, including cc and linker
  - aarch64 requires the aarch64-linux-gnu-* tools.
@@ -138,4 +138,4 @@ platforms may need to be done independently.
  - install **gcc-aarch64-linux-gnu** and **g++-aarch64-linux-gnu**
  - install __qemu-user__ for hardware emulation 
  - *compile* using `aarch64-linux-gnu-gcc`
- - *make* using `make PLATFORM_PREFIX=aarch64-linux-gnu- EMULATOR=qemu-arm64 test`
+ - *make* using `make PLATFORM_PREFIX=aarch64-linux-gnu- EMULATOR=qemu-aarch64 test`
