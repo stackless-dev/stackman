@@ -7,20 +7,19 @@ on:
     branches: [ master ]
 
 jobs:
-  test-amd64:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: make
-      run: make && make test
-  
+
   test-linux-x86:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platformflags: ["", "-m32"]
+        include:
+          - platformflags: ""
+            name: "AMD64"
+          - platformflags: -m32
+            name: "i386"
+    name: test-linux-x86 (${{matrix.name}})
     env:
-      PLATFORMFLAGS: ${{platformflags}}
+      PLATFORMFLAGS: ${{matrix.platformflags}}
     steps:
     - uses: actions/checkout@v2
     - name: install multilib
@@ -39,6 +38,7 @@ jobs:
         - arch: aarch64
           emulator: qemu-aarch64
           abi: aarch64-linux-gnu
+    name: test-linux-arm (${{matrix.arch}})
     env:
       PLATFORM_PREFIX: ${{matrix.abi}}-
       EMULATOR: ${{matrix.emulator}}
