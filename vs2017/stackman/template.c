@@ -1,4 +1,4 @@
-#include "..\..\src\stackman.h"
+#include "..\..\stackman\stackman.h"
 
 /*
  * template file to create assembly code (template.asm) to modify and add to real assembler.
