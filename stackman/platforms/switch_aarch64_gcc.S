@@ -53,7 +53,7 @@ stackman_switch:
 	mov	x3, x0
 	mov	x0, x1
 #APP
-// 57 "switch_aarch64_gcc.h" 1
+// 59 "../platforms/switch_aarch64_gcc.h" 1
 	mov x2, sp
 // 0 "" 2
 #NO_APP
@@ -63,7 +63,7 @@ stackman_switch:
 	blr	x3
 	mov	x2, x0
 #APP
-// 61 "switch_aarch64_gcc.h" 1
+// 63 "../platforms/switch_aarch64_gcc.h" 1
 	mov sp, x0
 // 0 "" 2
 #NO_APP
@@ -118,24 +118,28 @@ stackman_call:
 	mov	x29, sp
 	str	x19, [sp, 16]
 	.cfi_offset 19, -16
-	mov	x3, x0
+	mov	x4, x0
 	mov	x0, x1
-	mov	x1, x2
+	mov	x3, x2
 #APP
-// 77 "switch_aarch64_gcc.h" 1
+// 78 "../platforms/switch_aarch64_gcc.h" 1
 	mov x19, sp
 // 0 "" 2
-// 78 "switch_aarch64_gcc.h" 1
+// 79 "../platforms/switch_aarch64_gcc.h" 1
 	mov x2, sp
 // 0 "" 2
-// 82 "switch_aarch64_gcc.h" 1
-	mov sp, x1
+#NO_APP
+	cbz	x3, .L4
+#APP
+// 84 "../platforms/switch_aarch64_gcc.h" 1
+	mov sp, x3
 // 0 "" 2
 #NO_APP
+.L4:
 	mov	w1, 2
-	blr	x3
+	blr	x4
 #APP
-// 86 "switch_aarch64_gcc.h" 1
+// 88 "../platforms/switch_aarch64_gcc.h" 1
 	mov sp, x19
 // 0 "" 2
 #NO_APP
@@ -149,5 +153,5 @@ stackman_call:
 	.cfi_endproc
 .LFE1:
 	.size	stackman_call, .-stackman_call
-	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu1) 9.3.0"
+	.ident	"GCC: (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits
