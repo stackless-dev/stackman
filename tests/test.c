@@ -206,6 +206,8 @@ void *test_04_cb(void* context, int _opcode, void *old_sp)
 	c->sp[1] = old_sp;
 	return 0;
 }
+
+/* test stackman_call() with a non-null stack pointer */
 void test_04(void)
 {
 	char *block, *stack, *stack2;
@@ -247,15 +249,32 @@ void test_04(void)
 	for(i=0; i<64; i++)
 		cnt += stack2[-i] == '\x7f';
 	assert(cnt != 64);
+}
 
+/* test stackman_call() with a null stack pointer */
+void test_05(void)
+{
+	char *block, *stack, *stack2;
+	int i, cnt;
+	ctxt01 ctxt;
 
+	assert(STACKMAN_STACK_FULL_DESCENDING);
 
+	/* perform the call */
+	stackman_call(test_04_cb, &ctxt, 0);
+
+	/* verify that it was passed a stack */
+	assert(ctxt.sp[1]);
+	assert(STACKMAN_SP_LE(ctxt.sp[0], ctxt.sp[1]));
+
+	/* and that it was passed valid lower stack pointer */
+	assert(STACKMAN_SP_LE(ctxt.sp[1], &ctxt));
 }
 
 #endif
 
 /* Test our various macros */
-void test_05()
+void test_06()
 {
 
 	int local=0;
@@ -286,8 +305,10 @@ int main(int argc, char*argv[])
 #ifdef TEST_04
 	test_04();
 	printf("test_04 ok\n");
-#endif
 	test_05();
 	printf("test_05 ok\n");
+#endif
+	test_06();
+	printf("test_06 ok\n");
 	return 0;
 }
