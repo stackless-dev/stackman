@@ -50,7 +50,10 @@ stackman_call PROC callback:DWORD, context:DWORD, stack_pointer:DWORD
   mov edx, stack_pointer
 
   ; switch stack pointer
+  test edx, edx
+  je nullptr
   mov esp, stack_pointer
+nullptr:
   push ebp  ;old stack pointer
   push 2	;STACKMAN_OP_CALL
   push ecx  ;context
