@@ -30,16 +30,13 @@ platforms so that no assembly steps are required by users.
 
 ## Features
 - Simple api
-  - `stackman_switch()` is the main function.
+  - `stackman_switch()` and `stackman_call()` are the only functions.
   - The caller provides a callback and context pointer to customize behaviour.
-  - The callback can save the stack and provide the new stack pointer.
-  - After the switch, the callback can restore contents of new stack.
-  - Application behaviour is entirely defined by the callback.
-- Simple implementation
+  Simple implementation
   - The code involving assembly is as simple as possible, allowing for
     straightforward implementation on most platforms.
   - Complex logic and branching is delegated to the C callback.
-  - Custom platform code must only do three things:
+  - Custom platform assembly code must only do three things:
     1. Save and restore volatile registers and stack state on the stack
     2. Call the callback twice with the current stack pointer
     3. Set the stack pointer to the value returned by the first callback.
@@ -62,6 +59,7 @@ standardizing the api.  A number of ABI specifications is supported, meaning arc
 calling convention, plus archive format:
  - win_x86 (32 bits)
  - win_x64
+ - win_ARM64 (experimental)
  - sysv_i386 (linux)
  - sysv_amd64 (linux)
  - AAPCS (32 bit arm)
@@ -75,13 +73,46 @@ Supported toolchains:
 Other platforms can be easily adapted from both existing implementations for other
 projects as well as from example code provided.
 
-### Intel CET
-Intel's Conontrol-Flow Enforcement Technology is incompatible with stack switching
-because it imploys a secondary Shadow Stack, that the user-mode program cannot
-modify.  Unexpected return flow after a stack switch would cause the processor
-to fault.  Because of this, we need to mark any assembly code as not CET compatible.  Modern compilers are beginning to generate CET compatible objects and
-once supporting CPUs start to arrive, processes which consist entirely of CET compatible code may be run in such a protected environment.  See https://software.intel.com/content/www/us/en/develop/articles/technical-look-control-flow-enforcement-technology.html for more information
- 
+## API
+There are two functions that make up the stackman library: `stakman_switch()` and `stackman_call()` who
+both take a `stackman_cb_t` callback:
+```C
+typedef void *(*stackman_cb_t)(
+	void *context, int opcode, void *stack_pointer);
+void *stackman_switch(stackman_cb_t callback, void *context);
+void *stackman_call(stackman_cb_t callback, void *context, void *stack);
+```
+### stackman_switch()
+This is the main _stack manipulation_ API.  When called, it will call `callback` function twice:
+1. First it calls it with the current opcode `STACKMAN_OP_SAVE`, passing the current `stack_pointer` to
+the callback.  This gives the callback the opportunity to _save_ the stack data somewhere.  The callback
+can then return a **different** stack pointer.
+2. It takes the returned value from the calback and replaces the CPU _stack pointer_ with it.
+3. It calls the callback a second time, with the opcode `STACKMAN_OP_RESTORE` and the new stack pointer.
+This gives the callback the opportunity to replace the data on the stack with previously saved data.
+4. It returns the return value from the second call to the callback function.
+
+The `context` pointer is passed as-is to the callback, allowing it access to user-defined data.
+
+Depending on how the callback function is implemented, this API can be used for a number of things, like
+saving a copy of the stack, perform a stack switch, query the stack pointer, and so on.
+
+### stackman_call()
+This is a helper function to call a callback function, optionally providing it with a different stack to
+use.
+1. It saves the current CPU stack pointer.  If `stack` is non-zero, it will replace the stackpointer
+with that value.
+2. It calls the callback function with the opcode `STACKMAN_OP_CALL`.
+3. It replaces the stack pointer with the previously saved value and returns the return value from the callback.
+
+This function is useful for at least three things:
+- To move the call chain into a custom stack area, some heap-allocated block, for example.
+- To query the current stack pointer
+- To enforce an actual function call with stack pointer information.
+
+The last feature is useful to bypass any in-lining that a compiler may do, when one really wants
+a proper function call with stack, for example, when setting up a new stack entry point.
+
 ## Usage
  - Include `stackman.h` for a decleration of the `stackman_switch()` function
    and the definition of various platform specific macros.  See the documentation
@@ -100,6 +131,49 @@ There are two basic ways to add the library to your project:
  In the case of inlined code, it can be specified to prefer in-line assembly and static linkage
  over separate assembly language source.
 
+## Development
+### Adding new platforms
+1. Modify `platform.h` to identif the platform environment.  Define an ABI name and
+   include custom header files.
+2. Use the `switch_template.h` to help build a `switch_ABI.h` file for your ABI.
+3. Provide an assembler version, `switch_ABI.S` by compiling the `gen_asm.c` file for your platform.
+4. Provide cross-compilation tools for linux if possible, by modifying the `Makefile`
+
+### Cross-compilation
+Linux on x86-64 can be used to cross compile for x86 and ARM targets.  This is most useful to generate assembly code, e.g. when compiling
+stackman/platform/gen_asm.c
+ - x86 requires the -m32 flag to compilers and linkers.
+ - arm32 requires to use the arm-linux-gnueabi-* tools, including cc and linker
+ - aarch64 requires the aarch64-linux-gnu-* tools.
+
+The x86 tools require the **gcc-multilib** and **g++-multilib** packages to be installed.  They, however, can't co-exist with the **gcc-arm-linux-gnueabi** or
+**gcc-aarch64-linux-gnu** packages on some distributions, and so development for these
+platforms may need to be done independently.
+
+#### Cross compiling for x86 (32 bit) on Linux
+ - install __gcc-multilib__ and __g++-multilib__
+ - *compile* **gen_asm.c** using `gcc -m32`
+ - *make* using  `make PLATFORMFLAGS=-m32  test`
+
+#### Cross compiling for ARM (32 bit) on Linux
+ - install __gcc-arm-linux-gnueabi__ and __g++-arm-linux-gnueabi__
+ - install __qemu-user__ for hardware emulation 
+ - *compile* **gen_asm.c** using `arm-linux-gnueabi-gcc`
+ - *make* using  `make PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-arm test`
+
+#### Cross compiling for Arm64 on Linux
+ - install **gcc-aarch64-linux-gnu** and **g++-aarch64-linux-gnu**
+ - install __qemu-user__ for hardware emulation 
+ - *compile* using `aarch64-linux-gnu-gcc`
+ - *make* using `make PLATFORM_PREFIX=aarch64-linux-gnu- EMULATOR=qemu-aarch64 test`
+
+## A note about Intel CET
+Intel's Conontrol-Flow Enforcement Technology is incompatible with stack switching
+because it imploys a secondary Shadow Stack, that the user-mode program cannot
+modify.  Unexpected return flow after a stack switch would cause the processor
+to fault.  Because of this, we need to mark any assembly code as not CET compatible.  Modern compilers are beginning to generate CET compatible objects and
+once supporting CPUs start to arrive, processes which consist entirely of CET compatible code may be run in such a protected environment.  See https://software.intel.com/content/www/us/en/develop/articles/technical-look-control-flow-enforcement-technology.html for more information
+ 
 ## History
 This works was originally inspired by *Stackless Python* by [Christian Tismer](https://github.com/ctismer), where the original switching code was
 developed.
@@ -111,31 +185,3 @@ Our work on additional stack-manipulating libraries prompted us to try to distil
 rawest form into a separate, low-level, library.  Such that any project, wishing to implement *co-routine*-like
 behaviour on the C-stack level, could make use of simple, stable code, that can be easily extended for additional
 platforms as they come along.
-
-## Cross-compilation
-Linux on x86-64 can be used to cross compile for x86 and ARM targets.  This is most useful to generate assembly code, e.g. when compiling
-stackman/platform/gen_asm.c
- - x86 requires the -m32 flag to compilers and linkers.
- - arm32 requires to use the arm-linux-gnueabi-* tools, including cc and linker
- - aarch64 requires the aarch64-linux-gnu-* tools.
-
-The x86 tools require the **gcc-multilib** and **g++-multilib** packages to be installed.  They, however, can't co-exist with the **gcc-arm-linux-gnueabi** or
-**gcc-aarch64-linux-gnu** packages on some distributions, and so development for these
-platforms may need to be done independently.
-
-### Cross compiling for x86 (32 bit) on Linux
- - install __gcc-multilib__ and __g++-multilib__
- - *compile* **gen_asm.c** using `gcc -m32`
- - *make* using  `make PLATFORMFLAGS=-m32  test`
-
-### Cross compiling for ARM (32 bit) on Linux
- - install __gcc-arm-linux-gnueabi__ and __g++-arm-linux-gnueabi__
- - install __qemu-user__ for hardware emulation 
- - *compile* **gen_asm.c** using `arm-linux-gnueabi-gcc`
- - *make* using  `make PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-arm test`
-
-### Cross compiling for Arm64 on Linux
- - install **gcc-aarch64-linux-gnu** and **g++-aarch64-linux-gnu**
- - install __qemu-user__ for hardware emulation 
- - *compile* using `aarch64-linux-gnu-gcc`
- - *make* using `make PLATFORM_PREFIX=aarch64-linux-gnu- EMULATOR=qemu-aarch64 test`
