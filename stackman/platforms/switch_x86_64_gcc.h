@@ -93,7 +93,8 @@ void *stackman_call(stackman_cb_t callback, void *context, void *stack_pointer)
 	__asm__ ("movq %%rsp, %[sp]" : [sp] "=r" (old_sp));
 	
 	/* set stack pointer from provided using assembly */
-	__asm__ ("movq %[sp], %%rsp" :: [sp] "r" (stack_pointer));
+	if (stack_pointer != 0)
+		__asm__ ("movq %[sp], %%rsp" :: [sp] "r" (stack_pointer));
 
 	result = callback(context, STACKMAN_OP_CALL, old_sp);
 	/* restore stack pointer */
