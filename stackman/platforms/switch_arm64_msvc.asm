@@ -83,12 +83,15 @@
 	mov	x1, x2 ;stack
 	; store current sp in nv register
 	mov x18, sp
-	mov x2, sp ; new stack
 
-	; change stack
+	mov x2, sp ; old stack
+
+	; change stack, if provided non-zero
+	cbz x1, nullptr
 	mov sp, x1
+nullptr
 	mov	x1, #2 ; callback opcode
-	blr	x3     ; call callback, with context, opcode, new stack
+	blr	x3     ; call callback, with context, opcode, old stack
 
 	; restore stack (could do: sub sp, fp #12)
 	mov sp, x18
