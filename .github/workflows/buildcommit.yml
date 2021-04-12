@@ -74,6 +74,10 @@ jobs:
       - uses: microsoft/setup-msbuild@v1.0.2
       - name: build
         run: msbuild.exe vs2019\stackman.sln /p:Platform=${{matrix.platform}}
+      - name: strip timestamps from lib
+        run: python tools/strip-lib.py lib/win_${{matrix.platform}}/stackman.lib
+      - name: rebuild after stripping
+        run: msbuild.exe vs2019\stackman.sln /p:Platform=${{matrix.platform}}
       - name: test
         if: ${{ matrix.native == 'yes' }}
         run: vs2019\${{matrix.folder}}\Debug\test.exe
