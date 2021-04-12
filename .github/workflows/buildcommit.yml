@@ -23,10 +23,10 @@ jobs:
           - name: arm
             platformtools:  arm-linux-gnueabi
             emulator: qemu-arm
-    name: build-linux-gnu (${{matrix.name}})
+    # name: build-linux-gnu (${{matrix.name}})
     env:
       PLATFORMFLAGS: ${{matrix.platformflags}}
-      PLATFORM_PREFIX: ${{matrix.platformtools}}-
+      PLATFORM_PREFIX: ${{matrix.platformtools}}
       EMULATOR: ${{matrix.emulator}}
     steps:
     - uses: actions/checkout@v2
@@ -52,7 +52,7 @@ jobs:
         path: lib/${{ env.abiname }}/libstackman.a
       
   build-linux-arm:
-    if: 0
+    if: false
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -87,7 +87,7 @@ jobs:
           git push
       
   build-windows:
-    if: 0
+    if: false
     runs-on: windows-2019
     strategy:
       fail-fast: true
