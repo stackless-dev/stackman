@@ -21,18 +21,22 @@ endif
 ABI := $(shell ./abiname.sh "$(CC)" "$(CFLAGS)")
 ifndef ABI
 $(error Could not determine platform)
-else
-$(info ABI is $(ABI))
 endif
 
 LIB := lib/$(ABI)
 
 all: $(LIB)/libstackman.a
 
+# echo the abiname, for build tools.
+.PHONY: abiname
+abiname:
+	@echo $(ABI)
+
 obj = stackman/stackman.o stackman/stackman_s.o
 
 
 $(LIB)/libstackman.a: lib $(obj)
+	$(info ABI is $(ABI))
 	$(AR) $(ARFLAGS) -s $@ $(obj)
 
 .PHONY: lib clean
