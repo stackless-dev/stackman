@@ -14,14 +14,15 @@ jobs:
       fail-fast: false
       matrix:
         name: [AMD64, i386, arm]
-        platformflags: ["", "-m32"]
-        platformtools: ["", "", "arm-linux-gnueabi"]
-        emulator: ["", "", "qemu-arm"]
+        platformflags: [""]
+        platformtools: [""]
+        emulator: [""]
         include:
-          - platformflags: ""
-            name: "AMD64"
-          - platformflags: -m32
-            name: "i386"
+          - name: i386
+            platformflags: -m32
+          - name: arm
+            platformtools:  arm-linux-gnueabi
+            emulator: qemu-arm
     name: build-linux-gnu (${{matrix.name}})
     env:
       PLATFORMFLAGS: ${{matrix.platformflags}}
