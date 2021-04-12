@@ -8,24 +8,36 @@ on:
 
 jobs:
 
-  build-linux-x86:
+  build-linux-gnu:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        name: [AMD64, i386, arm]
+        platformflags: ["", "-m32"]
+        platformtools: ["", "", "arm-linux-gnueabi"]
+        emulator: ["", "", "qemu-arm"]
         include:
           - platformflags: ""
             name: "AMD64"
           - platformflags: -m32
             name: "i386"
-    name: build-linux-x86 (${{matrix.name}})
+    name: build-linux-gnu (${{matrix.name}})
     env:
       PLATFORMFLAGS: ${{matrix.platformflags}}
+      PLATFORM_PREFIX: ${{matrix.platformtools}}-
+      EMULATOR: ${{matrix.emulator}}
     steps:
     - uses: actions/checkout@v2
     - name: install multilib
       run: sudo apt-get install --no-install-recommends -y gcc-multilib g++-multilib 
       if: ${{ matrix.name == 'i386' }}
+    - name: install qemu
+      if: matrix.emulator
+      run: sudo apt-get install --no-install-recommends -y qemu-user 
+    - name: install abi lib
+      if: matrix.platformtools
+      run: sudo apt-get install --no-install-recommends -y gcc-${{matrix.platformtools}} g++-${{matrix.platformtools}} 
     - name: make
       run: make all
     - name: test
