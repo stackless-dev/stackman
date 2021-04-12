@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/kristjanvalur/stackman.svg?branch=master)](https://travis-ci.org/kristjanvalur/stackman)
+[![build test and commit](https://github.com/kristjanvalur/stackman/actions/workflows/buildcommit.yml/badge.svg)](https://github.com/kristjanvalur/stackman/actions/workflows/buildcommit.yml)
 
 # stackman
 Simple low-level stack manipulation API and implementation for common platforms
