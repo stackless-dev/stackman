@@ -80,5 +80,5 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: win-${{ matrix.platform }}
-          path: vs2019/${{matrix.folder}}/Debug/stackman.lib
+          name: win_${{ matrix.platform }}
+          path: lib/win_${{matrix.platform}}/stackman.lib
