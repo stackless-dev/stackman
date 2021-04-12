@@ -16,7 +16,7 @@ tmp=$(mktemp "${here}/tmp/abinameXXX.c")
 #1 create the preprocessed file
 CC=${1:-cc}
 CFLAGS=${2:-}
-${CC} ${CFLAGS} -E -o "${tmp}" "${here}/stackman/abiname.c"
+${CC} ${CFLAGS} -I${here}/../stackman -E -o "${tmp}" "${here}/abiname.c"
 #2 compile resulting file
 cc -o "${tmp}.out" "${tmp}"
 #3 run it
