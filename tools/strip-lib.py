@@ -3,11 +3,17 @@
 # the time is the TimeDateStamp in the COFF file header, four bytes at offset 4
 # See https://blog.conan.io/2019/09/02/Deterministic-builds-with-C-C++.html
 # also: https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#archive-library-file-format
+#
+# There are some additional fixes added for reproducability, such as fixing the zero-padding of names in the coff
+# section headers.
 
 import sys
 import struct
 
+verbose = True
+
 libheader = b"!<arch>\n"
+
 
 def main():
     infilename = sys.argv[1]
@@ -17,13 +23,13 @@ def main():
         outfilename = infilename
 
     with open(infilename, "rb") as fp:
-        lib = read_lib(fp, True)
+        lib = read_lib(fp)
     strip_lib_timestamp(lib)
     with open(outfilename, "wb") as fp:
         write_lib(fp, lib)
 
 
-def read_lib(fp, verbose=False):
+def read_lib(fp):
     """
     read microsoft .lib file,
     """
@@ -40,7 +46,7 @@ def read_lib(fp, verbose=False):
     assert fp.tell() - p == h1["size"]
     if verbose:
         print("first linker member", m1)
-    
+
     h2 = header_read(fp)
     if verbose:
         print("header", h2)
@@ -66,15 +72,15 @@ def read_lib(fp, verbose=False):
     if not h:
         return result
 
-    if h['name'] == "//":
+    if h["name"] == "//":
         result["hl"] = h
         p = fp.tell()
         while fp.tell() < p + h["size"]:
             result["longnames"].append(readcstr(fp))
-        h = None
         if verbose:
-            print('header', h)
-            print('longnames', result['longnames'])
+            print("header", h)
+            print("longnames", result["longnames"])
+        h = None
 
     # now read the headers, possibly we alread read one above.
     while True:
@@ -84,10 +90,10 @@ def read_lib(fp, verbose=False):
                 return result
 
         result["ho"].append(h)
-        result["o"].append(fp.read(h['size']))
+        result["o"].append(fp.read(h["size"]))
         if verbose:
-            print("header:", result['ho'][-1])
-            print("coff:", len(result['o'][-1]))
+            print("header:", result["ho"][-1])
+            print("coff length:", len(result["o"][-1]))
         h = None
 
     return result
@@ -109,16 +115,19 @@ def write_lib(fp, lib):
         header_write(fp, h)
         fp.write(c)
 
+
 def strip_lib_timestamp(lib):
     def fix_header(h):
-        h['date'] = "-1"
-    fix_header(lib['h1'])
-    fix_header(lib['h2'])
-    if lib['hl']:
-        fix_header(lib['hl'])
-    for h in lib['ho']:
+        h["date"] = "-1"
+
+    fix_header(lib["h1"])
+    fix_header(lib["h2"])
+    if lib["hl"]:
+        fix_header(lib["hl"])
+    for h in lib["ho"]:
         fix_header(h)
-    lib['o'] = [strip_coff_timestamp(c) for c in lib['o']]
+    lib["o"] = [strip_coff_timestamp(c) for c in lib["o"]]
+    lib["o"] = [fix_coff_null_padding(c) for c in lib["o"]]
 
 
 def header_read(fp):
@@ -126,7 +135,7 @@ def header_read(fp):
     read a header entry from a microsoft archive
     """
 
-    #header can start with optional newline
+    # header can start with optional newline
     optnl = read_optional_nl(fp)
 
     name = fp.read(16)
@@ -159,7 +168,7 @@ def header_write(fp, h):
         fp.write(e[:n])
 
     if h["optnl"]:
-        fp.write(h['optnl'])
+        fp.write(h["optnl"])
     writestr(h["name"], 16)
     writestr(h["date"], 12)
     writestr(h["uid"], 6)
@@ -193,7 +202,7 @@ def first_lm_write(fp, lm):
         fp.write(struct.pack(">L", o))
     for s in lm["strings"]:
         writecstr(fp, s)
-    
+
 
 def second_lm_read(fp):
     # number of members
@@ -210,7 +219,7 @@ def second_lm_read(fp):
     strings = []
     for i in range(n):
         strings.append(readcstr(fp))
-    
+
     return {"offsets": offsets, "indices": indices, "strings": strings}
 
 
@@ -225,7 +234,7 @@ def second_lm_write(fp, lm):
         fp.write(struct.pack("<H", i))
     for s in lm["strings"]:
         writecstr(fp, s)
-    
+
 
 def readcstr(f):
     buf = []
@@ -235,19 +244,21 @@ def readcstr(f):
             return b"".join(buf)
         else:
             buf.append(b)
-    
+
 
 def writecstr(f, s):
     f.write(s)
     f.write(b"\0")
 
+
 def read_optional_nl(fp):
     t = fp.tell()
     c = fp.read(1)
-    if c == b'\n':
+    if c == b"\n":
         return c
     else:
         fp.seek(t)
+
 
 def peek(fp):
     """ check the next char """
@@ -256,11 +267,51 @@ def peek(fp):
     fp.seek(t)
     return c
 
+
 def strip_coff_timestamp(coff, timestamp=0):
-    ts = struct.pack("<L", timestamp)
-    return coff[:4] + ts + coff[8:]
+    old = struct.unpack("<L", coff[4:8])[0]
+    if timestamp != old:
+        ts = struct.pack("<L", timestamp)
+        coff = coff[:4] + ts + coff[8:]
+        if verbose:
+            print("replaced coff timestamp %r with %r" % (old, timestamp))
+    return coff
+
+
+def fix_coff_null_padding(coff):
+    """
+    Section headers in coff files start with a 8 byte null padded field.
+    Some compilers don't set all the nulls to zero
+    """
+    header = coff[:20]
+    n_sections = struct.unpack("<H", header[2:4])[0]
+    sections = []
+    for i in range(n_sections):
+        # section headers start after header, each is 40 bytes
+        start = 20 + i * 40
+        sections.append(coff[start : start + 40])
+
+    modified = False
+    for n, s in enumerate(sections):
+        name = s[:8]
+        # find first null in name
+        i = name.find(b"\0")
+        if i >= 0:
+            # everything after first null is null
+            shortname = name[:i]
+            namenew = (shortname + b"\0" * 8)[:8]
+            if name != namenew:
+                sections[n] = namenew + s[8:]
+                modified = True
+                if verbose:
+                    print(
+                        "Fixed null padding of COFF section header name %r" % shortname
+                    )
+    if modified:
+        start = header + b"".join(sections)
+        coff = start + coff[len(start) :]
+    return coff
+
 
 if __name__ == "__main__":
     main()
-
-
