@@ -32,7 +32,7 @@ stackman_switch:
 	mov	r3, r0
 	mov	r0, r1
 	.syntax divided
-@ 82 "switch_arm_gcc.h" 1
+@ 84 "../platforms/switch_arm_gcc.h" 1
 	mov r2, sp
 @ 0 "" 2
 	.arm
@@ -43,7 +43,7 @@ stackman_switch:
 	blx	r3
 	mov	r2, r0
 	.syntax divided
-@ 86 "switch_arm_gcc.h" 1
+@ 88 "../platforms/switch_arm_gcc.h" 1
 	mov sp, r0
 @ 0 "" 2
 	.arm
@@ -64,30 +64,36 @@ stackman_call:
 	@ frame_needed = 1, uses_anonymous_args = 0
 	push	{r4, r5, fp, lr}
 	add	fp, sp, #12
-	mov	r3, r0
+	mov	r5, r0
 	mov	r0, r1
-	mov	r1, r2
+	mov	r3, r2
 	.syntax divided
-@ 102 "switch_arm_gcc.h" 1
+@ 104 "../platforms/switch_arm_gcc.h" 1
 	mov r4, sp
 @ 0 "" 2
-@ 103 "switch_arm_gcc.h" 1
+@ 105 "../platforms/switch_arm_gcc.h" 1
 	mov r2, sp
-@ 0 "" 2
-@ 106 "switch_arm_gcc.h" 1
-	mov sp, r1
 @ 0 "" 2
 	.arm
 	.syntax unified
-	mov	r1, #2
-	blx	r3
+	cmp	r3, #0
+	beq	.L4
 	.syntax divided
-@ 110 "switch_arm_gcc.h" 1
+@ 109 "../platforms/switch_arm_gcc.h" 1
+	mov sp, r3
+@ 0 "" 2
+	.arm
+	.syntax unified
+.L4:
+	mov	r1, #2
+	blx	r5
+	.syntax divided
+@ 113 "../platforms/switch_arm_gcc.h" 1
 	mov sp, r4
 @ 0 "" 2
 	.arm
 	.syntax unified
 	pop	{r4, r5, fp, pc}
 	.size	stackman_call, .-stackman_call
-	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu1) 9.3.0"
+	.ident	"GCC: (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0"
 	.section	.note.GNU-stack,"",%progbits

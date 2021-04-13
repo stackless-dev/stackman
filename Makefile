@@ -12,27 +12,31 @@ CXXFLAGS += $(NO_CET)
 
 OLDCC := $(CC)
 ifdef PLATFORM_PREFIX
-CC = $(PLATFORM_PREFIX)gcc
-CXX = $(PLATFORM_PREFIX)g++
-LD = $(PLATFORM_PREFIX)ld
-AR = $(PLATFORM_PREFIX)ar
+CC = $(PLATFORM_PREFIX)-gcc
+CXX = $(PLATFORM_PREFIX)-g++
+LD = $(PLATFORM_PREFIX)-ld
+AR = $(PLATFORM_PREFIX)-ar
 endif
 # run c preprocessor with any cflags to get cross compilation result, then run regular compile in native
-ABI := $(shell ./abiname.sh "$(CC)" "$(CFLAGS)")
+ABI := $(shell sh tools/abiname.sh "$(CC)" "$(CFLAGS)")
 ifndef ABI
 $(error Could not determine platform)
-else
-$(info ABI is $(ABI))
 endif
 
 LIB := lib/$(ABI)
 
 all: $(LIB)/libstackman.a
 
+# echo the abiname, for build tools.
+.PHONY: abiname
+abiname:
+	@echo $(ABI)
+
 obj = stackman/stackman.o stackman/stackman_s.o
 
 
 $(LIB)/libstackman.a: lib $(obj)
+	$(info ABI is $(ABI))
 	$(AR) $(ARFLAGS) -s $@ $(obj)
 
 .PHONY: lib clean
@@ -42,7 +46,7 @@ lib:
 clean:
 	rm -f stackman/*.o tests/*.o
 	rm -f bin/* 
-	rm -rf tmp
+	rm -rf tmp tools/tmp
 
 DEBUG = #-DDEBUG_DUMP
 

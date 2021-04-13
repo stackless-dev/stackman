@@ -76,31 +76,32 @@ stackman_call:
 	movl	%esp, %ebp
 	.cfi_def_cfa_register 5
 	pushl	%ebx
-	subl	$8, %esp
+	subl	$4, %esp
 	.cfi_offset 3, -12
+	movl	16(%ebp), %eax
 #APP
 # 108 "../platforms/switch_x86_gcc.h" 1
 	movl %esp, %ebx
 # 0 "" 2
-# 110 "../platforms/switch_x86_gcc.h" 1
-	leal 4(%esp), %eax
+# 111 "../platforms/switch_x86_gcc.h" 1
+	movl %esp, %edx
 # 0 "" 2
 #NO_APP
-	movl	16(%ebp), %edx
+	testl	%eax, %eax
+	je	.L4
 #APP
-# 113 "../platforms/switch_x86_gcc.h" 1
-	movl %edx, %esp
-# 0 "" 2
-# 115 "../platforms/switch_x86_gcc.h" 1
-	subl $4, %esp
+# 117 "../platforms/switch_x86_gcc.h" 1
+	movl %eax, %esp
 # 0 "" 2
 #NO_APP
-	pushl	%eax
+.L4:
+	subl	$4, %esp
+	pushl	%edx
 	pushl	$2
 	pushl	12(%ebp)
 	call	*8(%ebp)
 #APP
-# 119 "../platforms/switch_x86_gcc.h" 1
+# 124 "../platforms/switch_x86_gcc.h" 1
 	movl %ebx, %esp
 # 0 "" 2
 #NO_APP
@@ -113,5 +114,5 @@ stackman_call:
 	.cfi_endproc
 .LFE1:
 	.size	stackman_call, .-stackman_call
-	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
+	.ident	"GCC: (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits
