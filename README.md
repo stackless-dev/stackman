@@ -76,7 +76,7 @@ Other platforms can be easily adapted from both existing implementations for oth
 projects as well as from example code provided.
 
 ### Intel CET
-Intel's Conontrol-Flow Enforcement Technology is incompatible with stack switching
+Intel's Control-Flow Enforcement Technology is incompatible with stack switching
 because it imploys a secondary Shadow Stack, that the user-mode program cannot
 modify.  Unexpected return flow after a stack switch would cause the processor
 to fault.  Because of this, we need to mark any assembly code as not CET compatible.  Modern compilers are beginning to generate CET compatible objects and
