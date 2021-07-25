@@ -44,6 +44,25 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 	/* __asm__("pop volatile registers") */
 	return stack_pointer;
 }
+
+STACKMAN_LINKAGE_SWITCH
+void *stackman_call(stackman_cb_t callback, void *context, void *stack_pointer)
+{
+	void *old_sp, *result;
+	/* sp = store stack pointer in rbx */
+	/*__asm__ ("movq %%rsp, %%rbx" : : : "rbx");*/
+	/*__asm__ ("movq %%rsp, %[sp]" : [sp] "=r" (old_sp));*/
+	
+	/* if non-null, set stack pointer as provided using assembly */
+	if (stack_pointer != 0)
+		/*__asm__ ("movq %[sp], %%rsp" :: [sp] "r" (stack_pointer))*/;
+
+	result = callback(context, STACKMAN_OP_CALL, old_sp);
+	/* restore stack pointer */
+	/*__asm__ ("movq %%rbx, %%rsp" :::); */
+	
+	return result;
+}
 #endif
 
 #if __ASSEMBLER__ && defined(STACKMAN_ASSEMBLY_SRC)

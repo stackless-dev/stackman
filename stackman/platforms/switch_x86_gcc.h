@@ -107,12 +107,19 @@ void *stackman_call(stackman_cb_t callback, void *context, void *stack_pointer)
   /* sp = store stack pointer in ebx */
   __asm__ ("movl %%esp, %%ebx" : : : "ebx");
   /* save old stack pointer at same offset as new stack pointer */
-  __asm__ ("leal 4(%%esp), %[sp]" : [sp] "=r" (old_sp));
-  
+  /* (adjustment of stack pointer not required now)
+  /*__asm__ ("leal 4(%%esp), %[sp]" : [sp] "=r" (old_sp)); */
+  __asm__ ("movl %%esp, %[sp]" : [sp] "=r" (old_sp));
+
+
   /* set stack pointer from provided using assembly */
-  __asm__ ("movl %[sp], %%esp" :: [sp] "r" (stack_pointer));
-  /* subtract 4 bytes to make it 16 byte alighed after pushing 3 args */
-  __asm__ ("subl $4, %esp");
+  if (stack_pointer != 0)
+  {
+    __asm__ ("movl %[sp], %%esp" :: [sp] "r" (stack_pointer));
+    /* subtract 4 bytes to make it 16 byte alighed after pushing 3 args */
+    /* (adjustment of stack pointer not required now)
+    /* __asm__ ("subl $4, %esp"); */
+  }
 
   result = callback(context, STACKMAN_OP_CALL, old_sp);
   /* restore stack pointer */

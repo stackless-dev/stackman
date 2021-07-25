@@ -1,6 +1,23 @@
 # use unix lf line ending for everything except windows bat files
 * text=auto eol=lf
-*.asm text eol=lf
-*.h text eol=lf
-*.{cmd,[cC][mM][dD]} text eol=crlf
-*.{bat,[bB][aA][tT]} text eol=crlf
+
+# libraries are bin
+*.o binary
+*.obj binary
+*.a binary
+*.so binary
+*.lib binary
+*.dll binary
+*.pdb binary
+
+
+# source files explicitly
+*.{c,h,asm,S} text eol=lf
+
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Visulal studio is happier with crlf
+*.sln text eol=crlf
+*.vcxproj text eol=crlf
+*.vcxproj.filters text eol=crlf

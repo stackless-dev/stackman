@@ -122,7 +122,10 @@ stackman_call PROC FRAME
 	; rcx already set up with context
 	
 	; modify stack pointer before call
+	test r9, r9
+	je nullptr
 	mov rsp, r9
+nullptr:
 	sub rsp, 32 ;pre-allocate parameter stack for the callee
 	call rax
 
