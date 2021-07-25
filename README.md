@@ -168,11 +168,15 @@ platforms may need to be done independently.
  - *make* using `make PLATFORM_PREFIX=aarch64-linux-gnu- EMULATOR=qemu-aarch64 test`
 
 ## A note about Intel CET
-Intel's Conontrol-Flow Enforcement Technology is incompatible with stack switching
-because it imploys a secondary Shadow Stack, that the user-mode program cannot
+Intel's *Control-Flow Enforcement Technology* is incompatible with stack switching
+because it employs a secondary *Shadow Stack*, that the user-mode program cannot
 modify.  Unexpected return flow after a stack switch would cause the processor
-to fault.  Because of this, we need to mark any assembly code as not CET compatible.  Modern compilers are beginning to generate CET compatible objects and
-once supporting CPUs start to arrive, processes which consist entirely of CET compatible code may be run in such a protected environment.  See https://software.intel.com/content/www/us/en/develop/articles/technical-look-control-flow-enforcement-technology.html for more information
+to fault.  Because of this, we need to mark any assembly code as **not CET compatible** by
+adding special compiler flags to supporting compilers (currently modern GNU C).
+Modern compilers are beginning to generate CET compatible objects and
+once supporting CPUs start to arrive, processes which consist entirely of CET compatible
+code may be run in such a protected environment.
+See https://software.intel.com/content/www/us/en/develop/articles/technical-look-control-flow-enforcement-technology.html for more information
  
 ## History
 This works was originally inspired by *Stackless Python* by [Christian Tismer](https://github.com/ctismer), where the original switching code was
