@@ -104,7 +104,7 @@ NESTED_END stackman_switch, _TEXT$00
 stackman_call PROC FRAME
     push rbp
     .pushreg rbp
-	; now our stack is 16 byte aligned.  don't need additional spacle
+	; now our stack is 16 byte aligned.  don't need additional space
     ;sub rsp, 040h
     ;.allocstack 040h
     lea rbp, [rsp+00h]
