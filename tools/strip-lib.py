@@ -7,8 +7,8 @@
 # There are some additional fixes added for reproducability, such as fixing the zero-padding of names in the coff
 # section headers.
 
-import sys
 import struct
+import sys
 
 verbose = True
 
@@ -96,8 +96,6 @@ def read_lib(fp):
             print("coff length:", len(result["o"][-1]))
         h = None
 
-    return result
-
 
 def write_lib(fp, lib):
     fp.write(libheader)
@@ -184,15 +182,13 @@ def first_lm_read(fp):
 
     offsets = []
     strings = []
-    for i in range(nos):
+    for _ in range(nos):
         offset = fp.read(4)
         offsets.append(struct.unpack(">L", offset)[0])
-    for i in range(nos):
+    for _ in range(nos):
         strings.append(readcstr(fp))
     return {"offsets": offsets, "strings": strings}
     # sometimes there is an extra \0a after the strings
-    p = peek(fp)
-    return zip(offsets, strings)
 
 
 def first_lm_write(fp, lm):
@@ -208,16 +204,16 @@ def second_lm_read(fp):
     # number of members
     m = struct.unpack("<L", fp.read(4))[0]  # unsigned long, big-endian
     offsets = []
-    for i in range(m):
+    for _ in range(m):
         offsets.append(struct.unpack("<L", fp.read(4))[0])
 
     # number of symbols
     n = struct.unpack("<L", fp.read(4))[0]  # unsigned long, big-endian
     indices = []
-    for i in range(n):
+    for _ in range(n):
         indices.append(struct.unpack("<H", fp.read(2))[0])  # unsigned short
     strings = []
-    for i in range(n):
+    for _ in range(n):
         strings.append(readcstr(fp))
 
     return {"offsets": offsets, "indices": indices, "strings": strings}
@@ -261,7 +257,7 @@ def read_optional_nl(fp):
 
 
 def peek(fp):
-    """ check the next char """
+    """check the next char"""
     t = fp.tell()
     c = fp.read(1)
     fp.seek(t)
