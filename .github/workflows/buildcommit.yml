@@ -30,7 +30,7 @@ jobs:
       PLATFORM_PREFIX: ${{matrix.platformtools}}
       EMULATOR: ${{matrix.emulator}}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: install multilib
       run: sudo apt-get install --no-install-recommends -y gcc-multilib g++-multilib 
       if: ${{ matrix.name == 'i386' }}
@@ -53,7 +53,7 @@ jobs:
         path: lib/${{ env.abiname }}/libstackman.a
       
   build-windows:
-    runs-on: windows-2019
+    runs-on: windows-latest
     strategy:
       fail-fast: true
       matrix:
@@ -71,17 +71,17 @@ jobs:
             folder: arm64
           
     steps:
-      - uses: actions/checkout@v2
-      - uses: microsoft/setup-msbuild@v1.0.2
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
       - name: build
-        run: msbuild.exe vs2019\stackman.sln /p:Platform=${{matrix.platform}}
+        run: msbuild.exe vs2022\stackman.sln /p:Platform=${{matrix.platform}}
       - name: strip timestamps from lib
         run: python tools/strip-lib.py lib/win_${{matrix.platform}}/stackman.lib
       - name: rebuild after stripping
-        run: msbuild.exe vs2019\stackman.sln /p:Platform=${{matrix.platform}}
+        run: msbuild.exe vs2022\stackman.sln /p:Platform=${{matrix.platform}}
       - name: test
         if: ${{ matrix.native == 'yes' }}
-        run: vs2019\${{matrix.folder}}\Debug\test.exe
+        run: vs2022\${{matrix.folder}}\Debug\test.exe
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -93,7 +93,7 @@ jobs:
     needs: [build-linux-gnu, build-windows]
     if: ${{ github.event_name == 'push' }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: actions/download-artifact@v4
       with:
         path: lib
