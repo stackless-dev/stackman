@@ -47,7 +47,7 @@ jobs:
     - name: set abi name
       run: echo abiname=$(make abiname) >> $GITHUB_ENV
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.abiname }}
         path: lib/${{ env.abiname }}/libstackman.a
@@ -83,7 +83,7 @@ jobs:
         if: ${{ matrix.native == 'yes' }}
         run: vs2019\${{matrix.folder}}\Debug\test.exe
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: win_${{ matrix.platform }}
           path: lib/win_${{matrix.platform}}/stackman.lib
@@ -94,7 +94,7 @@ jobs:
     if: ${{ github.event_name == 'push' }}
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/download-artifact@v4.1.7
+    - uses: actions/download-artifact@v4
       with:
         path: lib
         
