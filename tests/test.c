@@ -254,8 +254,6 @@ void test_04(void)
 /* test stackman_call() with a null stack pointer */
 void test_05(void)
 {
-	char *block, *stack, *stack2;
-	int i, cnt;
 	ctxt01 ctxt;
 
 	assert(STACKMAN_STACK_FULL_DESCENDING);
