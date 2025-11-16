@@ -52,7 +52,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.abiname }}
-          path: lib/${{ env.abiname }}/libstackman.a
+        path: lib/${{ env.abiname }}/libstackman.a
       
   build-macos:
     runs-on: ${{ matrix.os }}
