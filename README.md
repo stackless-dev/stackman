@@ -75,17 +75,20 @@ calling convention, plus archive format:
 
  - win_x86 (32 bits)
  - win_x64
- - win_ARM64 (experimental)
+ - win_arm (32 bit ARM)
+ - win_arm64 (64 bit ARM)
  - sysv_i386 (linux)
  - sysv_amd64 (linux)
- - AAPCS (32 bit arm)
- - AAPCS64 (64 bit arm)
+ - AAPCS (32 bit arm - linux)
+ - AAPCS64 (64 bit arm - linux)
+
+All platforms are automatically built and tested by GitHub Actions CI on every commit.
 
 ### Supported toolchains:
 
  - Gnu C
  - clang
- - Microsoft Visual Studio
+ - Microsoft Visual Studio (VS2017, VS2019, VS2022)
    
 Other platforms can be easily adapted from both existing implementations for other
 projects as well as from example code provided.
@@ -150,15 +153,27 @@ There are two basic ways to add the library to your project: Using a static libr
 
 ### static library (preferred)
 
- - You link with the  `libstackman.a` or `stackman.lib` libraries provided for your platform.
+ - Link with the `libstackman.a` or `stackman.lib` libraries provided for your platform in the `lib/` directory.
+ - Pre-built libraries are available for all supported platforms (8 ABIs total).
+ - Libraries are automatically rebuilt by CI and committed to the repository for easy integration.
 
 ### inlined code
 
- - You inlude `stackman_impl.h` in one of your .c source files to provide inline assembly.
- - You include `stackman_impl.h` in an assembly (.S) file in your project to include assembly code.
- - (windows) You include `stackman_s.asm` in an assemby (.asm) file in your project.
- In the case of inlined code, it can be specified to prefer in-line assembly and static linkage
- over separate assembly language source.
+ - Include `stackman_impl.h` in one of your .c source files to provide inline assembly.
+ - Include `stackman_impl.h` in an assembly (.S) file in your project to include assembly code.
+ - (Windows) Include `stackman_s.asm` in an assembly (.asm) file in your project.
+
+In the case of inlined code, it can be specified to prefer in-line assembly and static linkage
+over separate assembly language source.
+
+## Continuous Integration
+
+The project uses GitHub Actions to automatically:
+- Build libraries for all 8 supported platforms (Linux: AMD64, i386, ARM32, ARM64; Windows: x86, x64, ARM, ARM64)
+- Run test suites on all platforms (using QEMU emulation for ARM on Linux)
+- Commit updated libraries back to the repository on successful builds
+
+See `.github/workflows/buildcommit.yml` for the complete CI configuration.
 
 ## Development
 
