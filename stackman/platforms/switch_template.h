@@ -31,7 +31,7 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 	/* assembly to save non-volatile registers
      * those, according to abi, that functions must save/restore if they
      * intend to use them
-	/* __asm__("push volatile registers") */
+	/* __asm__("push non-volatile registers") */
 
 	/* sp = get stack pointer from assembly code */
 	/* __asm__("get sp into stack_pointer") */
@@ -41,7 +41,7 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 	/* __asm__("store sp from stack_pointer") */
 	stack_pointer = callback(context, STACKMAN_OP_RESTORE, stack_pointer);
 	/* restore non-volatile registers from stack */
-	/* __asm__("pop volatile registers") */
+	/* __asm__("pop non-volatile registers") */
 	return stack_pointer;
 }
 

@@ -55,7 +55,7 @@
  * stack pointer.
  *
  * The implementation must simply:
- * 1) store all platform and cpu state on the stack (callee-stored
+ * 1) store all platform and cpu state on the stack (callee-saved
  *    registers, exception state, etc)
  * 2) call the callback with the context, opcode STACKMAN_OP_SAVE and
  *    the current stack pointer. This allows the application to do additional
@@ -92,7 +92,7 @@ typedef enum stackman_op_t {
 	STACKMAN_OP_SAVE = 0,
 
 	/* The callback receives the new stack pointer and should restore
-	 * any state for it, e.g. fillint the stack with the correct data.
+	 * any state for it, e.g. filling the stack with the correct data.
 	 * what it returns will be the return value from stackman_switch().
 	 */
 	STACKMAN_OP_RESTORE = 1,

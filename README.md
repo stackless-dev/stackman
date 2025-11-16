@@ -179,7 +179,7 @@ See `.github/workflows/buildcommit.yml` for the complete CI configuration.
 
 ### Adding new platforms
 
-1. Modify `platform.h` to identif the platform environment.  Define an ABI name and
+1. Modify `platform.h` to identify the platform environment.  Define an ABI name and
    include custom header files.
 2. Use the `switch_template.h` to help build a `switch_ABI.h` file for your ABI.
 3. Provide an assembler version, `switch_ABI.S` by compiling the `gen_asm.c` file for your platform.
