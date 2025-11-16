@@ -142,6 +142,16 @@ jobs:
         tar -czf ../stackman-${VERSION}-all-platforms.tar.gz .
         cd ..
         
+        # Rename individual libraries with platform names for release uploads
+        mkdir -p release-files
+        cp artifacts/sysv_amd64/libstackman.a release-files/libstackman-sysv_amd64.a
+        cp artifacts/sysv_i386/libstackman.a release-files/libstackman-sysv_i386.a
+        cp artifacts/arm32/libstackman.a release-files/libstackman-arm32.a
+        cp artifacts/aarch64/libstackman.a release-files/libstackman-aarch64.a
+        cp artifacts/win_x86/stackman.lib release-files/stackman-win_x86.lib
+        cp artifacts/win_x64/stackman.lib release-files/stackman-win_x64.lib
+        cp artifacts/win_arm64/stackman.lib release-files/stackman-win_arm64.lib
+        
     - name: Extract version from tag
       id: get_version
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
@@ -151,13 +161,13 @@ jobs:
       with:
         files: |
           stackman-${{ steps.get_version.outputs.VERSION }}-all-platforms.tar.gz
-          artifacts/sysv_amd64/libstackman.a
-          artifacts/sysv_i386/libstackman.a
-          artifacts/arm32/libstackman.a
-          artifacts/aarch64/libstackman.a
-          artifacts/win_x86/stackman.lib
-          artifacts/win_x64/stackman.lib
-          artifacts/win_arm64/stackman.lib
+          release-files/libstackman-sysv_amd64.a
+          release-files/libstackman-sysv_i386.a
+          release-files/libstackman-arm32.a
+          release-files/libstackman-aarch64.a
+          release-files/stackman-win_x86.lib
+          release-files/stackman-win_x64.lib
+          release-files/stackman-win_arm64.lib
         body: |
           See [CHANGELOG.md](https://github.com/stackless-dev/stackman/blob/${{ github.ref_name }}/CHANGELOG.md) for details.
           
