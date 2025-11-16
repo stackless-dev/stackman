@@ -9,13 +9,28 @@
  * and then copying the code from gen_asm.s into this file.
  * 
  */
+
+/* Mach-O (macOS) vs ELF (Linux) compatibility macros */
+#ifdef __APPLE__
+#define FUNCTION(name) .globl _##name
+#define LABEL(name) _##name:
+#define TYPE_FUNCTION(name)
+#define SIZE_FUNCTION(name)
+#define GNU_STACK
+#else
+#define FUNCTION(name) .global name ; .type name, %function
+#define LABEL(name) name:
+#define TYPE_FUNCTION(name) .type name, %function
+#define SIZE_FUNCTION(name) .size name, .-name
+#define GNU_STACK .section .note.GNU-stack,"",@progbits
+#endif
+
 	.arch armv8-a
 	.file	"gen_asm.c"
 	.text
 	.align	2
-	.global	stackman_switch
-	.type	stackman_switch, %function
-stackman_switch:
+	FUNCTION(stackman_switch)
+LABEL(stackman_switch)
 .LFB0:
 	.cfi_startproc
 	stp	x29, x30, [sp, -160]!
@@ -104,11 +119,10 @@ stackman_switch:
 	ret
 	.cfi_endproc
 .LFE0:
-	.size	stackman_switch, .-stackman_switch
+	SIZE_FUNCTION(stackman_switch)
 	.align	2
-	.global	stackman_call
-	.type	stackman_call, %function
-stackman_call:
+	FUNCTION(stackman_call)
+LABEL(stackman_call)
 .LFB1:
 	.cfi_startproc
 	stp	x29, x30, [sp, -32]!
@@ -152,6 +166,6 @@ stackman_call:
 	ret
 	.cfi_endproc
 .LFE1:
-	.size	stackman_call, .-stackman_call
+	SIZE_FUNCTION(stackman_call)
 	.ident	"GCC: (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0"
-	.section	.note.GNU-stack,"",@progbits
+	GNU_STACK
