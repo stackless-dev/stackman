@@ -290,6 +290,92 @@ void test_06()
 
 }
 
+/* Test floating point register preservation across stack switches.
+ * This test verifies that callee-saved FP registers are properly
+ * preserved across stack switches on all platforms.
+ * 
+ * Uses arrays to encourage compiler to use multiple FP registers
+ * and potentially SIMD instructions where available.
+ */
+typedef struct fp_test_context {
+	void *saved_sp;
+	int switch_done;
+} fp_test_context;
+
+void *test_07_cb(void* context, int opcode, void *sp)
+{
+	fp_test_context *c = (fp_test_context*)context;
+	
+	if (opcode == STACKMAN_OP_SAVE) {
+		c->saved_sp = sp;
+		return sp; /* No stack switch */
+	} else {
+		c->switch_done = 1;
+		return sp;
+	}
+}
+
+/* Aggressive FP computation using arrays to encourage vectorization
+ * and use of multiple FP registers including SIMD if available
+ */
+void test_07_compute(double *input, double *output, int count)
+{
+	int i;
+	/* Multiple operations to stress FP register usage */
+	for (i = 0; i < count; i++) {
+		double a = input[i];
+		double b = a * 1.234567;
+		double c = b + 0.987654;
+		double d = c * c;
+		double e = d - a;
+		output[i] = e / (a + 1.0);
+	}
+}
+
+void test_07(void)
+{
+	fp_test_context ctx;
+	double input[16], output1[16], output2[16];
+	int i;
+	
+	/* Initialize input with varying values */
+	for (i = 0; i < 16; i++) {
+		input[i] = (i + 1) * 3.14159 + 0.123456 * i;
+	}
+	
+	/* First computation - fills FP registers */
+	test_07_compute(input, output1, 16);
+	
+	/* Additional FP work to maximize register pressure */
+	double sum1 = 0.0, sum2 = 0.0;
+	for (i = 0; i < 16; i++) {
+		sum1 += output1[i] * (i + 1);
+		sum2 += input[i] / (i + 2);
+	}
+	
+	/* Stack switch - all FP registers must be preserved */
+	memset(&ctx, 0, sizeof(ctx));
+	stackman_switch(&test_07_cb, &ctx);
+	assert(ctx.switch_done);
+	
+	/* Second computation - should produce identical results */
+	test_07_compute(input, output2, 16);
+	
+	/* Verify outputs match exactly */
+	for (i = 0; i < 16; i++) {
+		assert(output1[i] == output2[i]);
+	}
+	
+	/* Verify accumulated sums still work */
+	double sum3 = 0.0, sum4 = 0.0;
+	for (i = 0; i < 16; i++) {
+		sum3 += output2[i] * (i + 1);
+		sum4 += input[i] / (i + 2);
+	}
+	assert(sum1 == sum3);
+	assert(sum2 == sum4);
+}
+
 int main(int argc, char*argv[])
 {
 	int stack_marker = 0;
@@ -308,5 +394,7 @@ int main(int argc, char*argv[])
 #endif
 	test_06();
 	printf("test_06 ok\n");
+	test_07();
+	printf("test_07 ok\n");
 	return 0;
 }
