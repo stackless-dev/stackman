@@ -220,7 +220,7 @@ LABEL(stackman_call)
 	ret
 
 	CFI_ENDPROC
-.LFB1:
+.LFE1:
 	SIZE_FUNCTION(stackman_call)
 
 /* Mark stack as non-executable */
