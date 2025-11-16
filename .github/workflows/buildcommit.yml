@@ -57,9 +57,8 @@ jobs:
   build-windows:
     runs-on: windows-latest
     strategy:
-      fail-fast: true
       matrix:
-        platform: [x86, x64, arm, arm64]
+        platform: [x86, x64, arm64]
         include:
           - platform: x86
             folder: Win32
@@ -67,8 +66,6 @@ jobs:
           - platform: x64
             folder: x64
             native: yes
-          - platform: arm
-            folder: arm
           - platform: arm64
             folder: arm64
           
@@ -93,7 +90,7 @@ jobs:
   commit-artifacts:
     runs-on: ubuntu-latest
     needs: [build-linux-gnu, build-windows]
-    if: ${{ github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/') }}
+    if: false  # Disabled - libraries no longer committed to repository
     steps:
     - uses: actions/checkout@v4
     - uses: actions/download-artifact@v4
@@ -126,24 +123,25 @@ jobs:
     - name: Create release archive
       run: |
         mkdir -p release/lib
-        # Copy all libraries to release/lib maintaining directory structure
-        cp -r artifacts/sysv_amd64/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/sysv_i386/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/arm32/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/aarch64/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/win_x86/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/win_x64/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/win_arm/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/win_arm64/* release/lib/ 2>/dev/null || true
         
-        # Copy headers and documentation
+        # Copy libraries maintaining the lib/{abi}/ structure
+        cp -r artifacts/sysv_amd64 release/lib/
+        cp -r artifacts/sysv_i386 release/lib/
+        cp -r artifacts/arm32 release/lib/
+        cp -r artifacts/aarch64 release/lib/
+        cp -r artifacts/win_x86 release/lib/
+        cp -r artifacts/win_x64 release/lib/
+        cp -r artifacts/win_arm64 release/lib/
+        
+        # Copy headers, tools, and documentation
         cp -r stackman release/
-        cp README.md LICENSE release/
+        cp -r tools release/
+        cp Makefile README.md LICENSE CHANGELOG.md release/
         
         # Create version-specific archive
         VERSION=${GITHUB_REF#refs/tags/v}
         cd release
-        tar -czf ../stackman-${VERSION}-all-platforms.tar.gz .
+        tar -czf ../stackman-${VERSION}.tar.gz .
         cd ..
         
     - name: Extract version from tag
@@ -153,34 +151,44 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          stackman-${{ steps.get_version.outputs.VERSION }}-all-platforms.tar.gz
-          artifacts/sysv_amd64/libstackman.a
-          artifacts/sysv_i386/libstackman.a
-          artifacts/arm32/libstackman.a
-          artifacts/aarch64/libstackman.a
-          artifacts/win_x86/stackman.lib
-          artifacts/win_x64/stackman.lib
-          artifacts/win_arm/stackman.lib
-          artifacts/win_arm64/stackman.lib
+        files: stackman-${{ steps.get_version.outputs.VERSION }}.tar.gz
         body: |
-          ## stackman ${{ steps.get_version.outputs.VERSION }}
+          See [CHANGELOG.md](https://github.com/stackless-dev/stackman/blob/${{ github.ref_name }}/CHANGELOG.md) for details.
           
-          Pre-built libraries for all supported platforms.
+          ## Download
           
-          ### Platforms Included:
-          - **Linux**: AMD64, i386, ARM32, ARM64 (aarch64)
-          - **Windows**: x86, x64, ARM, ARM64
+          Download `stackman-${{ steps.get_version.outputs.VERSION }}.tar.gz` containing pre-built libraries for all platforms.
           
-          ### Download Options:
-          - **All platforms**: `stackman-${{ steps.get_version.outputs.VERSION }}-all-platforms.tar.gz` (includes headers + all libraries)
-          - **Individual libraries**: Download specific platform library files below
+          ## Contents
           
-          ### Usage:
-          1. Download the archive or specific library for your platform
-          2. Include `stackman/stackman.h` in your code
-          3. Link with the appropriate library file
+          ```
+          stackman/           - Header files
+          lib/
+            sysv_amd64/      - Linux x86_64
+            sysv_i386/       - Linux x86 (32-bit)
+            arm32/           - Linux ARM (32-bit, AAPCS)
+            aarch64/         - Linux ARM64 (AAPCS64)
+            win_x86/         - Windows x86 (32-bit)
+            win_x64/         - Windows x64
+            win_arm64/       - Windows ARM64
+          README.md
+          LICENSE
+          CHANGELOG.md
+          ```
           
-          See [README.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/README.md) for complete documentation.
-        draft: false
-        prerelease: false
+          ## Usage
+          
+          ```bash
+          # Extract
+          tar -xzf stackman-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          
+          # Build detects platform automatically
+          make abiname  # Shows detected ABI (e.g., sysv_amd64)
+          
+          # Link with your project
+          gcc -Istackman mycode.c -Llib/sysv_amd64 -lstackman
+          
+          # Or let Makefile auto-detect
+          ABI=$(shell make -C stackman-${{ steps.get_version.outputs.VERSION }} abiname)
+          gcc -Istackman mycode.c -Llib/$(ABI) -lstackman
+          ```

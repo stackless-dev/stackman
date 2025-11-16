@@ -77,7 +77,6 @@ calling convention, plus archive format:
 
  - win_x86 (32 bits)
  - win_x64
- - win_arm (32 bit ARM)
  - win_arm64 (64 bit ARM)
  - sysv_i386 (linux)
  - sysv_amd64 (linux)
