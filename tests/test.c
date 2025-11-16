@@ -376,6 +376,98 @@ void test_07(void)
 	assert(sum2 == sum4);
 }
 
+/* Test integer register preservation across stack switches.
+ * This test verifies that callee-saved integer registers are properly
+ * preserved across stack switches on all platforms.
+ * 
+ * Uses complex integer arithmetic with many intermediate values to
+ * pressure the compiler to use multiple registers.
+ */
+typedef struct int_test_context {
+	void *saved_sp;
+	int switch_done;
+} int_test_context;
+
+void *test_08_cb(void* context, int opcode, void *sp)
+{
+	int_test_context *c = (int_test_context*)context;
+	
+	if (opcode == STACKMAN_OP_SAVE) {
+		c->saved_sp = sp;
+		return sp; /* No stack switch */
+	} else {
+		c->switch_done = 1;
+		return sp;
+	}
+}
+
+/* Complex integer computation with many intermediate values
+ * to encourage use of multiple callee-saved registers
+ */
+void test_08_compute(long *input, long *output, int count)
+{
+	int i;
+	/* Multiple operations creating intermediate values to stress register usage */
+	for (i = 0; i < count; i++) {
+		long a = input[i];
+		long b = a * 123456789L;
+		long c = b + 987654321L;
+		long d = c ^ (a << 3);
+		long e = d - (a * 7);
+		long f = e | (b & 0xFF00FF00);
+		long g = f + (c >> 2);
+		long h = g ^ (d * 13);
+		output[i] = h - (a + b + c);
+	}
+}
+
+void test_08(void)
+{
+	int_test_context ctx;
+	long input[16], output1[16], output2[16];
+	int i;
+	
+	/* Initialize input with varying values */
+	for (i = 0; i < 16; i++) {
+		input[i] = (long)(i + 1) * 314159L + i * 271828L;
+	}
+	
+	/* First computation - fills integer registers */
+	test_08_compute(input, output1, 16);
+	
+	/* Additional integer work to maximize register pressure */
+	long sum1 = 0, sum2 = 0, xor1 = 0;
+	for (i = 0; i < 16; i++) {
+		sum1 += output1[i] * (i + 1);
+		sum2 += input[i] << (i & 3);
+		xor1 ^= (output1[i] + input[i]);
+	}
+	
+	/* Stack switch - all callee-saved integer registers must be preserved */
+	memset(&ctx, 0, sizeof(ctx));
+	stackman_switch(&test_08_cb, &ctx);
+	assert(ctx.switch_done);
+	
+	/* Second computation - should produce identical results */
+	test_08_compute(input, output2, 16);
+	
+	/* Verify outputs match exactly */
+	for (i = 0; i < 16; i++) {
+		assert(output1[i] == output2[i]);
+	}
+	
+	/* Verify accumulated values still work */
+	long sum3 = 0, sum4 = 0, xor2 = 0;
+	for (i = 0; i < 16; i++) {
+		sum3 += output2[i] * (i + 1);
+		sum4 += input[i] << (i & 3);
+		xor2 ^= (output2[i] + input[i]);
+	}
+	assert(sum1 == sum3);
+	assert(sum2 == sum4);
+	assert(xor1 == xor2);
+}
+
 int main(int argc, char*argv[])
 {
 	int stack_marker = 0;
@@ -396,5 +488,7 @@ int main(int argc, char*argv[])
 	printf("test_06 ok\n");
 	test_07();
 	printf("test_07 ok\n");
+	test_08();
+	printf("test_08 ok\n");
 	return 0;
 }
