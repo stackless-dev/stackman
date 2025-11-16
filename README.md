@@ -2,6 +2,8 @@
 
 # stackman
 
+**Version 1.0.0**
+
 Simple low-level stack manipulation API and implementation for common platforms
 
 ## Purpose
