@@ -5,18 +5,19 @@
  * The LP64D ABI is used: 64-bit pointers with hardware floating point.
  */
 
+/* Always use assembly source file for RISC-V */
+#if !defined(STACKMAN_ASSEMBLY_SRC)
+#define STACKMAN_ASSEMBLY_SRC "platforms/switch_riscv64_gcc.S"
+#endif
+
 #ifndef STACKMAN_SWITCH_IMPL
 /* Just check if platform is supported */
 #define STACKMAN_SWITCH_INCLUDED
 #else
 
-/* Always use assembly source file for RISC-V */
-#ifndef STACKMAN_ASSEMBLY_SRC
-#define STACKMAN_ASSEMBLY_SRC "platforms/switch_riscv64_gcc.S"
-#endif
-
 #ifndef STACKMAN_HAVE_CALL
 #define STACKMAN_HAVE_CALL 1
+#undef STACKMAN_STACK_ALIGN
 #define STACKMAN_STACK_ALIGN 16
 #endif
 
