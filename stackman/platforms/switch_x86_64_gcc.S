@@ -17,12 +17,23 @@
 #define TYPE_FUNCTION(name)
 #define SIZE_FUNCTION(name)
 #define GNU_STACK
+/* Disable CFI directives on macOS - they have different semantics */
+#define CFI_STARTPROC
+#define CFI_ENDPROC
+#define CFI_DEF_CFA_OFFSET(x)
+#define CFI_OFFSET(r,o)
+#define CFI_RESTORE(r)
 #else
 #define FUNCTION(name) .globl name ; .type name, @function
 #define LABEL(name) name:
 #define TYPE_FUNCTION(name) .type name, @function
 #define SIZE_FUNCTION(name) .size name, .-name
 #define GNU_STACK .section .note.GNU-stack,"",@progbits
+#define CFI_STARTPROC CFI_STARTPROC
+#define CFI_ENDPROC CFI_ENDPROC
+#define CFI_DEF_CFA_OFFSET(x) CFI_DEF_CFA_OFFSET()x
+#define CFI_OFFSET(r,o) .cfi_offset r, o
+#define CFI_RESTORE(r) CFI_RESTORE()r
 #endif
 
 	.file	"gen_asm.c"
@@ -30,27 +41,27 @@
 	FUNCTION(stackman_switch)
 LABEL(stackman_switch)
 .LFB0:
-	.cfi_startproc
+	CFI_STARTPROC
 	pushq	%r15
-	.cfi_def_cfa_offset 16
-	.cfi_offset 15, -16
+	CFI_DEF_CFA_OFFSET(16)
+	CFI_OFFSET(15,-16)
 	pushq	%r14
-	.cfi_def_cfa_offset 24
-	.cfi_offset 14, -24
+	CFI_DEF_CFA_OFFSET(24)
+	CFI_OFFSET(14,-24)
 	pushq	%r13
-	.cfi_def_cfa_offset 32
-	.cfi_offset 13, -32
+	CFI_DEF_CFA_OFFSET(32)
+	CFI_OFFSET(13,-32)
 	pushq	%r12
-	.cfi_def_cfa_offset 40
-	.cfi_offset 12, -40
+	CFI_DEF_CFA_OFFSET(40)
+	CFI_OFFSET(12,-40)
 	pushq	%rbp
-	.cfi_def_cfa_offset 48
-	.cfi_offset 6, -48
+	CFI_DEF_CFA_OFFSET(48)
+	CFI_OFFSET(6,-48)
 	pushq	%rbx
-	.cfi_def_cfa_offset 56
-	.cfi_offset 3, -56
+	CFI_DEF_CFA_OFFSET(56)
+	CFI_OFFSET(3,-56)
 	subq	$24, %rsp
-	.cfi_def_cfa_offset 80
+	CFI_DEF_CFA_OFFSET(80)
 	movq	%rdi, %rax
 	movq	%rsi, %rcx
 #APP
@@ -92,35 +103,35 @@ LABEL(stackman_switch)
 # 0 "" 2
 #NO_APP
 	addq	$24, %rsp
-	.cfi_def_cfa_offset 56
+	CFI_DEF_CFA_OFFSET(56)
 	popq	%rbx
-	.cfi_def_cfa_offset 48
+	CFI_DEF_CFA_OFFSET(48)
 	popq	%rbp
-	.cfi_def_cfa_offset 40
+	CFI_DEF_CFA_OFFSET(40)
 	popq	%r12
-	.cfi_def_cfa_offset 32
+	CFI_DEF_CFA_OFFSET(32)
 	popq	%r13
-	.cfi_def_cfa_offset 24
+	CFI_DEF_CFA_OFFSET(24)
 	popq	%r14
-	.cfi_def_cfa_offset 16
+	CFI_DEF_CFA_OFFSET(16)
 	popq	%r15
-	.cfi_def_cfa_offset 8
+	CFI_DEF_CFA_OFFSET(8)
 	ret
-	.cfi_endproc
+	CFI_ENDPROC
 .LFE0:
 	SIZE_FUNCTION(stackman_switch)
 	FUNCTION(stackman_call)
 LABEL(stackman_call)
 .LFB1:
-	.cfi_startproc
+	CFI_STARTPROC
 	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
+	CFI_DEF_CFA_OFFSET(16)
+	CFI_OFFSET(6,-16)
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
 	pushq	%rbx
 	subq	$8, %rsp
-	.cfi_offset 3, -24
+	CFI_OFFSET(3,-24)
 	movq	%rdi, %rax
 	movq	%rsi, %rdi
 #APP
@@ -150,9 +161,9 @@ LABEL(stackman_call)
 	addq	$8, %rsp
 	popq	%rbx
 	popq	%rbp
-	.cfi_def_cfa_offset 8
+	CFI_DEF_CFA_OFFSET(8)
 	ret
-	.cfi_endproc
+	CFI_ENDPROC
 .LFE1:
 	SIZE_FUNCTION(stackman_call)
 	.ident	"GCC: (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0"
