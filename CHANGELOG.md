@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - **BREAKING**: Dropped Windows ARM32 (win_arm) support
   - Microsoft Windows SDK 10.0.26100.0+ no longer supports 32-bit ARM development
+  - Last SDK version supporting ARM32 was Windows SDK 10.0.22621 (Windows 11 SDK, version 22H2)
   - ARM32 Windows devices (Windows RT) are obsolete
   - ARM64 Windows remains fully supported
 
