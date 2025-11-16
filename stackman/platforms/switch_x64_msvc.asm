@@ -49,7 +49,7 @@ NESTED_ENTRY stackman_switch, _TEXT$00
 	.allocstack 20h
 .endprolog
 
-	;save argments in nonvolatile registers
+	;save arguments in non-volatile registers
 	mov r12, rcx ;callback
 	mov r13, rdx ;context
 
@@ -111,7 +111,7 @@ stackman_call PROC FRAME
     .setframe rbp, 00h
     .endprolog
 
-	; suffle arguments into volatile registers
+	; shuffle arguments into volatile registers
 	mov rax, rcx ; callback
 	mov rcx, rdx ; context into first arg
 	mov r9, r8   ; and stack pointer in volatile registers

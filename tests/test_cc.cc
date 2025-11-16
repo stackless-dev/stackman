@@ -6,9 +6,9 @@
 #include <iostream>
 using namespace std;
 
-/* simple test ithout modifying stack pointers.
- * test that the callback is called wiht valid
- * stackpoiners and the stage member in the 
+/* simple test without modifying stack pointers.
+ * test that the callback is called with valid
+ * stack pointers and the stage member in the 
  * correct order.
  */
 typedef struct ctxt01

@@ -9,9 +9,9 @@
 
 #define assert_align(p) assert((intptr_t)(p) == STACKMAN_SP_ALIGN(p))
 
-/* simple test ithout modifying stack pointers.
- * test that the callback is called wiht valid
- * stackpoiners and the stage member in the 
+/* simple test without modifying stack pointers.
+ * test that the callback is called with valid
+ * stack pointers and the stage member in the
  * correct order.
  */
 typedef struct ctxt01

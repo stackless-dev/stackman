@@ -8,7 +8,7 @@
  * defines:
  * STACKMAN_LINKAGE_STATIC - define to provide static linkage to stackman_switch()
  * 
- * See also stackman.h for main incle api
+ * See also stackman.h for main include api
  */
 
 #define STACKMAN_SWITCH_IMPL
