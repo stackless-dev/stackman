@@ -21,6 +21,7 @@
 #define CFI_STARTPROC
 #define CFI_ENDPROC
 #define CFI_DEF_CFA_OFFSET(x)
+#define CFI_DEF_CFA_REGISTER(x)
 #define CFI_OFFSET(r,o)
 #define CFI_RESTORE(r)
 #else
@@ -29,11 +30,12 @@
 #define TYPE_FUNCTION(name) .type name, @function
 #define SIZE_FUNCTION(name) .size name, .-name
 #define GNU_STACK .section .note.GNU-stack,"",@progbits
-#define CFI_STARTPROC CFI_STARTPROC
-#define CFI_ENDPROC CFI_ENDPROC
-#define CFI_DEF_CFA_OFFSET(x) CFI_DEF_CFA_OFFSET()x
+#define CFI_STARTPROC .cfi_startproc
+#define CFI_ENDPROC .cfi_endproc
+#define CFI_DEF_CFA_OFFSET(x) .cfi_def_cfa_offset x
+#define CFI_DEF_CFA_REGISTER(x) .cfi_def_cfa_register x
 #define CFI_OFFSET(r,o) .cfi_offset r, o
-#define CFI_RESTORE(r) CFI_RESTORE()r
+#define CFI_RESTORE(r) .cfi_restore r
 #endif
 
 	.file	"gen_asm.c"
@@ -128,7 +130,7 @@ LABEL(stackman_call)
 	CFI_DEF_CFA_OFFSET(16)
 	CFI_OFFSET(6,-16)
 	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
+	CFI_DEF_CFA_REGISTER(6)
 	pushq	%rbx
 	subq	$8, %rsp
 	CFI_OFFSET(3,-24)
