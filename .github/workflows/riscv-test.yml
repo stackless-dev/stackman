@@ -33,7 +33,7 @@ jobs:
     
     - name: Build library
       env:
-        PLATFORM_PREFIX: riscv64-linux-gnu-
+        PLATFORM_PREFIX: riscv64-linux-gnu
       run: make all
     
     - name: Show ABI name
@@ -41,7 +41,7 @@ jobs:
     
     - name: Run tests
       env:
-        PLATFORM_PREFIX: riscv64-linux-gnu-
+        PLATFORM_PREFIX: riscv64-linux-gnu
         EMULATOR: qemu-riscv64
       run: make test
     
