@@ -10,9 +10,6 @@
 #define STACKMAN_SWITCH_INCLUDED
 #else
 
-/* Stack pointer alignment for RISC-V - must be 16-byte aligned */
-#define STACKMAN_SP_ALIGN_BYTES 16
-
 /* Always use assembly source file for RISC-V */
 #ifndef STACKMAN_ASSEMBLY_SRC
 #define STACKMAN_ASSEMBLY_SRC "platforms/switch_riscv64_gcc.S"
