@@ -99,20 +99,20 @@ LABEL(stackman_switch)
 	mv	s2, a0		/* s2 = callback */
 	mv	s3, a1		/* s3 = context */
 	
-	/* First callback: callback(context, sp, 0) */
+	/* First callback: callback(context, opcode, sp) */
 	mv	a0, s3		/* a0 = context */
-	mv	a1, sp		/* a1 = current sp */
-	li	a2, 0		/* a2 = 0 (first call) */
+	li	a1, 0		/* a1 = STACKMAN_OP_SAVE */
+	mv	a2, sp		/* a2 = current sp */
 	jalr	s2		/* call callback */
 	
 	/* Save returned pointer and switch stack */
 	mv	s4, a0		/* s4 = returned value */
 	mv	sp, a0		/* switch to new stack */
 	
-	/* Second callback: callback(context, new_sp, 1) */
+	/* Second callback: callback(context, opcode, sp) */
 	mv	a0, s3		/* a0 = context */
-	mv	a1, sp		/* a1 = new sp */
-	li	a2, 1		/* a2 = 1 (second call) */
+	li	a1, 1		/* a1 = STACKMAN_OP_RESTORE */
+	mv	a2, sp		/* a2 = new sp */
 	jalr	s2		/* call callback */
 	
 	/* Restore callee-saved floating point registers */
@@ -200,10 +200,10 @@ LABEL(stackman_call)
 	mv	t1, a2			/* t1 = new_stack (for arg) */
 	mv	sp, a2			/* switch to new stack */
 	
-	/* Call callback(context, new_stack, 0) */
+	/* Call callback(context, opcode, sp) */
 	mv	a0, a1			/* a0 = context */
-	mv	a1, t1			/* a1 = new_stack */
-	li	a2, 0			/* a2 = 0 */
+	li	a1, 2			/* a1 = STACKMAN_OP_CALL */
+	mv	a2, t1			/* a2 = new_stack */
 	jalr	t0			/* call callback */
 	
 	/* Restore old stack pointer from s0 */
