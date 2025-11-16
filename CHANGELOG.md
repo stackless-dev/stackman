@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-11-16
+
+### Added
+- RISC-V platform support
+  - `riscv64` - RISC-V 64-bit (LP64D ABI with hardware double-precision floating point)
+- Platform detection for RISC-V in `platforms/platform.h` using `__riscv` and `__riscv_xlen` macros
+- Assembly implementation in `platforms/switch_riscv64_gcc.S`
+  - Full register preservation (s0-s11, fs0-fs11, ra)
+  - 16-byte stack alignment per RISC-V ABI
+  - Both `stackman_switch` and `stackman_call` functions
+- RISC-V build job in CI workflow with qemu-riscv64 emulation
+- RISC-V library included in release archives
+
+### Changed
+- Release archives now contain 10 platform libraries (was 9)
+
 ## [1.1.0] - 2025-11-16
 
 ### Added

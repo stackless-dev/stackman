@@ -2,7 +2,7 @@
 
 # stackman
 
-**Version 1.1.0**
+**Version 1.2.0**
 
 Simple low-level stack manipulation API and implementation for common platforms
 
@@ -80,6 +80,7 @@ calling convention, plus archive format:
    - sysv_amd64 (64-bit x86_64)
    - arm32 (32-bit ARM, AAPCS)
    - aarch64 (64-bit ARM, AAPCS64)
+   - riscv64 (64-bit RISC-V, LP64D ABI)
  - **macOS (Darwin)**
    - darwin_x86_64 (Intel)
    - darwin_arm64 (Apple Silicon)
