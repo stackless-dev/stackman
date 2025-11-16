@@ -2,7 +2,7 @@
 
 # stackman
 
-**Version 1.0.0**
+**Version 1.0.1**
 
 Simple low-level stack manipulation API and implementation for common platforms
 
@@ -75,13 +75,18 @@ The current code is distilled out of other work, with the aim of simplifying and
 standardizing the api.  A number of ABI specifications is supported, meaning architecture and
 calling convention, plus archive format:
 
- - win_x86 (32 bits)
- - win_x64
- - win_arm64 (64 bit ARM)
- - sysv_i386 (linux)
- - sysv_amd64 (linux)
- - AAPCS (32 bit arm - linux)
- - AAPCS64 (64 bit arm - linux)
+ - **Linux (System V ABI)**
+   - sysv_i386 (32-bit x86)
+   - sysv_amd64 (64-bit x86_64)
+   - arm32 (32-bit ARM, AAPCS)
+   - aarch64 (64-bit ARM, AAPCS64)
+ - **macOS (Darwin)**
+   - darwin_x86_64 (Intel)
+   - darwin_arm64 (Apple Silicon)
+ - **Windows**
+   - win_x86 (32-bit)
+   - win_x64 (64-bit)
+   - win_arm64 (64-bit ARM)
 
 All platforms are automatically built and tested by GitHub Actions CI on every commit.
 
@@ -154,9 +159,10 @@ There are two basic ways to add the library to your project: Using a static libr
 
 ### static library (preferred)
 
- - Link with the `libstackman.a` or `stackman.lib` libraries provided for your platform in the `lib/` directory.
- - Pre-built libraries are available for all supported platforms (8 ABIs total).
- - Libraries are automatically rebuilt by CI and committed to the repository for easy integration.
+ - Download pre-built libraries from the [Releases page](https://github.com/kristjanvalur/stackman/releases) for your platform
+ - Alternatively, link with the `libstackman.a` or `stackman.lib` libraries in the `lib/` directory if you've cloned the repository
+ - Pre-built libraries are available for all supported platforms (9 ABIs total: 4 Linux, 2 macOS, 3 Windows)
+ - Libraries are automatically rebuilt by CI and committed to the repository for easy integration
 
 ### inlined code
 
@@ -170,9 +176,19 @@ over separate assembly language source.
 ## Continuous Integration
 
 The project uses GitHub Actions to automatically:
-- Build libraries for all 8 supported platforms (Linux: AMD64, i386, ARM32, ARM64; Windows: x86, x64, ARM, ARM64)
+- Build libraries for all 9 supported platforms (Linux: AMD64, i386, ARM32, ARM64; macOS: x86_64, ARM64; Windows: x86, x64, ARM64)
 - Run test suites on all platforms (using QEMU emulation for ARM on Linux)
-- Commit updated libraries back to the repository on successful builds
+- Commit updated libraries back to the repository on successful builds (for development branches)
+- Create GitHub Releases with downloadable libraries when version tags are pushed
+
+### Releases
+
+Tagged versions (e.g., `v1.0.0`) automatically trigger:
+- Build of all platforms
+- Creation of a GitHub Release
+- Upload of individual library files and a combined archive containing all platforms + headers
+
+Download stable releases from: https://github.com/kristjanvalur/stackman/releases
 
 See `.github/workflows/buildcommit.yml` for the complete CI configuration.
 

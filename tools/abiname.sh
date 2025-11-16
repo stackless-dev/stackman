@@ -11,6 +11,8 @@
 set -eu
 here=$(dirname "$0")
 mkdir -p "${here}/tmp"
+# Clean up any stale temp files first
+rm -f "${here}/tmp"/abiname*.c "${here}/tmp"/abiname*.c.out
 tmp=$(mktemp "${here}/tmp/abinameXXX.c")
 
 #1 create the preprocessed file
