@@ -74,6 +74,10 @@
 #else
 #define _STACKMAN_ABI aarch64
 #endif
+#elif defined(__riscv) && (__riscv_xlen == 64)
+#include "switch_riscv64_gcc.h" /* gcc using riscv64 */
+#define _STACKMAN_PLATFORM riscv64_clang
+#define _STACKMAN_ABI riscv64
 #endif
 #endif /* __clang__ */
 
@@ -103,6 +107,10 @@
 #else
 #define _STACKMAN_ABI aarch64
 #endif
+#elif defined(__riscv) && (__riscv_xlen == 64)
+#include "switch_riscv64_gcc.h" /* gcc using riscv64 */
+#define _STACKMAN_PLATFORM riscv64_gcc
+#define _STACKMAN_ABI riscv64
 #endif
 #endif /* __GNUC__ */
 

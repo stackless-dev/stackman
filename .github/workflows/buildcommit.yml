@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [AMD64, i386, arm, aarch64]
+        name: [AMD64, i386, arm, aarch64, riscv64]
         include:
           - name: i386
             platformflags: -m32
@@ -26,6 +26,9 @@ jobs:
           - name: aarch64
             platformtools:  aarch64-linux-gnu
             emulator: qemu-aarch64
+          - name: riscv64
+            platformtools:  riscv64-linux-gnu
+            emulator: qemu-riscv64
     # name: build-linux-gnu (${{matrix.name}})
     env:
       PLATFORMFLAGS: ${{matrix.platformflags}}
@@ -156,6 +159,7 @@ jobs:
         cp -r artifacts/sysv_i386 release/lib/
         cp -r artifacts/arm32 release/lib/
         cp -r artifacts/aarch64 release/lib/
+        cp -r artifacts/riscv64 release/lib/
         cp -r artifacts/darwin_x86_64 release/lib/
         cp -r artifacts/darwin_arm64 release/lib/
         cp -r artifacts/win_x86 release/lib/
@@ -197,6 +201,7 @@ jobs:
             sysv_i386/       - Linux x86 (32-bit)
             arm32/           - Linux ARM (32-bit, AAPCS)
             aarch64/         - Linux ARM64 (AAPCS64)
+            riscv64/         - Linux RISC-V 64-bit (LP64D)
             darwin_x86_64/   - macOS x86_64 (Intel)
             darwin_arm64/    - macOS ARM64 (Apple Silicon)
             win_x86/         - Windows x86 (32-bit)
