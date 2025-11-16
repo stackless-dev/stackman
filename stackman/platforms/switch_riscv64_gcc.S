@@ -182,35 +182,36 @@ LABEL(stackman_call)
 .LFB1:
 	CFI_STARTPROC
 
-	/* Allocate small frame (16 bytes for ra + old_sp) */
+	/* Allocate frame for ra and s0 (callee-saved) */
 	addi	sp, sp, -16
 	CFI_DEF_CFA_OFFSET(16)
 	
-	/* Save return address and old stack pointer */
+	/* Save return address and s0 (we'll use it to preserve old sp) */
 	sd	ra, 8(sp)
 	CFI_OFFSET(1, -8)
-	sd	sp, 0(sp)		/* Save old sp before we modify it */
-	CFI_OFFSET(2, -16)
+	sd	s0, 0(sp)
+	CFI_OFFSET(8, -16)
 	
-	/* Setup args and switch to new stack
-	 * a0 already contains callback
-	 * a1 already contains context
-	 * a2 contains new_stack
-	 */
-	mv	t0, a0			/* t0 = callback (temporary) */
+	/* Save old stack pointer in s0 (callee-saved register) */
+	mv	s0, sp
+	
+	/* Setup args for callback and switch to new stack */
+	mv	t0, a0			/* t0 = callback */
 	mv	t1, a2			/* t1 = new_stack (for arg) */
 	mv	sp, a2			/* switch to new stack */
 	
 	/* Call callback(context, new_stack, 0) */
-	mv	a0, a1			/* a0 = context (was in a1) */
+	mv	a0, a1			/* a0 = context */
 	mv	a1, t1			/* a1 = new_stack */
 	li	a2, 0			/* a2 = 0 */
 	jalr	t0			/* call callback */
 	
-	/* Restore old stack pointer */
-	ld	sp, 0(sp)		/* Restore original sp */
+	/* Restore old stack pointer from s0 */
+	mv	sp, s0
 	
-	/* Restore return address and return */
+	/* Restore s0 and return address */
+	ld	s0, 0(sp)
+	CFI_RESTORE(8)
 	ld	ra, 8(sp)
 	CFI_RESTORE(1)
 	
