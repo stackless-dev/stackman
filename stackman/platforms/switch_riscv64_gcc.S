@@ -39,53 +39,127 @@
  * - a0: callback function pointer (first arg)
  * - a1: context pointer (second arg)
  * - Callee-saved regs: s0-s11 must be preserved
+ * - FP regs: fs0-fs11 (callee-saved floating point)
  */
 	FUNCTION(stackman_switch)
 LABEL(stackman_switch)
 .LFB0:
 	CFI_STARTPROC
 
-	/* TODO: Calculate frame size based on saved registers
-	 * Need to save:
-	 * - ra (return address)
-	 * - s0-s11 (callee-saved registers)
-	 * - fp/s0 for frame pointer
-	 * 
-	 * Total: ~14 registers * 8 bytes = 112 bytes (round to 128 for alignment)
+	/* Allocate stack frame (160 bytes)
+	 * Layout: ra(8) + s0-s11(12*8=96) + fs0-fs11(12*8=96) = 200 bytes
+	 * Round to 208 for 16-byte alignment
 	 */
-
-	/* TODO: Allocate stack frame and save registers */
-	/* addi sp, sp, -128 */
-	/* sd ra, 120(sp) */
-	/* sd s0, 112(sp) */
-	/* sd s1-s11, ... */
-
-	/* TODO: Set up frame pointer */
-	/* addi s0, sp, 128 */
-
-	/* TODO: Call callback with current sp */
-	/* First call: callback(context, sp) */
-	/* mv a1, sp          # second arg = current sp */
-	/* mv a2, a0          # save callback for later */
-	/* mv a0, a1_original # first arg = context */
-	/* jalr a2            # call callback */
-
-	/* TODO: Switch to new stack returned in a0 */
-	/* mv sp, a0 */
-
-	/* TODO: Second callback invocation with new sp */
-	/* Same pattern as first call */
-
-	/* TODO: Restore registers from new stack */
-	/* ld s11, offset(sp) */
-	/* ... */
-	/* ld ra, offset(sp) */
-
-	/* TODO: Deallocate frame and return */
-	/* addi sp, sp, 128 */
-	/* ret */
-
-	/* PLACEHOLDER - just return for now */
+	addi	sp, sp, -208
+	CFI_DEF_CFA_OFFSET(208)
+	
+	/* Save return address and callee-saved registers */
+	sd	ra, 200(sp)
+	CFI_OFFSET(1, -8)	/* ra is x1 */
+	sd	s0, 192(sp)
+	CFI_OFFSET(8, -16)
+	sd	s1, 184(sp)
+	CFI_OFFSET(9, -24)
+	sd	s2, 176(sp)
+	CFI_OFFSET(18, -32)
+	sd	s3, 168(sp)
+	CFI_OFFSET(19, -40)
+	sd	s4, 160(sp)
+	CFI_OFFSET(20, -48)
+	sd	s5, 152(sp)
+	CFI_OFFSET(21, -56)
+	sd	s6, 144(sp)
+	CFI_OFFSET(22, -64)
+	sd	s7, 136(sp)
+	CFI_OFFSET(23, -72)
+	sd	s8, 128(sp)
+	CFI_OFFSET(24, -80)
+	sd	s9, 120(sp)
+	CFI_OFFSET(25, -88)
+	sd	s10, 112(sp)
+	CFI_OFFSET(26, -96)
+	sd	s11, 104(sp)
+	CFI_OFFSET(27, -104)
+	
+	/* Save callee-saved floating point registers */
+	fsd	fs0, 96(sp)
+	fsd	fs1, 88(sp)
+	fsd	fs2, 80(sp)
+	fsd	fs3, 72(sp)
+	fsd	fs4, 64(sp)
+	fsd	fs5, 56(sp)
+	fsd	fs6, 48(sp)
+	fsd	fs7, 40(sp)
+	fsd	fs8, 32(sp)
+	fsd	fs9, 24(sp)
+	fsd	fs10, 16(sp)
+	fsd	fs11, 8(sp)
+	
+	/* Preserve callback and context in callee-saved registers */
+	mv	s2, a0		/* s2 = callback */
+	mv	s3, a1		/* s3 = context */
+	
+	/* First callback: callback(context, sp, 0) */
+	mv	a0, s3		/* a0 = context */
+	mv	a1, sp		/* a1 = current sp */
+	li	a2, 0		/* a2 = 0 (first call) */
+	jalr	s2		/* call callback */
+	
+	/* Save returned pointer and switch stack */
+	mv	s4, a0		/* s4 = returned value */
+	mv	sp, a0		/* switch to new stack */
+	
+	/* Second callback: callback(context, new_sp, 1) */
+	mv	a0, s3		/* a0 = context */
+	mv	a1, sp		/* a1 = new sp */
+	li	a2, 1		/* a2 = 1 (second call) */
+	jalr	s2		/* call callback */
+	
+	/* Restore callee-saved floating point registers */
+	fld	fs11, 8(sp)
+	fld	fs10, 16(sp)
+	fld	fs9, 24(sp)
+	fld	fs8, 32(sp)
+	fld	fs7, 40(sp)
+	fld	fs6, 48(sp)
+	fld	fs5, 56(sp)
+	fld	fs4, 64(sp)
+	fld	fs3, 72(sp)
+	fld	fs2, 80(sp)
+	fld	fs1, 88(sp)
+	fld	fs0, 96(sp)
+	
+	/* Restore callee-saved integer registers */
+	ld	s11, 104(sp)
+	CFI_RESTORE(27)
+	ld	s10, 112(sp)
+	CFI_RESTORE(26)
+	ld	s9, 120(sp)
+	CFI_RESTORE(25)
+	ld	s8, 128(sp)
+	CFI_RESTORE(24)
+	ld	s7, 136(sp)
+	CFI_RESTORE(23)
+	ld	s6, 144(sp)
+	CFI_RESTORE(22)
+	ld	s5, 152(sp)
+	CFI_RESTORE(21)
+	ld	s4, 160(sp)
+	CFI_RESTORE(20)
+	ld	s3, 168(sp)
+	CFI_RESTORE(19)
+	ld	s2, 176(sp)
+	CFI_RESTORE(18)
+	ld	s1, 184(sp)
+	CFI_RESTORE(9)
+	ld	s0, 192(sp)
+	CFI_RESTORE(8)
+	ld	ra, 200(sp)
+	CFI_RESTORE(1)
+	
+	/* Deallocate frame and return */
+	addi	sp, sp, 208
+	CFI_DEF_CFA_OFFSET(0)
 	ret
 
 	CFI_ENDPROC
@@ -108,14 +182,46 @@ LABEL(stackman_call)
 .LFB1:
 	CFI_STARTPROC
 
-	/* TODO: Similar to stackman_switch but simpler
-	 * - Save minimal state on current stack
-	 * - Switch to new_stack (a2)
-	 * - Call callback
-	 * - Return
-	 */
-
-	/* PLACEHOLDER */
+	/* Allocate small frame (32 bytes for ra + s0-s2) */
+	addi	sp, sp, -32
+	CFI_DEF_CFA_OFFSET(32)
+	
+	/* Save return address and callee-saved registers we'll use */
+	sd	ra, 24(sp)
+	CFI_OFFSET(1, -8)
+	sd	s0, 16(sp)
+	CFI_OFFSET(8, -16)
+	sd	s1, 8(sp)
+	CFI_OFFSET(9, -24)
+	sd	s2, 0(sp)
+	CFI_OFFSET(18, -32)
+	
+	/* Preserve callback and context */
+	mv	s0, a0		/* s0 = callback */
+	mv	s1, a1		/* s1 = context */
+	mv	s2, a2		/* s2 = new_stack */
+	
+	/* Switch to new stack */
+	mv	sp, s2
+	
+	/* Call callback(context, new_stack, 0) */
+	mv	a0, s1		/* a0 = context */
+	mv	a1, s2		/* a1 = new_stack */
+	li	a2, 0		/* a2 = 0 */
+	jalr	s0		/* call callback */
+	
+	/* Restore registers and return */
+	ld	s2, 0(sp)
+	CFI_RESTORE(18)
+	ld	s1, 8(sp)
+	CFI_RESTORE(9)
+	ld	s0, 16(sp)
+	CFI_RESTORE(8)
+	ld	ra, 24(sp)
+	CFI_RESTORE(1)
+	
+	addi	sp, sp, 32
+	CFI_DEF_CFA_OFFSET(0)
 	ret
 
 	CFI_ENDPROC
