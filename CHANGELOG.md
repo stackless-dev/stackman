@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- macOS platform support
+  - `darwin_x86_64` - macOS on Intel (x86_64)
+  - `darwin_arm64` - macOS on Apple Silicon (ARM64)
+- Platform detection for macOS in `platforms/platform.h` using `__APPLE__` and `__aarch64__` macros
+- Mach-O assembly compatibility for both x86_64 and ARM64
+  - Conditional assembly macros for ELF vs Mach-O object formats
+  - Disabled CFI directives on macOS (different semantics than Linux)
+  - Symbol name mangling with leading underscore for Mach-O
+- macOS build jobs in CI workflow (macos-15-intel and macos-latest runners)
+- macOS libraries included in release archives
+
+### Changed
+- Assembly files (`switch_x86_64_gcc.S`, `switch_aarch64_gcc.S`) now support both Linux (ELF) and macOS (Mach-O)
+- `Makefile` detects Darwin and disables `-static` flag (not supported on macOS)
+- `tools/abiname.sh` improved to handle stale temp files on macOS
+- Release archives now contain 9 platform libraries (was 7)
+
+## [1.0.1] - 2025-11-16
+
+### Changed
+- Disabled automatic library commits to repository
+- Pre-built libraries now available exclusively via [GitHub Releases](https://github.com/stackless-dev/stackman/releases)
+- Added `lib/README.md` documenting deprecation timeline
+
+### Deprecated
+- `lib/` directory in repository - will be removed in v2.0.0
+- Committing binary library files to git (causes bloat and merge conflicts)
+
 ## [1.0.0] - 2025-11-16
 
 ### Added
