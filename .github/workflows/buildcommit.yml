@@ -122,15 +122,18 @@ jobs:
     
     - name: Create release archive
       run: |
-        mkdir -p release/lib
-        # Copy all libraries to release/lib maintaining directory structure
-        cp -r artifacts/sysv_amd64/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/sysv_i386/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/arm32/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/aarch64/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/win_x86/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/win_x64/* release/lib/ 2>/dev/null || true
-        cp -r artifacts/win_arm64/* release/lib/ 2>/dev/null || true
+        mkdir -p release
+        # Copy libraries maintaining directory structure
+        mkdir -p release/lib/sysv_amd64 release/lib/sysv_i386 release/lib/arm32 release/lib/aarch64
+        mkdir -p release/lib/win_x86 release/lib/win_x64 release/lib/win_arm64
+        
+        cp artifacts/sysv_amd64/libstackman.a release/lib/sysv_amd64/
+        cp artifacts/sysv_i386/libstackman.a release/lib/sysv_i386/
+        cp artifacts/arm32/libstackman.a release/lib/arm32/
+        cp artifacts/aarch64/libstackman.a release/lib/aarch64/
+        cp artifacts/win_x86/stackman.lib release/lib/win_x86/
+        cp artifacts/win_x64/stackman.lib release/lib/win_x64/
+        cp artifacts/win_arm64/stackman.lib release/lib/win_arm64/
         
         # Copy headers and documentation
         cp -r stackman release/
@@ -142,15 +145,15 @@ jobs:
         tar -czf ../stackman-${VERSION}-all-platforms.tar.gz .
         cd ..
         
-        # Rename individual libraries with platform names for release uploads
-        mkdir -p release-files
-        cp artifacts/sysv_amd64/libstackman.a release-files/libstackman-sysv_amd64.a
-        cp artifacts/sysv_i386/libstackman.a release-files/libstackman-sysv_i386.a
-        cp artifacts/arm32/libstackman.a release-files/libstackman-arm32.a
-        cp artifacts/aarch64/libstackman.a release-files/libstackman-aarch64.a
-        cp artifacts/win_x86/stackman.lib release-files/stackman-win_x86.lib
-        cp artifacts/win_x64/stackman.lib release-files/stackman-win_x64.lib
-        cp artifacts/win_arm64/stackman.lib release-files/stackman-win_arm64.lib
+        # Create individual platform archives for easy download
+        mkdir -p platform-archives
+        tar -czf platform-archives/stackman-${VERSION}-sysv_amd64.tar.gz -C release stackman lib/sysv_amd64 README.md LICENSE CHANGELOG.md
+        tar -czf platform-archives/stackman-${VERSION}-sysv_i386.tar.gz -C release stackman lib/sysv_i386 README.md LICENSE CHANGELOG.md
+        tar -czf platform-archives/stackman-${VERSION}-arm32.tar.gz -C release stackman lib/arm32 README.md LICENSE CHANGELOG.md
+        tar -czf platform-archives/stackman-${VERSION}-aarch64.tar.gz -C release stackman lib/aarch64 README.md LICENSE CHANGELOG.md
+        tar -czf platform-archives/stackman-${VERSION}-win_x86.tar.gz -C release stackman lib/win_x86 README.md LICENSE CHANGELOG.md
+        tar -czf platform-archives/stackman-${VERSION}-win_x64.tar.gz -C release stackman lib/win_x64 README.md LICENSE CHANGELOG.md
+        tar -czf platform-archives/stackman-${VERSION}-win_arm64.tar.gz -C release stackman lib/win_arm64 README.md LICENSE CHANGELOG.md
         
     - name: Extract version from tag
       id: get_version
@@ -161,25 +164,42 @@ jobs:
       with:
         files: |
           stackman-${{ steps.get_version.outputs.VERSION }}-all-platforms.tar.gz
-          release-files/libstackman-sysv_amd64.a
-          release-files/libstackman-sysv_i386.a
-          release-files/libstackman-arm32.a
-          release-files/libstackman-aarch64.a
-          release-files/stackman-win_x86.lib
-          release-files/stackman-win_x64.lib
-          release-files/stackman-win_arm64.lib
+          platform-archives/stackman-${{ steps.get_version.outputs.VERSION }}-sysv_amd64.tar.gz
+          platform-archives/stackman-${{ steps.get_version.outputs.VERSION }}-sysv_i386.tar.gz
+          platform-archives/stackman-${{ steps.get_version.outputs.VERSION }}-arm32.tar.gz
+          platform-archives/stackman-${{ steps.get_version.outputs.VERSION }}-aarch64.tar.gz
+          platform-archives/stackman-${{ steps.get_version.outputs.VERSION }}-win_x86.tar.gz
+          platform-archives/stackman-${{ steps.get_version.outputs.VERSION }}-win_x64.tar.gz
+          platform-archives/stackman-${{ steps.get_version.outputs.VERSION }}-win_arm64.tar.gz
         body: |
           See [CHANGELOG.md](https://github.com/stackless-dev/stackman/blob/${{ github.ref_name }}/CHANGELOG.md) for details.
           
-          ## Pre-built Libraries
+          ## Downloads
           
-          Download individual platform libraries or the combined archive containing all platforms.
+          **Option 1: All Platforms**
+          - Download `stackman-${{ steps.get_version.outputs.VERSION }}-all-platforms.tar.gz` for all platforms
           
-          **Platforms:**
-          - Linux: sysv_amd64, sysv_i386, arm32 (AAPCS), aarch64 (AAPCS64)
-          - Windows: win_x86, win_x64, win_arm64
+          **Option 2: Single Platform**
+          Download the platform-specific archive for your system:
+          - `stackman-${{ steps.get_version.outputs.VERSION }}-sysv_amd64.tar.gz` - Linux x86_64
+          - `stackman-${{ steps.get_version.outputs.VERSION }}-sysv_i386.tar.gz` - Linux x86 (32-bit)
+          - `stackman-${{ steps.get_version.outputs.VERSION }}-arm32.tar.gz` - Linux ARM (32-bit, AAPCS)
+          - `stackman-${{ steps.get_version.outputs.VERSION }}-aarch64.tar.gz` - Linux ARM64 (AAPCS64)
+          - `stackman-${{ steps.get_version.outputs.VERSION }}-win_x86.tar.gz` - Windows x86 (32-bit)
+          - `stackman-${{ steps.get_version.outputs.VERSION }}-win_x64.tar.gz` - Windows x64
+          - `stackman-${{ steps.get_version.outputs.VERSION }}-win_arm64.tar.gz` - Windows ARM64
           
-          **Usage:**
-          1. Download the library for your platform
-          2. Include `stackman/stackman.h` in your code
-          3. Link with the downloaded library
+          Each archive contains:
+          - Headers (`stackman/`)
+          - Library file (`lib/{platform}/libstackman.a` or `lib/{platform}/stackman.lib`)
+          - Documentation (README.md, LICENSE, CHANGELOG.md)
+          
+          ## Usage
+          
+          ```bash
+          # Extract
+          tar -xzf stackman-${{ steps.get_version.outputs.VERSION }}-sysv_amd64.tar.gz
+          
+          # Compile your code
+          gcc -Istackman mycode.c -Llib/sysv_amd64 -lstackman
+          ```
