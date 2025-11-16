@@ -53,7 +53,11 @@
 #if defined(__amd64__)
 #include "switch_x86_64_gcc.h" /* gcc on amd64 */
 #define _STACKMAN_PLATFORM x86_64_clang
+#ifdef __APPLE__
+#define _STACKMAN_ABI darwin_x86_64
+#else
 #define _STACKMAN_ABI sysv_amd64
+#endif
 #elif defined(__i386__)
 #include "switch_x86_gcc.h" /* gcc on X86 */
 #define _STACKMAN_PLATFORM x86_clang
@@ -65,7 +69,11 @@
 #elif defined(__ARM_ARCH_ISA_A64)
 #include "switch_aarch64_gcc.h" /* gcc using arm aarch64*/
 #define _STACKMAN_PLATFORM aarch64_clang
+#ifdef __APPLE__
+#define _STACKMAN_ABI darwin_arm64
+#else
 #define _STACKMAN_ABI aarch64
+#endif
 #endif
 #endif /* __clang__ */
 
@@ -74,7 +82,11 @@
 #if defined(__amd64__)
 #include "switch_x86_64_gcc.h" /* gcc on amd64 */
 #define _STACKMAN_PLATFORM x86_64_gcc
+#ifdef __APPLE__
+#define _STACKMAN_ABI darwin_x86_64
+#else
 #define _STACKMAN_ABI sysv_amd64
+#endif
 #elif defined(__i386__)
 #include "switch_x86_gcc.h" /* gcc on X86 */
 #define _STACKMAN_PLATFORM x86_gcc
@@ -86,7 +98,11 @@
 #elif defined(__ARM_ARCH_ISA_A64)
 #include "switch_aarch64_gcc.h" /* gcc using arm aarch64*/
 #define _STACKMAN_PLATFORM aarch64_gcc
+#ifdef __APPLE__
+#define _STACKMAN_ABI darwin_arm64
+#else
 #define _STACKMAN_ABI aarch64
+#endif
 #endif
 #endif /* __GNUC__ */
 

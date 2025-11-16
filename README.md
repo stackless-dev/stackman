@@ -155,9 +155,10 @@ There are two basic ways to add the library to your project: Using a static libr
 
 ### static library (preferred)
 
- - Link with the `libstackman.a` or `stackman.lib` libraries provided for your platform in the `lib/` directory.
- - Pre-built libraries are available for all supported platforms (8 ABIs total).
- - Libraries are automatically rebuilt by CI and committed to the repository for easy integration.
+ - Download pre-built libraries from the [Releases page](https://github.com/kristjanvalur/stackman/releases) for your platform
+ - Alternatively, link with the `libstackman.a` or `stackman.lib` libraries in the `lib/` directory if you've cloned the repository
+ - Pre-built libraries are available for all supported platforms (8 ABIs total)
+ - Libraries are automatically rebuilt by CI and committed to the repository for easy integration
 
 ### inlined code
 
@@ -173,7 +174,17 @@ over separate assembly language source.
 The project uses GitHub Actions to automatically:
 - Build libraries for all 8 supported platforms (Linux: AMD64, i386, ARM32, ARM64; Windows: x86, x64, ARM, ARM64)
 - Run test suites on all platforms (using QEMU emulation for ARM on Linux)
-- Commit updated libraries back to the repository on successful builds
+- Commit updated libraries back to the repository on successful builds (for development branches)
+- Create GitHub Releases with downloadable libraries when version tags are pushed
+
+### Releases
+
+Tagged versions (e.g., `v1.0.0`) automatically trigger:
+- Build of all platforms
+- Creation of a GitHub Release
+- Upload of individual library files and a combined archive containing all platforms + headers
+
+Download stable releases from: https://github.com/kristjanvalur/stackman/releases
 
 See `.github/workflows/buildcommit.yml` for the complete CI configuration.
 

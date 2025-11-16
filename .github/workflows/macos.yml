@@ -1,0 +1,45 @@
+name: macOS build and test
+
+on:
+  push:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build-macos:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-13, macos-14]  # macos-13 = x86_64, macos-14 = ARM64 (M1)
+        include:
+          - os: macos-13
+            arch: x86_64
+            abi: darwin_x86_64
+          - os: macos-14
+            arch: arm64
+            abi: darwin_arm64
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Show system info
+      run: |
+        uname -a
+        uname -m
+        cc --version
+    
+    - name: Build library
+      run: make all
+    
+    - name: Run tests
+      run: make test
+    
+    - name: Show ABI name
+      run: make abiname
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.abi }}
+        path: lib/${{ matrix.abi }}/libstackman.a
