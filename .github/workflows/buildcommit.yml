@@ -133,9 +133,10 @@ jobs:
         cp -r artifacts/win_x64 release/lib/
         cp -r artifacts/win_arm64 release/lib/
         
-        # Copy headers and documentation
+        # Copy headers, tools, and documentation
         cp -r stackman release/
-        cp README.md LICENSE CHANGELOG.md release/
+        cp -r tools release/
+        cp Makefile README.md LICENSE CHANGELOG.md release/
         
         # Create version-specific archive
         VERSION=${GITHUB_REF#refs/tags/v}
