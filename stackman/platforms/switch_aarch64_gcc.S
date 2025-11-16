@@ -29,11 +29,11 @@
 #define TYPE_FUNCTION(name) .type name, %function
 #define SIZE_FUNCTION(name) .size name, .-name
 #define GNU_STACK .section .note.GNU-stack,"",@progbits
-#define CFI_STARTPROC CFI_STARTPROC
-#define CFI_ENDPROC CFI_ENDPROC
-#define CFI_DEF_CFA_OFFSET(x) CFI_DEF_CFA_OFFSET()x
+#define CFI_STARTPROC .cfi_startproc
+#define CFI_ENDPROC .cfi_endproc
+#define CFI_DEF_CFA_OFFSET(x) .cfi_def_cfa_offset x
 #define CFI_OFFSET(r,o) .cfi_offset r, o
-#define CFI_RESTORE(r) CFI_RESTORE()r
+#define CFI_RESTORE(r) .cfi_restore r
 #endif
 
 	.arch armv8-a
