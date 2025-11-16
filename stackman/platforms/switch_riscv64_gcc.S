@@ -182,53 +182,44 @@ LABEL(stackman_call)
 .LFB1:
 	CFI_STARTPROC
 
-	/* Allocate small frame (32 bytes for ra + s0-s2) */
-	addi	sp, sp, -32
-	CFI_DEF_CFA_OFFSET(32)
+	/* Allocate small frame (16 bytes for ra + old_sp) */
+	addi	sp, sp, -16
+	CFI_DEF_CFA_OFFSET(16)
 	
-	/* Save return address and callee-saved registers we'll use */
-	sd	ra, 24(sp)
+	/* Save return address and old stack pointer */
+	sd	ra, 8(sp)
 	CFI_OFFSET(1, -8)
-	sd	s0, 16(sp)
-	CFI_OFFSET(8, -16)
-	sd	s1, 8(sp)
-	CFI_OFFSET(9, -24)
-	sd	s2, 0(sp)
-	CFI_OFFSET(18, -32)
+	sd	sp, 0(sp)		/* Save old sp before we modify it */
+	CFI_OFFSET(2, -16)
 	
-	/* Preserve callback, context, and OLD stack pointer */
-	mv	s0, a0		/* s0 = callback */
-	mv	s1, a1		/* s1 = context */
-	mv	s2, sp		/* s2 = old stack pointer (IMPORTANT!) */
-	
-	/* Switch to new stack */
-	mv	sp, a2		/* sp = new_stack */
+	/* Setup args and switch to new stack
+	 * a0 already contains callback
+	 * a1 already contains context
+	 * a2 contains new_stack
+	 */
+	mv	t0, a0			/* t0 = callback (temporary) */
+	mv	t1, a2			/* t1 = new_stack (for arg) */
+	mv	sp, a2			/* switch to new stack */
 	
 	/* Call callback(context, new_stack, 0) */
-	mv	a0, s1		/* a0 = context */
-	mv	a1, a2		/* a1 = new_stack */
-	li	a2, 0		/* a2 = 0 */
-	jalr	s0		/* call callback */
+	mv	a0, a1			/* a0 = context (was in a1) */
+	mv	a1, t1			/* a1 = new_stack */
+	li	a2, 0			/* a2 = 0 */
+	jalr	t0			/* call callback */
 	
 	/* Restore old stack pointer */
-	mv	sp, s2
+	ld	sp, 0(sp)		/* Restore original sp */
 	
-	/* Restore registers and return */
-	ld	s2, 0(sp)
-	CFI_RESTORE(18)
-	ld	s1, 8(sp)
-	CFI_RESTORE(9)
-	ld	s0, 16(sp)
-	CFI_RESTORE(8)
-	ld	ra, 24(sp)
+	/* Restore return address and return */
+	ld	ra, 8(sp)
 	CFI_RESTORE(1)
 	
-	addi	sp, sp, 32
+	addi	sp, sp, 16
 	CFI_DEF_CFA_OFFSET(0)
 	ret
 
 	CFI_ENDPROC
-.LFE1:
+.LFB1:
 	SIZE_FUNCTION(stackman_call)
 
 /* Mark stack as non-executable */
