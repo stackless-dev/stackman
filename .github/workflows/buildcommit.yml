@@ -55,9 +55,8 @@ jobs:
   build-windows:
     runs-on: windows-latest
     strategy:
-      fail-fast: true
       matrix:
-        platform: [x86, x64, arm, arm64]
+        platform: [x86, x64, arm64]
         include:
           - platform: x86
             folder: Win32
@@ -65,8 +64,6 @@ jobs:
           - platform: x64
             folder: x64
             native: yes
-          - platform: arm
-            folder: arm
           - platform: arm64
             folder: arm64
           
