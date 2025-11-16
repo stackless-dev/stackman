@@ -196,19 +196,22 @@ LABEL(stackman_call)
 	sd	s2, 0(sp)
 	CFI_OFFSET(18, -32)
 	
-	/* Preserve callback and context */
+	/* Preserve callback, context, and OLD stack pointer */
 	mv	s0, a0		/* s0 = callback */
 	mv	s1, a1		/* s1 = context */
-	mv	s2, a2		/* s2 = new_stack */
+	mv	s2, sp		/* s2 = old stack pointer (IMPORTANT!) */
 	
 	/* Switch to new stack */
-	mv	sp, s2
+	mv	sp, a2		/* sp = new_stack */
 	
 	/* Call callback(context, new_stack, 0) */
 	mv	a0, s1		/* a0 = context */
-	mv	a1, s2		/* a1 = new_stack */
+	mv	a1, a2		/* a1 = new_stack */
 	li	a2, 0		/* a2 = 0 */
 	jalr	s0		/* call callback */
+	
+	/* Restore old stack pointer */
+	mv	sp, s2
 	
 	/* Restore registers and return */
 	ld	s2, 0(sp)
