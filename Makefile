@@ -50,6 +50,12 @@ clean:
 
 DEBUG = #-DDEBUG_DUMP
 
+# macOS doesn't support static linking
+STATIC_FLAG := -static
+ifeq ($(shell uname -s),Darwin)
+	STATIC_FLAG :=
+endif
+
 .PHONY: test tests
 
 test: tests
@@ -66,13 +72,13 @@ tests: bin/test_asm
 tests: LDLIBS := -lstackman
 
 bin/test: tests/test.o $(LIB)/libstackman.a
-	$(CC) $(LDFLAGS) -static -o $@ $< ${DEBUG} $(LDLIBS)
+	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $< ${DEBUG} $(LDLIBS)
 
 bin/test_cc: tests/test_cc.o $(LIB)/libstackman.a
-	$(CXX) $(LDFLAGS) -static -o $@ $< ${DEBUG} $(LDLIBS)
+	$(CXX) $(LDFLAGS) $(STATIC_FLAG) -o $@ $< ${DEBUG} $(LDLIBS)
 
 bin/test_static: tests/test_static.o
-	$(CC) $(LDFLAGS) -static -o $@ $^ ${DEBUG}
+	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $^ ${DEBUG}
 
 bin/test_asm: tests/test_asm.o tests/test_asm_s.o
-	$(CC) $(LDFLAGS) -static -o $@ $^ ${DEBUG}
+	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $^ ${DEBUG}
