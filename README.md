@@ -116,13 +116,13 @@ void *stackman_call(stackman_cb_t callback, void *context, void *stack);
 
 This is the main _stack manipulation_ API.  When called, it will call `callback` function twice:
 
-1. First it calls it with the current opcode `STACKMAN_OP_SAVE`, passing the current `stack_pointer` to
+1. First it calls it with the opcode `STACKMAN_OP_SAVE`, passing the current `stack_pointer` to
 the callback.  This gives the callback the opportunity to _save_ the stack data somewhere.  The callback
 can then return a **different** stack pointer.
-2. It takes the returned value from the calback and replaces the CPU _stack pointer_ with it.
+2. It takes the returned value from the callback and replaces the CPU _stack pointer_ with it.
 3. It calls the callback a second time, with the opcode `STACKMAN_OP_RESTORE` and the new stack pointer.
 This gives the callback the opportunity to replace the data on the stack with previously saved data.
-4. It returns the return value from the second call to the callback function.
+4. `stackman_switch()` returns the return value from the second callback invocation.
 
 The `context` pointer is passed as-is to the callback, allowing it access to user-defined data.
 
