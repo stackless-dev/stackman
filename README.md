@@ -167,9 +167,24 @@ There are two basic ways to add the library to your project: Using a static libr
 
 ### inlined code
 
- - Include `stackman_impl.h` in one of your .c source files to provide inline assembly.
- - Include `stackman_impl.h` in an assembly (.S) file in your project to include assembly code.
- - (Windows) Include `stackman_s.asm` in an assembly (.asm) file in your project.
+**Note:** Most platforms now use separate assembly files (`.S` or `.asm`) rather than inline assembly. 
+Inline assembly is only available for some platforms when using GCC (not Clang), and using separate 
+assembly files is generally preferred for reliability and compatibility.
+
+**To include the implementation directly in your project:**
+
+ - **Recommended:** Include `stackman_impl.h` in an assembly (`.S`) file in your project. This works for all Unix-like platforms (Linux, macOS, BSD).
+ - **Windows:** Include `stackman_s.asm` in an assembly (`.asm`) file in your project.
+ - **Legacy (GCC only, limited platforms):** Include `stackman_impl.h` in a `.c` source file to use inline assembly where available (x86, x86_64, ARM32, ARM64 with GCC).
+
+**Platforms with inline assembly support:**
+- x86 (sysv_i386)
+- x86_64 (sysv_amd64) 
+- ARM32 (arm32)
+- ARM64 (aarch64)
+
+Only when compiled with GCC and `STACKMAN_INLINE_ASM` is not disabled. Clang, RISC-V, macOS, and Windows 
+always use separate assembly files.
 
 In the case of inlined code, it can be specified to prefer in-line assembly and static linkage
 over separate assembly language source.
