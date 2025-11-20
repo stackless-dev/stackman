@@ -1,10 +1,21 @@
 [![build test and commit](https://github.com/kristjanvalur/stackman/actions/workflows/buildcommit.yml/badge.svg)](https://github.com/kristjanvalur/stackman/actions/workflows/buildcommit.yml)
 
-# 🦸 stackman
 
-**Do you have a stack? Stackman is here to help.**
+```
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║  > stackman                                                  ║
+║    ┌─┐┌┬┐┌─┐┌─┐┬┌─┌┬┐┌─┐┌┐┌                                  ║
+║    └─┐ │ ├─┤│  ├┴┐│││├─┤│││                                  ║
+║    └─┘ ┴ ┴ ┴└─┘┴ ┴┴ ┴┴ ┴┘└┘                                  ║
+║                                                              ║
+║  Do you have a stack? Stackman is here to help.              ║
+║                                                              ║
+║  v1.2.0 • 10 platforms • Stack switching simplified          ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+```
 
-**Version 1.2.0**
 
 Simple low-level stack manipulation API and implementation for common platforms
 
