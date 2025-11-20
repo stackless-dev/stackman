@@ -1,6 +1,8 @@
 [![build test and commit](https://github.com/kristjanvalur/stackman/actions/workflows/buildcommit.yml/badge.svg)](https://github.com/kristjanvalur/stackman/actions/workflows/buildcommit.yml)
 
-# stackman
+# 🦸 stackman
+
+**Do you have a stack? Stackman is here to help.**
 
 **Version 1.2.0**
 
