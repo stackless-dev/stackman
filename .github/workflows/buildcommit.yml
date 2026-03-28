@@ -144,7 +144,7 @@ jobs:
           
     steps:
       - uses: actions/checkout@v6.0.2
-      - uses: microsoft/setup-msbuild@v2
+      - uses: microsoft/setup-msbuild@v3
       - name: build
         run: msbuild.exe vs2022\stackman.sln /p:Platform=${{matrix.platform}}
       - name: strip timestamps from lib
