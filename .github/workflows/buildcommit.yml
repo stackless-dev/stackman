@@ -35,16 +35,59 @@ jobs:
       PLATFORM_PREFIX: ${{matrix.platformtools}}
       EMULATOR: ${{matrix.emulator}}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6.0.2
     - name: install multilib
-      run: sudo apt-get install --no-install-recommends -y gcc-multilib g++-multilib 
+      run: |
+        set -euxo pipefail
+        retry() {
+          local n=0
+          until "$@"; do
+            n=$((n+1))
+            if [ "$n" -ge 3 ]; then
+              return 1
+            fi
+            sleep $((n*5))
+          done
+        }
+        retry sudo apt-get -o Acquire::Retries=5 update
+        retry sudo apt-get install --no-install-recommends -y gcc-multilib g++-multilib
       if: ${{ matrix.name == 'i386' }}
     - name: install qemu
       if: matrix.emulator
-      run: sudo apt-get install --no-install-recommends -y qemu-user 
+      run: |
+        set -euxo pipefail
+        retry() {
+          local n=0
+          until "$@"; do
+            n=$((n+1))
+            if [ "$n" -ge 3 ]; then
+              return 1
+            fi
+            sleep $((n*5))
+          done
+        }
+        retry sudo apt-get -o Acquire::Retries=5 update
+        retry sudo apt-get install --no-install-recommends -y qemu-user
     - name: install abi lib
       if: matrix.platformtools
-      run: sudo apt-get install --no-install-recommends -y gcc-${{matrix.platformtools}} g++-${{matrix.platformtools}} 
+      run: |
+        set -euxo pipefail
+        retry() {
+          local n=0
+          until "$@"; do
+            n=$((n+1))
+            if [ "$n" -ge 3 ]; then
+              return 1
+            fi
+            sleep $((n*5))
+          done
+        }
+        retry sudo apt-get -o Acquire::Retries=5 update
+        if ! retry sudo apt-get install --no-install-recommends -y gcc-${{matrix.platformtools}} g++-${{matrix.platformtools}}; then
+          # Mirrorlist/indexes can lag on ubuntu-latest; refresh and retry with --fix-missing.
+          retry sudo apt-get -o Acquire::Retries=5 update
+          retry sudo apt-get install --no-install-recommends -y --fix-missing gcc-${{matrix.platformtools}} g++-${{matrix.platformtools}}
+        fi
     - name: make
       run: make all
     - name: test
@@ -52,7 +95,7 @@ jobs:
     - name: set abi name
       run: echo abiname=$(make abiname) >> $GITHUB_ENV
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7.0.0
       with:
         name: ${{ env.abiname }}
         path: lib/${{ env.abiname }}/libstackman.a
@@ -70,7 +113,7 @@ jobs:
             abi: darwin_arm64
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6.0.2
     
     - name: Build library
       run: make all
@@ -79,7 +122,7 @@ jobs:
       run: make test
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7.0.0
       with:
         name: ${{ matrix.abi }}
         path: lib/${{ matrix.abi }}/libstackman.a
@@ -100,7 +143,7 @@ jobs:
             folder: arm64
           
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.2
       - uses: microsoft/setup-msbuild@v2
       - name: build
         run: msbuild.exe vs2022\stackman.sln /p:Platform=${{matrix.platform}}
@@ -112,7 +155,7 @@ jobs:
         if: ${{ matrix.native == 'yes' }}
         run: vs2022\${{matrix.folder}}\Debug\test.exe
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: win_${{ matrix.platform }}
           path: lib/win_${{matrix.platform}}/stackman.lib
@@ -122,7 +165,7 @@ jobs:
     needs: [build-linux-gnu, build-macos, build-windows]
     if: false  # Disabled - libraries no longer committed to repository
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6.0.2
     - uses: actions/download-artifact@v4
       with:
         path: lib
@@ -143,7 +186,7 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6.0.2
     
     - name: Download all artifacts
       uses: actions/download-artifact@v4
