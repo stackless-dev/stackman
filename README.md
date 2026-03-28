@@ -1,4 +1,4 @@
-[![build test and commit](https://github.com/kristjanvalur/stackman/actions/workflows/buildcommit.yml/badge.svg)](https://github.com/kristjanvalur/stackman/actions/workflows/buildcommit.yml)
+[![build test and commit](https://github.com/stackless-dev/stackman/actions/workflows/buildcommit.yml/badge.svg)](https://github.com/stackless-dev/stackman/actions/workflows/buildcommit.yml)
 
 
 ```
