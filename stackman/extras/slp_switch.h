@@ -24,7 +24,7 @@
 
 #define SLP_STACK_MAGIC 0
 
-/* need a special function arount SLP_SAVE_STATE() because
+/* need a special function around SLP_SAVE_STATE() because
  * the macro has a built-in return of 0 or -1.  Must catch
  * that.
  */

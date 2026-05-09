@@ -28,7 +28,7 @@
 	mov	r4, r3
 	blx	r3     ;first callback
 	mov	r2, r0 ;store new stackpointer in register, for next cb,
-	; switch stack pointer, maintaing fp offset
+	; switch stack pointer, maintaining fp offset
 	sub r1, sp, r0
 	mov sp, r0 ;switch stack pointer
 	sub fp, fp, r1

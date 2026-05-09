@@ -5,7 +5,7 @@
  * if an implementaition exists, and once (defining STACKMAN_SWITCH_IMPL)
  * to define the implementation.
  * This results in the definition of STACKMAN_PLATFORM
- * and possibly STACKMAN_ASSEMBLY_SRC if the implentation is assembly
+ * and possibly STACKMAN_ASSEMBLY_SRC if the implementation is assembly
  * based and not in-line c.
  */
 

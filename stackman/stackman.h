@@ -80,7 +80,7 @@
 #endif
 
 
-/* align a stack pointer to the righ alighment, either nudging it up or down */
+/* align a stack pointer to the right alignment, either nudging it up or down */
 #define STACKMAN_SP_ALIGN_DOWN(a) (((intptr_t)(a) & ~(STACKMAN_STACK_ALIGN-1)))
 #define STACKMAN_SP_ALIGN_UP(a)	  (((intptr_t)((a)+STACKMAN_STACK_ALIGN-1) & ~(STACKMAN_STACK_ALIGN-1)))
 

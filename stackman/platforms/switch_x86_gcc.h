@@ -33,7 +33,7 @@
  * and preserve registers. But we ourselves assemble the 
  * calls and stack pointer changes
  *
- * This file can be excercised on 64 bit linux by adding -m32 to
+ * This file can be exercised on 64 bit linux by adding -m32 to
  * the gcc command line.
  */
 #include "../stackman_switch.h"
