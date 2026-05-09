@@ -67,7 +67,7 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 	__asm__ ("movq %[result], %%rsp" :: [result] "r" (stack_pointer2));
 	__asm__ ("addq %[arg],  %%rbp" :: [arg] "r" (diff));
 
-	stack_pointer = callback(context, STACKMAN_OP_RESTORE, stack_pointer);
+	stack_pointer = callback(context, STACKMAN_OP_RESTORE, stack_pointer2);
 	/* restore non-volatile registers from stack */
 	__asm__ volatile (
         "ldmxcsr %[sr]\n\t"

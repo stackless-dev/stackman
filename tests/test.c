@@ -102,6 +102,8 @@ void *jmp_cb(void* context, int opcode, void *sp)
 	if (opcode == (int)STACKMAN_OP_SAVE) {
 		return c->stack_near;
 	} else {
+		/* RESTORE must receive the active switched stack pointer. */
+		assert(sp == c->stack_near);
 		restore_stack(c->stack_near, c->buf, c->size);
 		return sp;
 	}

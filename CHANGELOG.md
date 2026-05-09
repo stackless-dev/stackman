@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- CI: pinned Windows runner to `windows-2022` (from `windows-latest`) to keep VS2022 v143 toolset availability stable for ARM64 builds
+
+### Fixed
+- Fixed amd64 (sysv_amd64 GCC) restore callback stack-pointer argument to pass the active switched stack pointer
+- Added assertion coverage in `tests/test.c` to detect incorrect restore callback stack pointer on amd64
+
 ## [1.2.0] - 2025-11-16
 
 ### Added
@@ -99,6 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI for automated building and testing
 - Visual Studio project files (VS2017, VS2019, VS2022)
 
+[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.0...HEAD
 [1.2.0]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.0
 [1.1.0]: https://github.com/stackless-dev/stackman/releases/tag/v1.1.0
 [1.0.1]: https://github.com/stackless-dev/stackman/releases/tag/v1.0.1
