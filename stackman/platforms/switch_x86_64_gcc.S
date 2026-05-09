@@ -93,7 +93,7 @@ LABEL(stackman_switch)
 	addq %rax,  %rbp
 # 0 "" 2
 #NO_APP
-	movq	%rbx, %rdx
+	movq	%rsp, %rdx
 	movl	$1, %esi
 	movq	%r15, %rdi
 	call	*%r14
