@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-05-09
+
 ### Changed
 - CI: pinned Windows runner to `windows-2022` (from `windows-latest`) to keep VS2022 v143 toolset availability stable for ARM64 builds
 
@@ -108,7 +110,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI for automated building and testing
 - Visual Studio project files (VS2017, VS2019, VS2022)
 
-[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.1
 [1.2.0]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.0
 [1.1.0]: https://github.com/stackless-dev/stackman/releases/tag/v1.1.0
 [1.0.1]: https://github.com/stackless-dev/stackman/releases/tag/v1.0.1
