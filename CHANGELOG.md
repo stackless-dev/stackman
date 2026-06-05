@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-06-05
+
+### Changed
+- Windows MSVC library projects now compile with `/Zl` to omit embedded default runtime library directives from generated object files
+- Windows static libraries no longer carry `/DEFAULTLIB:"MSVCRTD"` metadata, reducing unintended CRT coupling for downstream linkers
+
 ## [1.2.1] - 2026-05-09
 
 ### Changed
@@ -110,7 +116,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI for automated building and testing
 - Visual Studio project files (VS2017, VS2019, VS2022)
 
-[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.2...HEAD
+[1.2.2]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.2
 [1.2.1]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.1
 [1.2.0]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.0
 [1.1.0]: https://github.com/stackless-dev/stackman/releases/tag/v1.1.0
