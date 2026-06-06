@@ -10,6 +10,14 @@
 # run the provided code.
 set -eu
 here=$(dirname "$0")
+
+canonicalize_abi() {
+	case "$1" in
+		win_aarch64) printf '%s\n' "win_arm64" ;;
+		*) printf '%s\n' "$1" ;;
+	esac
+}
+
 mkdir -p "${here}/tmp"
 # Clean up any stale temp files first
 rm -f "${here}/tmp"/abiname*.c "${here}/tmp"/abiname*.c.out
@@ -20,11 +28,12 @@ CC=${1:-cc}
 CFLAGS=${2:-}
 ABI_OVERRIDE=${3:-${STACKMAN_ABI:-}}
 if [ -n "${ABI_OVERRIDE}" ]; then
-	printf '%s\n' "${ABI_OVERRIDE}"
+	canonicalize_abi "${ABI_OVERRIDE}"
 	exit 0
 fi
 ${CC} ${CFLAGS} -I${here}/../stackman -E -o "${tmp}" "${here}/abiname.c"
 #2 compile resulting file
 cc -o "${tmp}.out" "${tmp}"
 #3 run it
-"${tmp}.out"
+abi=$("${tmp}.out")
+canonicalize_abi "${abi}"

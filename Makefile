@@ -22,7 +22,8 @@ endif
 ifeq ($(strip $(STACKMAN_ABI)),)
 ABI := $(shell sh tools/abiname.sh "$(CC)" "$(CFLAGS)")
 else
-ABI := $(STACKMAN_ABI)
+# Accept legacy alias for backward compatibility.
+ABI := $(patsubst win_aarch64,win_arm64,$(STACKMAN_ABI))
 endif
 ifndef ABI
 $(error Could not determine platform)
