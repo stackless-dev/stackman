@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ABI probe diagnostics now query compiler target triple and emit clearer mismatch guidance when target intent is not fully propagated through wrapper/toolchain settings
 - Target triple probing now prefers `CC` with `CFLAGS` (with fallback probing) so clang-style cross-target flags are reflected in secondary detection
 
+## [1.2.2] - 2026-06-05
+
+### Changed
+- Windows MSVC library projects now compile with `/Zl` to omit embedded default runtime library directives from generated object files
+- Windows static libraries no longer carry `/DEFAULTLIB:"MSVCRTD"` metadata, reducing unintended CRT coupling for downstream linkers
+
 ## [1.2.1] - 2026-05-09
 
 ### Changed
