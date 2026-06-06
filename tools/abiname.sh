@@ -67,15 +67,15 @@ tmp=$(mktemp "${here}/tmp/abinameXXX.c")
 CC=${1:-cc}
 CFLAGS=${2:-}
 ABI_OVERRIDE=${3:-${STACKMAN_ABI:-}}
-target_triple=$(detect_target_triple)
 if [ -n "${ABI_OVERRIDE}" ]; then
 	abi=$(canonicalize_abi "${ABI_OVERRIDE}")
 	if [ -n "${STACKMAN_ABI_DEBUG:-}" ] || [ -n "${STACKMAN_ABI_TRACE:-}" ]; then
-		printf '%s\n' "stackman abiname: cc=${CC} target=${target_triple:-unknown} abi=${abi} source=override" >&2
+		printf '%s\n' "stackman abiname: cc=${CC} target=override-skip abi=${abi} source=override" >&2
 	fi
 	printf '%s\n' "${abi}"
 	exit 0
 fi
+target_triple=$(detect_target_triple)
 ${CC} ${CFLAGS} -I${here}/../stackman -E -o "${tmp}" "${here}/abiname.c"
 #2 compile resulting file
 cc -o "${tmp}.out" "${tmp}"
