@@ -18,6 +18,11 @@ tmp=$(mktemp "${here}/tmp/abinameXXX.c")
 #1 create the preprocessed file
 CC=${1:-cc}
 CFLAGS=${2:-}
+ABI_OVERRIDE=${3:-${STACKMAN_ABI:-}}
+if [ -n "${ABI_OVERRIDE}" ]; then
+	printf '%s\n' "${ABI_OVERRIDE}"
+	exit 0
+fi
 ${CC} ${CFLAGS} -I${here}/../stackman -E -o "${tmp}" "${here}/abiname.c"
 #2 compile resulting file
 cc -o "${tmp}.out" "${tmp}"

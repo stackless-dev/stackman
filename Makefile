@@ -17,8 +17,13 @@ CXX = $(PLATFORM_PREFIX)-g++
 LD = $(PLATFORM_PREFIX)-ld
 AR = $(PLATFORM_PREFIX)-ar
 endif
-# run c preprocessor with any cflags to get cross compilation result, then run regular compile in native
+# Allow explicit ABI selection for deterministic cross-build packaging.
+# If not provided, auto-detect from compiler macros.
+ifeq ($(strip $(STACKMAN_ABI)),)
 ABI := $(shell sh tools/abiname.sh "$(CC)" "$(CFLAGS)")
+else
+ABI := $(STACKMAN_ABI)
+endif
 ifndef ABI
 $(error Could not determine platform)
 endif
