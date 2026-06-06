@@ -11,7 +11,7 @@
 ║                                                              ║
 ║  Do you have a stack? Stackman is here to help.              ║
 ║                                                              ║
-║  v1.2.2 • 10 platforms • Stack switching simplified          ║
+║  v1.2.3 • 10 platforms • Stack switching simplified          ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
@@ -243,6 +243,22 @@ stackman/platform/gen_asm.c
 The x86 tools require the **gcc-multilib** and **g++-multilib** packages to be installed.  They, however, can't co-exist with the **gcc-arm-linux-gnueabi** or
 **gcc-aarch64-linux-gnu** packages on some distributions, and so development for these
 platforms may need to be done independently.
+
+#### Deterministic ABI selection with STACKMAN_ABI
+
+The Makefile normally auto-detects the ABI via compiler macro probing. In some cross-build wrappers,
+target intent may not be fully visible to that probe. Set `STACKMAN_ABI` to force the selected output
+library ABI deterministically.
+
+Supported values match the ABI names in this document (for example: `sysv_i386`, `sysv_amd64`, `arm32`,
+`aarch64`, `riscv64`, `darwin_x86_64`, `darwin_arm64`, `win_x86`, `win_x64`, `win_arm64`).
+For compatibility, `win_aarch64` is also accepted and normalized to `win_arm64`.
+
+Examples:
+
+- `make STACKMAN_ABI=sysv_i386 PLATFORMFLAGS=-m32 test`
+- `make STACKMAN_ABI=arm32 PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-arm test`
+- `make STACKMAN_ABI=win_arm64 PLATFORM_PREFIX=aarch64-w64-mingw32- all`
 
 #### Cross compiling for x86 (32 bit) on Linux
 

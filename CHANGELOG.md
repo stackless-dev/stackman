@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.3] - 2026-06-06
+
 ### Added
 - Added explicit `STACKMAN_ABI` override support in the Makefile and ABI probe script for deterministic cross-build packaging
 
@@ -124,7 +126,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI for automated building and testing
 - Visual Studio project files (VS2017, VS2019, VS2022)
 
-[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.3...HEAD
+[1.2.3]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.3
 [1.2.2]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.2
 [1.2.1]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.1
 [1.2.0]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.0
