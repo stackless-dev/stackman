@@ -44,7 +44,7 @@
 #elif defined(_M_ARM64)
 #include "switch_arm64_msvc.h" /* MS Visual Studio on ARM */
 #define _STACKMAN_PLATFORM arm64_msvc
-#define _STACKMAN_ABI win_aarch64
+#define _STACKMAN_ABI win_arm64
 #endif
 
 

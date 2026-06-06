@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added explicit `STACKMAN_ABI` override support in the Makefile and ABI probe script for deterministic cross-build packaging
+
+### Changed
+- Normalized Windows ARM64 ABI naming to `win_arm64` and kept compatibility mapping for legacy `win_aarch64` inputs
+- ABI probe diagnostics now query compiler target triple and emit clearer mismatch guidance when target intent is not fully propagated through wrapper/toolchain settings
+- Target triple probing now prefers `CC` with `CFLAGS` (with fallback probing) so clang-style cross-target flags are reflected in secondary detection
+
 ## [1.2.2] - 2026-06-05
 
 ### Changed
