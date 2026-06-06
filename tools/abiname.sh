@@ -19,6 +19,17 @@ canonicalize_abi() {
 }
 
 detect_target_triple() {
+	# Prefer querying with CFLAGS so explicit target flags (for example
+	# --target=... in clang-based cross builds) are reflected.
+	if ${CC} ${CFLAGS} -dumpmachine >/dev/null 2>&1; then
+		${CC} ${CFLAGS} -dumpmachine
+		return 0
+	fi
+	if ${CC} ${CFLAGS} --print-target-triple >/dev/null 2>&1; then
+		${CC} ${CFLAGS} --print-target-triple
+		return 0
+	fi
+	# Fall back to no CFLAGS in case unrelated build flags make the query fail.
 	if ${CC} -dumpmachine >/dev/null 2>&1; then
 		${CC} -dumpmachine
 		return 0
@@ -73,7 +84,7 @@ abi=$("${tmp}.out")
 abi=$(canonicalize_abi "${abi}")
 target_abi=$(abi_from_target_triple "${target_triple}")
 if [ -n "${target_abi}" ] && [ "${target_abi}" != "${abi}" ]; then
-	printf '%s\n' "warning: stackman ABI mismatch: compiler target '${target_triple}' suggests '${target_abi}', macro probe selected '${abi}'. Consider setting STACKMAN_ABI explicitly." >&2
+	printf '%s\n' "warning: stackman ABI mismatch: compiler target '${target_triple}' suggests '${target_abi}', macro probe selected '${abi}'. This usually means target intent was not fully propagated (flags/wrapper selection). Consider setting STACKMAN_ABI explicitly for deterministic packaging." >&2
 fi
 if [ -n "${STACKMAN_ABI_DEBUG:-}" ] || [ -n "${STACKMAN_ABI_TRACE:-}" ]; then
 	printf '%s\n' "stackman abiname: cc=${CC} target=${target_triple:-unknown} abi=${abi} source=macro" >&2
