@@ -103,7 +103,7 @@ jobs:
   build-macos:
     runs-on: ${{ matrix.os }}
     env:
-      MACOSX_DEPLOYMENT_TARGET: "14.0"
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
     strategy:
       fail-fast: false
       matrix:
@@ -111,8 +111,10 @@ jobs:
         include:
           - os: macos-15-intel
             abi: darwin_x86_64
+            deployment_target: "10.13"
           - os: macos-latest
             abi: darwin_arm64
+            deployment_target: "11.0"
     
     steps:
     - uses: actions/checkout@v6.0.2

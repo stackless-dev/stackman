@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- macOS release libraries now use per-architecture deployment targets: `10.13` for Intel and `11.0` for Apple Silicon.
+
 ## [1.2.4] - 2026-06-23
 
 ### Fixed
