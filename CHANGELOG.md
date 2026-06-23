@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.4] - 2026-06-23
+
 ### Fixed
 - macOS release libraries are built with `MACOSX_DEPLOYMENT_TARGET=14.0` so they are not tagged with the runner's current macOS version.
 
@@ -129,7 +131,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI for automated building and testing
 - Visual Studio project files (VS2017, VS2019, VS2022)
 
-[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.3...HEAD
+[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.4...HEAD
+[1.2.4]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.4
 [1.2.3]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.3
 [1.2.2]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.2
 [1.2.1]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.1

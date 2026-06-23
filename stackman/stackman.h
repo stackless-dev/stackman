@@ -5,10 +5,10 @@
 /* Version information */
 #define STACKMAN_VERSION_MAJOR 1
 #define STACKMAN_VERSION_MINOR 2
-#define STACKMAN_VERSION_PATCH 3
+#define STACKMAN_VERSION_PATCH 4
 
 /* Version as a string */
-#define STACKMAN_VERSION "1.2.3"
+#define STACKMAN_VERSION "1.2.4"
 
 /* Version as a single number for comparisons (MMmmpp: Major, minor, patch) */
 #define STACKMAN_VERSION_NUMBER ((STACKMAN_VERSION_MAJOR * 10000) + \
