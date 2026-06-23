@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.5] - 2026-06-23
+
 ### Changed
 - macOS release libraries now use per-architecture deployment targets: `10.13` for Intel and `11.0` for Apple Silicon.
 
@@ -134,7 +136,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI for automated building and testing
 - Visual Studio project files (VS2017, VS2019, VS2022)
 
-[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.4...HEAD
+[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.5...HEAD
+[1.2.5]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.5
 [1.2.4]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.4
 [1.2.3]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.3
 [1.2.2]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.2
