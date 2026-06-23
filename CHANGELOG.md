@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- macOS release libraries are built with `MACOSX_DEPLOYMENT_TARGET=14.0` so they are not tagged with the runner's current macOS version.
+
 ## [1.2.3] - 2026-06-06
 
 ### Added

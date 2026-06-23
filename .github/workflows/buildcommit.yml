@@ -102,6 +102,8 @@ jobs:
       
   build-macos:
     runs-on: ${{ matrix.os }}
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "14.0"
     strategy:
       fail-fast: false
       matrix:
