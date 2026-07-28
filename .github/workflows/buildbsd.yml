@@ -1,0 +1,64 @@
+name: build and test bsd
+
+on:
+  push:
+    branches: [ master, dev ]
+
+  pull_request:
+    branches: [ master ]
+
+# The BSDs use the same sysv_amd64 ABI as Linux, so these jobs build and test
+# the existing sources rather than producing an additional library artifact.
+# Each job runs in a real VM on the ubuntu-latest runner; GNU make is required
+# because the Makefile uses GNU make syntax, while the BSD base system make
+# is bmake.
+
+jobs:
+
+  build-freebsd:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6.0.2
+    - name: build and test
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        cache-after-prepare: true
+        prepare: |
+          pkg install -y gmake
+        run: |
+          set -ex
+          gmake all
+          gmake test
+
+  build-openbsd:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6.0.2
+    - name: build and test
+      uses: vmactions/openbsd-vm@v1
+      with:
+        usesh: true
+        cache-after-prepare: true
+        prepare: |
+          pkg_add -I gmake
+        run: |
+          set -ex
+          gmake all
+          gmake test
+
+  build-netbsd:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6.0.2
+    - name: build and test
+      uses: vmactions/netbsd-vm@v1
+      with:
+        usesh: true
+        cache-after-prepare: true
+        prepare: |
+          /usr/sbin/pkg_add gmake
+        run: |
+          set -ex
+          gmake all
+          gmake test
