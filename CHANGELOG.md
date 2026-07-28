@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- ABI detection now works on the BSDs: `tools/abiname.sh` used a `mktemp` template with three `X`s, which BSD `mktemp(1)` rejects.
+
 ## [1.2.5] - 2026-06-23
 
 ### Changed
