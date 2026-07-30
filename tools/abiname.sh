@@ -61,7 +61,8 @@ abi_from_target_triple() {
 mkdir -p "${here}/tmp"
 # Clean up any stale temp files first
 rm -f "${here}/tmp"/abiname*.c "${here}/tmp"/abiname*.c.out
-tmp=$(mktemp "${here}/tmp/abinameXXX.c")
+# BSD mktemp(1) requires at least six trailing Xs; GNU mktemp accepts them too.
+tmp=$(mktemp "${here}/tmp/abinameXXXXXX.c")
 
 #1 create the preprocessed file
 CC=${1:-cc}

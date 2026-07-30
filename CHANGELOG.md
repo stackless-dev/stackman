@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- FreeBSD, OpenBSD and NetBSD (amd64, `sysv_amd64` ABI) are built and tested on every commit by a new `build and test bsd` workflow.
+
+### Fixed
+- ABI detection now works on the BSDs: `tools/abiname.sh` used a `mktemp` template with three `X`s, which BSD `mktemp(1)` rejects.
+
 ## [1.2.5] - 2026-06-23
 
 ### Changed

@@ -1,4 +1,5 @@
 [![build test and commit](https://github.com/stackless-dev/stackman/actions/workflows/buildcommit.yml/badge.svg)](https://github.com/stackless-dev/stackman/actions/workflows/buildcommit.yml)
+[![build and test bsd](https://github.com/stackless-dev/stackman/actions/workflows/buildbsd.yml/badge.svg)](https://github.com/stackless-dev/stackman/actions/workflows/buildbsd.yml)
 
 
 ```
@@ -101,8 +102,15 @@ calling convention, plus archive format:
    - win_x86 (32-bit)
    - win_x64 (64-bit)
    - win_arm64 (64-bit ARM)
+ - **FreeBSD, OpenBSD, NetBSD (System V ABI)**
+   - sysv_amd64 (64-bit x86_64)
 
 All platforms are automatically built and tested by GitHub Actions CI on every commit.
+
+The BSDs share the `sysv_amd64` ABI with Linux and therefore need no separate
+assembly implementation or pre-built library; they are built and tested from
+source by the `build and test bsd` workflow.  Note that the Makefile requires
+GNU make, which on the BSDs is `gmake` rather than the base system `make`.
 
 ### Supported toolchains:
 
