@@ -1,0 +1,101 @@
+/*
+ * this file is provided for where inline assembly is not
+ * dependable, such as with clang, or if
+ * STACKMAN_INLINE_ASM is false
+ * The file is generated using
+ * "arm-linux-gnueabihf-gcc -S -marm gen_asm.c" and then copying the code
+ * from gen_asm.s into this file.
+ *
+ */
+	.arch armv7-a
+	.fpu vfpv3-d16
+	.eabi_attribute 28, 1
+	.eabi_attribute 20, 1
+	.eabi_attribute 21, 1
+	.eabi_attribute 23, 3
+	.eabi_attribute 24, 1
+	.eabi_attribute 25, 1
+	.eabi_attribute 26, 2
+	.eabi_attribute 30, 6
+	.eabi_attribute 34, 1
+	.eabi_attribute 18, 4
+	.file	"gen_asm.c"
+	.text
+	.align	2
+	.global	stackman_switch
+	.syntax unified
+	.arm
+	.type	stackman_switch, %function
+stackman_switch:
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 0, uses_anonymous_args = 0
+	push	{r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
+	vpush.64	{d8, d9, d10, d11, d12, d13, d14, d15}
+	mov	r3, r0
+	mov	r0, r1
+	.syntax divided
+@ 91 "../platforms/switch_armhf_gcc.h" 1
+	mov r2, sp
+@ 0 "" 2
+	.arm
+	.syntax unified
+	mov	r1, #0
+	mov	r5, r0
+	mov	r4, r3
+	blx	r3
+	mov	r2, r0
+	.syntax divided
+@ 95 "../platforms/switch_armhf_gcc.h" 1
+	mov sp, r0
+@ 0 "" 2
+	.arm
+	.syntax unified
+	mov	r1, #1
+	mov	r0, r5
+	blx	r4
+	vldm	sp!, {d8-d15}
+	pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, pc}
+	.size	stackman_switch, .-stackman_switch
+	.align	2
+	.global	stackman_call
+	.syntax unified
+	.arm
+	.type	stackman_call, %function
+stackman_call:
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 1, uses_anonymous_args = 0
+	push	{r4, r5, fp, lr}
+	add	fp, sp, #12
+	mov	r5, r0
+	mov	r0, r1
+	mov	r3, r2
+	.syntax divided
+@ 111 "../platforms/switch_armhf_gcc.h" 1
+	mov r4, sp
+@ 0 "" 2
+@ 112 "../platforms/switch_armhf_gcc.h" 1
+	mov r2, sp
+@ 0 "" 2
+	.arm
+	.syntax unified
+	cmp	r3, #0
+	beq	.L4
+	.syntax divided
+@ 116 "../platforms/switch_armhf_gcc.h" 1
+	mov sp, r3
+@ 0 "" 2
+	.arm
+	.syntax unified
+.L4:
+	mov	r1, #2
+	blx	r5
+	.syntax divided
+@ 120 "../platforms/switch_armhf_gcc.h" 1
+	mov sp, r4
+@ 0 "" 2
+	.arm
+	.syntax unified
+	pop	{r4, r5, fp, pc}
+	.size	stackman_call, .-stackman_call
+	.ident	"GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+	.section	.note.GNU-stack,"",%progbits
