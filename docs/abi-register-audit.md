@@ -53,7 +53,9 @@ Per-platform comments, checked against the code:
 `lib/README.md` is about prebuilt archives, not the API or the register sets.
 Its platform list omits `riscv64` and the Darwin ABIs that the main README
 lists. `CHANGELOG.md` records Windows ARM32 as dropped in 1.0.0.
-`platform.h` still selects `switch_arm_msvc.h` when `_M_ARM` is set.
+The sources, the `_M_ARM` branch in `platform.h`, the Debug|ARM project
+configurations, and the prebuilt `lib/win_arm` archive are gone. Windows
+ARM64 stays.
 
 ## AArch64
 
@@ -122,7 +124,7 @@ not run it.
 | `switch_x86_gcc.S` | `ebx`, `esi`, `edi`, `ebp`, x87 control word | Integer set is complete. There is no callee-saved XMM on i386 SysV. `fstcw` stores the control word at `0x10(%esp)`, the pointer passed to the callback, and `fldcw` loads it after the restore callback. |
 | `switch_x86_msvc.asm` | `ebx`, `esi`, `edi`, `ebp`, x87 control word, plus the C wrapper saves `fs:[0]` | Integer set is complete for cdecl. `stackman_switch_raw` stores the control word in a slot below the callee-saved pushes, at the pointer passed to the callback. The C wrapper still restores `fs:[0]`. |
 | `switch_arm_gcc.S` | `r4`–`r11`, `lr` | Complete for the soft-float `arm-linux-gnueabi` ABI this tree ships (`.arch armv5t`, `.fpu softvfp`). `d8`–`d15` are not spilled, and `__ARM_PCS_VFP` is a compile error. The live `r11` is adjusted with the stack delta before `STACKMAN_OP_RESTORE`; the epilogue still pops the saved value. |
-| `switch_arm_msvc.asm` | `r4`–`r11`, `lr`, `q4`–`q7` (`d8`–`d15`), `FPSCR` | The set matches 32-bit Windows ARM. Alignment does not. `push {r4-r10, fp, lr}` is 9 words, so `sp` is 4-byte aligned for `vpush {q4-q7}`. A doubleword `VPUSH` requires 8-byte alignment. `stackman_call` pushes 3 registers and then `blx`s with `sp` still 4 mod 8. The changelog records this ABI as dropped; the file is still wrong if it is built. |
+| Windows ARM32 | — | Removed. `CHANGELOG.md` dropped `win_arm` in 1.0.0. The old `vpush` ran at 4 mod 8, and `stackman_call` called with `sp` still 4 mod 8. The sources are deleted so that assembly cannot be built. |
 | `switch_riscv64_gcc.S` | `ra`, `s0`–`s11`, `fs0`–`fs11` | `stackman_switch` is complete for LP64D. `gp` and `tp` are left alone. `fcsr` is thread `fenv` state, not a per-call spill. The optional `s0` frame delta is not applied: `s0` is not a frame chain there, and `stackman_call` uses it to hold the previous stack pointer. |
 
 ### RISC-V `stackman_call`
@@ -151,34 +153,6 @@ requires of `setjmp` / `longjmp`: commit the lazy ZA buffer and clear
 spill the ZA array in this file. `FPMR`, `FFR`, and `ZT0` stay
 caller-saved. Skip the call on the Windows ARM64 file; this helper is the
 AAPCS64 one. This can wait until a supported target actually enables SME.
-
-### Windows ARM32: delete it, or align `sp` before `vpush`
-
-`CHANGELOG.md` says 1.0.0 dropped `win_arm`. The sources are still wired
-up: `switch_arm_msvc.asm`, `switch_arm_msvc.h`, the `_M_ARM` branch in
-`platform.h`, and the `win_arm` output directories in the VS projects.
-Preferred fix: delete that wiring so the file cannot be built.
-
-If the file stays, the entry `sp` is 8-byte aligned and
-`push {r4-r10, fp, lr}` subtracts 36 bytes, so `vpush {q4-q7}` runs at
-4 mod 8. Push a pad so the count is even, then pad `FPSCR` the same way,
-or the `blx` is 4 mod 8 again:
-
-```asm
-push {r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}  ; 40 bytes
-add  fp, sp, #32                                 ; saved fp is the 9th word
-vpush {q4-q7}
-vmrs r2, fpscr
-push {r2, r3}                                    ; fpscr plus a pad
-```
-
-Pop in reverse, with `pc` in place of `lr`. `r3` is a pad; it does not
-have to be preserved beyond the pop.
-
-`stackman_call` has the same call-site bug.
-`push {r4, fp, lr}` is 12 bytes. Push one more register
-(`push {r3, r4, fp, lr}`) and point `fp` at the saved frame pointer with
-`add fp, sp, #8`.
 
 ## What the current tests cover
 

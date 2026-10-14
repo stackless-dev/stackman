@@ -2,7 +2,6 @@
 
 ; this code is adopted from the switch_aarch64_gcc.S
 ; which again was generated from switch_arm_gcc.h
-; This code is also modelled on the hand-customized switch_arm_msvc.asm
 ; see https://docs.microsoft.com/en-us/cpp/build/arm64-windows-abi-conventions?view=msvc-160
 
 	;ARM64
