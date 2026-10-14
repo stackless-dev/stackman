@@ -1,7 +1,4 @@
 /* Switch function for 32-bit ARM hard-float (AAPCS-VFP, gnueabihf).
- * The soft-float file switch_arm_gcc.S stays as it is. platform.h
- * includes this header only when __ARM_PCS_VFP is set. Softfp does not
- * define that macro and keeps using the soft-float assembly.
  *
  * d8-d15 are callee-saved. The empty asm clobber makes gcc spill them
  * in the prologue, before the stack pointer is passed to the callback,
@@ -11,6 +8,9 @@
  * FPSCR is not spilled. AAPCS keeps the AHP, DN, FZ, and RMode bits
  * across a call. Do not adjust r11: stackman_switch is built with
  * omit-frame-pointer, so r11 is not this frame.
+ *
+ * Softfp (-mfloat-abi=softfp) does not define __ARM_PCS_VFP, so it
+ * does not use this file.
  *
  * Generate the checked-in assembly with:
  *   arm-linux-gnueabihf-gcc -S -marm gen_asm.c
@@ -38,25 +38,10 @@
 #ifdef STACKMAN_SWITCH_IMPL
 #if !__ASSEMBLER__ && !defined(STACKMAN_ASSEMBLY_SRC)
 
-/* inline assembly does not _by default_ produce code that is usable
- * because depending
- * on optimization,the fp (r11) register may be used to restore the
- * stack pointer on function exit, thereby invalidating our changes
- * to the stack pointer.
- * To arrive at reasonable assembler, follow some approach similar to:
- * "arm-linux-gnueabihf-gcc -S -marm gen_asm.c"
- *  to generate gen_asm.s which can then be
- * modified for actual use.
- * Simple optimized
- * version is better than no-optimized because the latter uses stack
- * variables for arguments.  And it turns out that this version actually
- * runs because it does not use fp for restoring the stack pointer
- *
- * However, for now the optimizer can be instructed to omit frame
- * pointer, so we simply use that method. the -fomit-frame-pointer
- * option is applied with an __attribute__, and r11 explicitly pushed.
- * we must also enable optimization level "O" so that intermediates
- * aren't stored on the stack.
+/* omit-frame-pointer: without it, gcc can restore sp from r11 on exit
+ * and undo the switch. -O keeps the arguments in registers instead of
+ * stack slots. Regenerate the checked-in assembly with the command in
+ * the file header.
  */
 
 #include "../stackman_switch.h"

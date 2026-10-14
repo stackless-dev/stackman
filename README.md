@@ -189,7 +189,7 @@ There are two basic ways to add the library to your project: Using a static libr
 
  - Download pre-built libraries from the [Releases page](https://github.com/kristjanvalur/stackman/releases) for your platform
  - Alternatively, link with the `libstackman.a` or `stackman.lib` libraries in the `lib/` directory if you've cloned the repository
- - Pre-built libraries are available for all supported platforms (9 ABIs total: 4 Linux, 2 macOS, 3 Windows)
+ - Pre-built libraries are available for all supported platforms (11 ABIs total: 6 Linux, 2 macOS, 3 Windows)
  - Libraries are automatically rebuilt by CI and committed to the repository for easy integration
 
 ### inlined code
@@ -219,7 +219,7 @@ over separate assembly language source.
 ## Continuous Integration
 
 The project uses GitHub Actions to automatically:
-- Build libraries for all 9 supported platforms (Linux: AMD64, i386, ARM32, ARM64; macOS: x86_64, ARM64; Windows: x86, x64, ARM64)
+- Build libraries for all 11 supported platforms (Linux: AMD64, i386, ARM32, armhf, ARM64, RISC-V; macOS: x86_64, ARM64; Windows: x86, x64, ARM64)
 - Run test suites on all platforms (using QEMU emulation for ARM on Linux)
 - Commit updated libraries back to the repository on successful builds (for development branches)
 - Create GitHub Releases with downloadable libraries when version tags are pushed
