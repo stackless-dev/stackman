@@ -371,10 +371,16 @@ Silicon natively. Windows runs the test binary for x86 and x64 only. The
 
 The `stackman_call` contract checks are in `tests/test.c` (`test_04`,
 `test_05`). They run on the existing Linux, qemu, and macOS jobs with no new
-toolchains. `qemu-riscv64` is expected to fail until `switch_riscv64_gcc.S`
-skips a null stack and passes the previous stack pointer: `test_04` asserts,
-and `test_05` faults. The `STACKMAN_OP_CALL` enumerator comment already
-matches that contract.
+toolchains. On the first run of those tests, `qemu-riscv64` still printed
+`test_03 ok` and then `test_06 ok`: `test_04` and `test_05` were not in the
+binary. `STACKMAN_HAVE_CALL` lived inside the `STACKMAN_SWITCH_IMPL` branch
+of `switch_riscv64_gcc.h`, so a normal `#include "stackman.h"` never defined
+it and `tests/test.c` compiled the calls out. The macro is now set on that
+include, with `STACKMAN_STACK_ALIGN` 16, matching the other platform headers.
+After that, `qemu-riscv64` fails until `switch_riscv64_gcc.S` skips a null
+stack and passes the previous stack pointer: `test_04` asserts, and
+`test_05` faults. The `STACKMAN_OP_CALL` enumerator comment already matches
+that contract.
 
 Do not add a per-register assembly harness yet.
 
