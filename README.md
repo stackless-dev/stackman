@@ -106,6 +106,9 @@ calling convention, plus archive format:
  - **FreeBSD, OpenBSD, NetBSD (System V ABI)**
    - sysv_amd64 (64-bit x86_64)
 
+Which registers each ABI spills is listed in
+[`docs/platform-abi.md`](docs/platform-abi.md).
+
 The 64-bit ARM ABIs (`aarch64`, `darwin_arm64`, and `win_arm64`) do not
 preserve SME ZA context across `stackman_switch`.
 

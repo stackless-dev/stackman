@@ -53,7 +53,9 @@ those comments unless you are regenerating the file.
 Volatile registers may change. Do not add a test that treats them as
 preserved.
 
-Details and the original audit are in `docs/abi-register-audit.md`.
+Current spills are in `docs/platform-abi.md`.
+`docs/abi-register-audit.md` is the audit from when those gaps were
+found and fixed. Do not edit the audit for a later port or spill.
 Limits that are easy to fix the wrong way:
 
 - `arm32` is the soft-float assembly (`switch_arm_gcc.S`, `.arch armv5t`,

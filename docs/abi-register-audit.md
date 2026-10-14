@@ -109,10 +109,7 @@ Two gaps that are not missing base registers:
 `switch_aarch64_gcc.h`, so regenerating the `.S` from `gen_asm.c` keeps
 them. The epilogue still reloads the saved `x29`. A callback that relocates
 a stack still has to rewrite saved frame-pointer slots in the copied bytes.
-`__arm_za_disable` is not called. See Roadmap. `FPCR` and `FPSR` are
-stored in a 16-byte slot at the stack pointer passed to the callback
-and written back after `STACKMAN_OP_RESTORE`. A thread switch saves
-both, and two stacks on one thread would otherwise share them.
+`__arm_za_disable` is not called. See Roadmap.
 
 ### `switch_arm64_msvc.asm` (Windows `win_arm64`)
 
@@ -161,7 +158,7 @@ file and does not run it.
 | `switch_x64_msvc.asm` | `rbx`, `rbp`, `rdi`, `rsi`, `r12`–`r15`, `xmm6`–`xmm15` | Those registers match the Windows x64 ABI. MXCSR[6:15] is non-volatile on Windows and is not spilled, so a changed rounding mode does not travel with the stack. The SysV file does save MXCSR. |
 | `switch_x86_gcc.S` | `ebx`, `esi`, `edi`, `ebp` | Integer set is complete. There is no callee-saved XMM on i386 SysV. The x87 control word is callee-saved in that ABI and is not saved. |
 | `switch_x86_msvc.asm` | `ebx`, `esi`, `edi`, `ebp`, plus the C wrapper saves `fs:[0]` | Integer set is complete for cdecl. Same x87 control-word gap. |
-| `switch_arm_gcc.S` | `r4`–`r11`, `lr` | Complete for the soft-float `arm-linux-gnueabi` ABI this tree ships (`.arch armv5t`, `.fpu softvfp`). `d8`–`d15` are absent. The inline header clobbers them, so a hard-float or softfp build of this `.S` would drop callee-saved VFP state. The live frame pointer is not adjusted. |
+| `switch_arm_gcc.S` | `r4`–`r11`, `lr` | Complete for the soft-float `arm-linux-gnueabi` ABI this tree ships (`.arch armv5t`, `.fpu softvfp`). `d8`–`d15` are absent. The inline header clobbers them, so a hard-float or softfp build of this `.S` would drop callee-saved VFP state. `armhf` is not a configured ABI. The live frame pointer is not adjusted. |
 | `switch_arm_msvc.asm` | `r4`–`r11`, `lr`, `q4`–`q7` (`d8`–`d15`), `FPSCR` | The set matches 32-bit Windows ARM. Alignment does not. `push {r4-r10, fp, lr}` is 9 words, so `sp` is 4-byte aligned for `vpush {q4-q7}`. A doubleword `VPUSH` requires 8-byte alignment. `stackman_call` pushes 3 registers and then `blx`s with `sp` still 4 mod 8. The changelog records this ABI as dropped; the file is still wrong if it is built. |
 | `switch_riscv64_gcc.S` | `ra`, `s0`–`s11`, `fs0`–`fs11` | `stackman_switch` is complete for LP64D. `gp` and `tp` are left alone. `fcsr` is thread `fenv` state, not a per-call spill. |
 
@@ -189,19 +186,13 @@ file and does not run it.
   keep the callback or the new stack pointer in `r11` across that asm.
   AArch64 still adjusts `x29`, which the prologue sets with
   `mov x29, sp`.
-- `__ARM_PCS_VFP` selects `armhf` (`switch_armhf_gcc.S`), which spills
-  `d8`–`d15` and the whole `FPSCR`. The soft-float file was left
-  unchanged.
 - Windows ARM32 was removed: `switch_arm_msvc.asm`, `switch_arm_msvc.h`,
   the `_M_ARM` branch in `platform.h`, the Debug|ARM configurations in
   vs2017, vs2019, and vs2022, and `lib/win_arm/stackman.lib`. The
   alignment alternative was not used. Windows ARM64 stays.
-- The RISC-V integer and `fs0`–`fs11` spill was already complete. The
-  optional `s0` frame delta was left unchanged: `s0` is not a frame chain
-  in `stackman_switch`, and `stackman_call` uses it to hold the previous
-  stack pointer. `fcsr` is stored at `0(sp)`, the pad below `fs11`, and
-  written back after `STACKMAN_OP_RESTORE`. A thread switch saves the
-  whole register. `stackman_call` still does not spill it.
+- The RISC-V register spill was already complete. The optional `s0` frame
+  delta was left unchanged: `s0` is not a frame chain in `stackman_switch`,
+  and `stackman_call` uses it to hold the previous stack pointer.
 
 ### RISC-V `stackman_call`
 
@@ -247,9 +238,7 @@ compiles this file and does not run it, so the `x18` fix needs a Windows
 ARM64 machine or an emulator before it can be considered tested.
 
 **Applied fix.** The `x18` change was made as written above. Unwind codes
-were not added. `FPSR` is stored at `[sp, #176]` next to the existing
-`FPCR` spill. The frame is 192 bytes. `stackman_call` still does not
-spill either register.
+were not added.
 
 ### AArch64 SysV and Apple: keep `x29` attached to the new stack
 
@@ -367,8 +356,7 @@ The shipped integer set (`r4`–`r11`, `lr`) needs no new stores.
 **Applied fix.** `__ARM_PCS_VFP` is a compile error, and `CP_REGISTERS` is
 commented as inline-only. The optional `r11` adjustment was applied and
 then removed. See the frame-pointer applied fix above. `d8`–`d15` were
-not added to this file. `__ARM_PCS_VFP` selects `armhf`
-(`switch_armhf_gcc.S` spills `d8`–`d15` and the whole `FPSCR`).
+not added. A separate hard-float port is on the roadmap.
 
 ### Windows ARM32: delete it, or align `sp` before `vpush`
 
@@ -405,25 +393,20 @@ alternative was not used.
 
 ## Roadmap
 
-SME lazy save is still open. The ARM32 hard-float port is `armhf`.
+Two items from the audit are still open.
 
 ### ARM32 hard-float
 
-The soft-float file `switch_arm_gcc.S` is unchanged (`arm-linux-gnueabi`,
+The shipped `switch_arm_gcc.S` is soft-float (`arm-linux-gnueabi`,
 `.arch armv5t`, `.fpu softvfp`) and does not spill `d8`–`d15`.
-`__ARM_PCS_VFP` is still a compile error in that header, so a hard-float
-build cannot use that file by mistake.
+`__ARM_PCS_VFP` is a compile error, so a hard-float build cannot use that
+file by mistake.
 
-`switch_armhf_gcc.h` is the hard-float port. `platform.h` selects it,
-and the ABI name `armhf`, when `__ARM_PCS_VFP` is set. `stackman_switch`
-spills `d8`–`d15` and the whole `FPSCR`.
-
-Softfp (`-mfloat-abi=softfp`) is not a supported platform, and it is not
-clear how widely it is used. It does not define `__ARM_PCS_VFP`, so the
-build selects `arm32` and runs. That assembly does not preserve `FPSCR`.
-The compiler can still use `d8`–`d15` while building `arm32`. Do not add
-an `FPSCR` spill to the soft-float file to cover softfp: that file is
-`.fpu softvfp`, and `vmrs fpscr` is an undefined instruction without VFP.
+A hard-float port is a new assembly, alongside the soft-float file. It
+spills `d8`–`d15` in `stackman_switch`, has its own ABI name, and is what
+a `__ARM_PCS_VFP` build selects. The `#error` stays until that port
+exists. Softfp is not that port: it does not define `__ARM_PCS_VFP`, and
+the compiler can still use `d8`–`d15`.
 
 ### AArch64 SME lazy save
 
@@ -555,5 +538,4 @@ first.
 
 **Applied fix.** No `fenv` test was added. After the spills above, the
 original mode should also come back on SysV i386 (x87 control word),
-Windows x86 (x87 control word), Windows x64 (MXCSR), the 64-bit ARM
-ABIs (`FPCR`, with `FPSR` restored alongside it), and RISC-V (`fcsr`).
+Windows x86 (x87 control word), and Windows x64 (MXCSR).
