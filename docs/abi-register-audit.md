@@ -48,7 +48,7 @@ Per-platform comments, checked against the code:
 | `switch_arm_gcc.h` | `r4`–`r11`, and `d8`–`d15` unless Thumb. `FPSCR` is not saved. | The integer list matches `switch_arm_gcc.S`. That `.S` is soft-float and does not save `d8`–`d15`, so `CP_REGISTERS` describes the inline path only. |
 | `switch_riscv64_gcc.S` | `s0`–`s11`, `fs0`–`fs11`, `ra` for `stackman_switch` | Yes for that function. `stackman_call` skips a null stack and passes the previous stack pointer. |
 | `switch_x64_msvc.asm` | "all registers that the x64 ABI specifies as non-volatile", plus xmm | The GPRs and `xmm6`–`xmm15` match. MXCSR[6:15] is non-volatile on Windows and is not saved, so the comment overclaims. |
-| `switch_arm64_msvc.asm` | `x18`–`x28`, `d8`–`d15`, `FPCR` are pushed | The spill matches the comment. The routine then uses `x18` as a scratch register, which the Windows ABI does not allow. |
+| `switch_arm64_msvc.asm` | `x18`–`x28`, `d8`–`d15`, `FPCR` are pushed | The spill matches the comment. `x18` is spilled and restored, and neither routine writes the live register. The callback is held in `x20`. `stackman_call` holds the old stack pointer in `x19`. |
 
 `lib/README.md` is about prebuilt archives, not the API or the register sets.
 Its platform list omits `riscv64` and the Darwin ABIs that the main README
@@ -95,32 +95,22 @@ Two gaps that are not missing base registers:
 ### `switch_arm64_msvc.asm` (Windows `win_arm64`)
 
 The spill set matches the Windows document: `x19`–`x28`, `x29`, `x30`,
-`d8`–`d15`, `FPCR`, and `x18`. The bug is the live value of `x18` during the
-callbacks.
+`d8`–`d15`, `FPCR`, and `x18`. `x18` is the TEB for the whole time user
+code runs. Both routines spill it and leave the live register alone.
 
-`stackman_switch` stores the callback in `x18` and calls through it:
+`stackman_switch` keeps the context in `x19` and the callback in `x20`.
+The first call is `blr x3` after `x20` has been loaded from `x3`, because
+the callback clobbers `x3`. The second call is `blr x20`. The `x18` store
+and reload stay, so a restored context gets the value it spilled.
 
-```asm
-mov x19, x0
-mov x18, x3
-blr x3          ; first callback, x18 is no longer the TEB
-...
-blr x18         ; second callback
-```
+`stackman_call` spills `x19` at `[sp, #16]` and keeps the old stack pointer
+there. It does not read or write `x18`.
 
-`stackman_call` parks the old stack pointer in `x18` across `blr x3`. TLS,
-the stack limit, `__chkstk`, and any Win32 call read the TEB through `x18`.
-The epilogue writes the saved value back, so the original caller is repaired
-only when the callback returns.
-
-Fix: keep `x18` unchanged. `stackman_switch` already spills `x19`–`x28`; use
-one of those for the callback. `stackman_call` should spill some other
-non-volatile (for example `x19`) and keep the old stack pointer there.
-
-The Windows file adjusts `fp` across the switch, which the SysV file does not.
+The file adjusts `fp` across the switch, which the SysV file does not.
 It has no SEH unwind opcodes. The x64 MASM uses `NESTED_ENTRY` and
 `.pushreg` / `save_xmm128`. That is an unwinding gap, separate from the
-register values.
+register values. The Windows ARM64 test job compiles this file and does
+not run it.
 
 ## Other platforms
 
@@ -150,28 +140,6 @@ captured after the 16-byte frame allocation). The return value stays in
 Each item is a local edit. The spill lists that already match the ABI stay
 as they are. `stackman_call` only needs a new spill when the fix starts
 using a callee-saved register it does not already save.
-
-### Windows ARM64: stop writing `x18`
-
-File: `stackman/platforms/switch_arm64_msvc.asm`.
-
-`stackman_switch` already spills `x19`–`x28` before it assigns them. Keep
-the context in `x19`. Keep the callback in `x20` instead of `x18`, and make
-the second call `blr x20`. The first call can stay `blr x3` only if `x20`
-was loaded from `x3` first; the callback clobbers `x3`. Leave the `x18`
-store and reload in place so a restored context gets the value it spilled,
-and do not write `x18` between them.
-
-`stackman_call` should spill `x19` in the slot that now holds `x18`
-(`str`/`ldr` at `[sp, #16]`), keep the old stack pointer in `x19`, and
-delete every `x18` access. The 32-byte frame is already large enough.
-
-Unwind data is a separate change. Describe the prologue with the ARM64
-counterparts of the `NESTED_ENTRY` / `save_xmm128` macros in
-`switch_x64_msvc.asm`, one unwind code per store, so `RtlUnwind` can find
-`x19`–`x30`, `d8`–`d15`, and the `FPCR` slot. The Windows ARM64 test job
-compiles this file and does not run it, so the `x18` fix needs a Windows
-ARM64 machine or an emulator before it can be considered tested.
 
 ### AArch64 SysV and Apple: keep `x29` attached to the new stack
 
@@ -351,11 +319,11 @@ Do not add a per-register assembly harness yet.
 A post-return sentinel check is the usual way to prove callee-saved
 registers survive. It is a poor fit here.
 
-- It misses the Windows `x18` bug. That routine saves `x18` and writes it
-  back before `ret`. The damage is the live TEB during the callback. The
-  harness would see the restored value and pass. Sampling `x18` inside the
-  callback only means something on Windows, and the Windows ARM64 job does
-  not run tests.
+- A post-return check would have missed the old Windows `x18` bug. That
+  routine saved `x18` and wrote it back before `ret`. The damage was the
+  live TEB during the callback, so the harness would have seen the restored
+  value and passed. Sampling `x18` inside the callback only means something
+  on Windows, and the Windows ARM64 job does not run tests.
 - It needs a different `.S` or `.asm` for each ABI, kept in lockstep with
   the spill list. The known mistakes above were found by reading those
   lists against the ABI. A harness that encodes the same list will not
@@ -379,7 +347,7 @@ only for the no-op switch:
 3. `stackman_switch` returns the same stack pointer.
 4. The harness compares the sentinels, then restores the original registers.
 
-That catches "forgot to spill `d8`" on AArch64. It still does not catch
+That catches "forgot to spill `d8`" on AArch64. It would not have caught
 "`x18` was wrong for the duration of the call", and it does not belong in
 the first patch.
 

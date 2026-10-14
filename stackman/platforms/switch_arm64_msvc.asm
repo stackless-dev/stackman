@@ -30,14 +30,17 @@
 	stp	d14, d15, [sp, #160]
 
 	; args are x0=callback, x1=context
-	; shuffle calling arguments into r0, r1 and r2
+	; shuffle calling arguments into x0, x1 and x2
 	; for the call to the callback.
+	; x18 is the TEB for the whole time user code runs. Spill it
+	; above, and do not write the live register. x19 and x20 are
+	; already spilled.
 	mov	x3, x0
 	mov	x0, x1 ;context
 	mov x2, sp ;stack pointer
 	mov	x1, #0 ;operation
-	mov	x19, x0 ;store these a bit in nv registers
-	mov	x18, x3
+	mov	x19, x0 ;context
+	mov	x20, x3 ;callback (x3 is clobbered by the call)
 	blr	x3     ;first callback
 	mov	x2, x0 ;store new stackpointer in register, for next cb,
 	; switch stack, maintaining fp offset
@@ -47,7 +50,7 @@
 	
 	mov	x1, #1 ;operation
 	mov	x0, x19 ;context
-	blr	x18     ;second callback
+	blr	x20     ;second callback
 
 	; restore registers from stack
 	ldp	x2,  x18, [sp, #16]
@@ -69,20 +72,18 @@
 	EXPORT |stackman_call|
 	ALIGN
 |stackman_call| PROC
-; args "callback", "context" are in x0, x1
-	; push non-volatile x18-x28 registers, in addition to fp,rl pair.
-	; x29 is fp, x30 is lr.
+; args "callback", "context", "stack" are in x0, x1, x2
+	; x29 is fp, x30 is lr. x18 is the TEB and is not touched.
 	stp	x29, x30, [sp, #-32]!	; store fp,lr pair, allocate stack space
 	mov	x29, sp					; and set fp pointing to old fp on stack
-	; push non-volatile register 18
-	str	x18, [sp, #16]
+	str	x19, [sp, #16]
 	
 	; args are x0 = callback, x1 = context, x2=stack
 	mov	x3, x0
 	mov	x0, x1 ;context
 	mov	x1, x2 ;stack
-	; store current sp in nv register
-	mov x18, sp
+	; store current sp in a spilled non-volatile
+	mov x19, sp
 
 	mov x2, sp ; old stack
 
@@ -94,10 +95,10 @@ nullptr
 	blr	x3     ; call callback, with context, opcode, old stack
 
 	; restore stack (could do: sub sp, fp #12)
-	mov sp, x18
+	mov sp, x19
 
 	; return
-	ldr x18, [sp, #16]
+	ldr x19, [sp, #16]
 	ldp	x29, x30, [sp], #32
 	ret
 	ENDP
