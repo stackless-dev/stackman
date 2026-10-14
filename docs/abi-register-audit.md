@@ -190,8 +190,8 @@ file and does not run it.
   AArch64 still adjusts `x29`, which the prologue sets with
   `mov x29, sp`.
 - `__ARM_PCS_VFP` selects `armhf` (`switch_armhf_gcc.S`), which spills
-  `d8`–`d15`. `FPSCR` is still not spilled. The soft-float file was
-  left unchanged.
+  `d8`–`d15` and the whole `FPSCR`. The soft-float file was left
+  unchanged.
 - Windows ARM32 was removed: `switch_arm_msvc.asm`, `switch_arm_msvc.h`,
   the `_M_ARM` branch in `platform.h`, the Debug|ARM configurations in
   vs2017, vs2019, and vs2022, and `lib/win_arm/stackman.lib`. The
@@ -368,7 +368,7 @@ The shipped integer set (`r4`–`r11`, `lr`) needs no new stores.
 commented as inline-only. The optional `r11` adjustment was applied and
 then removed. See the frame-pointer applied fix above. `d8`–`d15` were
 not added to this file. `__ARM_PCS_VFP` selects `armhf`
-(`switch_armhf_gcc.S` spills `d8`–`d15`; `FPSCR` is still not spilled).
+(`switch_armhf_gcc.S` spills `d8`–`d15` and the whole `FPSCR`).
 
 ### Windows ARM32: delete it, or align `sp` before `vpush`
 
