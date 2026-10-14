@@ -43,7 +43,7 @@ Per-platform comments, checked against the code:
 | Place | Claim | Matches the code |
 | --- | --- | --- |
 | `switch_x86_64_gcc.h` | `rbx`, `rbp`, `r12`–`r15`, x87 control word, MXCSR | Yes. The comment used to say "mmx"; the instruction is `stmxcsr`. |
-| `switch_x86_gcc.h` | `ebx`, `esi`, `edi`, and `ebp` via the frame | Yes for what it saves. It does not mention the x87 control word. |
+| `switch_x86_gcc.h` | `ebx`, `esi`, `edi`, `ebp` via the frame, x87 control word | Yes. The control word is stored with `fstcw` at the pointer passed to the callback. |
 | `switch_aarch64_gcc.h` | `x19`–`x28`, `x29` via the frame, `d8`–`d15` | Yes for the base AAPCS64 set. Silent on `x18` and SME. |
 | `switch_arm_gcc.h` | `r4`–`r11`, and `d8`–`d15` unless Thumb. `FPSCR` is not saved. | The integer list matches `switch_arm_gcc.S`. That `.S` is soft-float and does not save `d8`–`d15`, so `CP_REGISTERS` describes the inline path only. |
 | `switch_riscv64_gcc.S` | `s0`–`s11`, `fs0`–`fs11`, `ra` for `stackman_switch` | Yes for that function. `stackman_call` skips a null stack and passes the previous stack pointer. |
@@ -119,8 +119,8 @@ not run it.
 | --- | --- | --- |
 | `switch_x86_64_gcc.S` | `rbx`, `rbp`, `r12`–`r15`, x87 control word, MXCSR | Complete for SysV AMD64. XMM registers are volatile there. The frame pointer is adjusted with the stack delta. |
 | `switch_x64_msvc.asm` | `rbx`, `rbp`, `rdi`, `rsi`, `r12`–`r15`, `xmm6`–`xmm15`, MXCSR | Those registers match the Windows x64 ABI. MXCSR is stored at `[rsp+160]`, the pad in the 168-byte xmm frame, and loaded back before that frame is released. `stackman_call` does not spill it. |
-| `switch_x86_gcc.S` | `ebx`, `esi`, `edi`, `ebp` | Integer set is complete. There is no callee-saved XMM on i386 SysV. The x87 control word is callee-saved in that ABI and is not saved. |
-| `switch_x86_msvc.asm` | `ebx`, `esi`, `edi`, `ebp`, plus the C wrapper saves `fs:[0]` | Integer set is complete for cdecl. Same x87 control-word gap. |
+| `switch_x86_gcc.S` | `ebx`, `esi`, `edi`, `ebp`, x87 control word | Integer set is complete. There is no callee-saved XMM on i386 SysV. `fstcw` stores the control word at `0x10(%esp)`, the pointer passed to the callback, and `fldcw` loads it after the restore callback. |
+| `switch_x86_msvc.asm` | `ebx`, `esi`, `edi`, `ebp`, x87 control word, plus the C wrapper saves `fs:[0]` | Integer set is complete for cdecl. `stackman_switch_raw` stores the control word in a slot below the callee-saved pushes, at the pointer passed to the callback. The C wrapper still restores `fs:[0]`. |
 | `switch_arm_gcc.S` | `r4`–`r11`, `lr` | Complete for the soft-float `arm-linux-gnueabi` ABI this tree ships (`.arch armv5t`, `.fpu softvfp`). `d8`–`d15` are absent. The inline header clobbers them, so a hard-float or softfp build of this `.S` would drop callee-saved VFP state. `armhf` is not a configured ABI. The live frame pointer is not adjusted. |
 | `switch_arm_msvc.asm` | `r4`–`r11`, `lr`, `q4`–`q7` (`d8`–`d15`), `FPSCR` | The set matches 32-bit Windows ARM. Alignment does not. `push {r4-r10, fp, lr}` is 9 words, so `sp` is 4-byte aligned for `vpush {q4-q7}`. A doubleword `VPUSH` requires 8-byte alignment. `stackman_call` pushes 3 registers and then `blx`s with `sp` still 4 mod 8. The changelog records this ABI as dropped; the file is still wrong if it is built. |
 | `switch_riscv64_gcc.S` | `ra`, `s0`–`s11`, `fs0`–`fs11` | `stackman_switch` is complete for LP64D. `gp` and `tp` are left alone. `fcsr` is thread `fenv` state, not a per-call spill. |
@@ -161,29 +161,6 @@ requires of `setjmp` / `longjmp`: commit the lazy ZA buffer and clear
 spill the ZA array in this file. `FPMR`, `FFR`, and `ZT0` stay
 caller-saved. Skip the call on the Windows ARM64 file; this helper is the
 AAPCS64 one. This can wait until a supported target actually enables SME.
-
-### i386: spill the x87 control word
-
-The integer spills are complete. The gap is `fnstcw` / `fldcw` around the
-two callbacks in `stackman_switch`, stored inside the frame that the
-callback is asked to copy.
-
-- `switch_x86_gcc.S` and the inline block in `switch_x86_gcc.h` must
-  change together. The `.S` is a copy of the header's asm string. The
-  `subl $0x1c, %esp` frame has unused bytes at `0x10(%esp)`, `0x14(%esp)`,
-  and `0x18(%esp)`, and `0x10(%esp)` is the pointer passed to the callback.
-  `fnstcw` a word at that pointer before the first `call`, and `fldcw` it
-  after the second `call`, before `addl $0x1c, %esp`. After
-  `leal -0x10(%eax), %esp` the same word is at `0x10(%esp)` on the new
-  stack. Regenerating with `gcc -S -m32 -fcf-protection=none` from
-  `gen_asm.c` is the project's usual way to refresh the `.S`.
-- `switch_x86_msvc.asm`: `fnstcw` / `fldcw` in `stackman_switch_raw`, in a
-  slot allocated with `ebx` / `esi` / `edi`, so the word is on the stack
-  image rather than in the C wrapper's `seh_state` local. The wrapper
-  already restores `fs:[0]` and should keep doing that.
-
-XMM registers stay unsaved: they are volatile for SysV i386 and for
-Windows cdecl. `__vectorcall` is not the convention this library uses.
 
 ### ARM32 soft-float: refuse a hard-float build
 
@@ -316,8 +293,9 @@ the first patch.
 
 `fesetround` before `stackman_switch`, a callback that changes the rounding
 mode and returns, then read the mode again. Expect the original mode where
-the assembly saves the control word (SysV x86-64). Expect the callback's
-mode to stick where the ABI treats that register as thread state and the
-assembly does not save it (AAPCS64 `FPCR`, RISC-V `fcsr`). This is
-ABI-specific and easy to get wrong; land the `stackman_call` contract tests
-first.
+the assembly saves the control word (SysV x86-64 MXCSR and x87 control
+word, SysV i386 x87 control word, Windows x64 MXCSR, Windows x86 x87
+control word). Expect the callback's mode to stick where the ABI treats
+that register as thread state and the assembly does not save it (AAPCS64
+`FPCR`, RISC-V `fcsr`). This is ABI-specific and easy to get wrong; land
+the `stackman_call` contract tests first.
