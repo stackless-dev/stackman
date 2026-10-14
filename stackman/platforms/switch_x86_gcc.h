@@ -23,8 +23,9 @@
  * eax, ecx, edx are scratch regs, 
  * ebp, ebx, esi, edi and the x87 control word are callee-preserved.
  * The control word is stored at the stack pointer passed to the callback
- * so a copied stack image carries it. fstcw does not wait on pending
- * exceptions, matching switch_x86_64_gcc.S.
+ * so a copied stack image carries it. fstcw matches switch_x86_64_gcc.S.
+ * It is FWAIT plus FNSTCW, so a pending unmasked exception is delivered
+ * on this stack before the switch.
  * We have compiler construct a frame and push ebp
  * an then we fix an aligned stack pointer and just store
  * the arguments in proper places.
