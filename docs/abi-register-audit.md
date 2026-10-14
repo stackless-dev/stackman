@@ -413,9 +413,14 @@ build cannot use that file by mistake.
 
 `switch_armhf_gcc.h` is the hard-float port. `platform.h` selects it,
 and the ABI name `armhf`, when `__ARM_PCS_VFP` is set. `stackman_switch`
-spills `d8`–`d15` and the whole `FPSCR`. Softfp is not this port: it
-does not define `__ARM_PCS_VFP`, and the compiler can still use
-`d8`–`d15` while building `arm32`.
+spills `d8`–`d15` and the whole `FPSCR`.
+
+Softfp (`-mfloat-abi=softfp`) is not a supported platform, and it is not
+clear how widely it is used. It does not define `__ARM_PCS_VFP`, so the
+build selects `arm32` and runs. That assembly does not preserve `FPSCR`.
+The compiler can still use `d8`–`d15` while building `arm32`. Do not add
+an `FPSCR` spill to the soft-float file to cover softfp: that file is
+`.fpu softvfp`, and `vmrs fpscr` is an undefined instruction without VFP.
 
 ### AArch64 SME lazy save
 
