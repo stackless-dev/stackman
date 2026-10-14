@@ -109,7 +109,10 @@ Two gaps that are not missing base registers:
 `switch_aarch64_gcc.h`, so regenerating the `.S` from `gen_asm.c` keeps
 them. The epilogue still reloads the saved `x29`. A callback that relocates
 a stack still has to rewrite saved frame-pointer slots in the copied bytes.
-`__arm_za_disable` is not called. See Roadmap.
+`__arm_za_disable` is not called. See Roadmap. `FPCR` and `FPSR` are
+stored in a 16-byte slot at the stack pointer passed to the callback
+and written back after `STACKMAN_OP_RESTORE`. A thread switch saves
+both, and two stacks on one thread would otherwise share them.
 
 ### `switch_arm64_msvc.asm` (Windows `win_arm64`)
 
@@ -241,7 +244,9 @@ compiles this file and does not run it, so the `x18` fix needs a Windows
 ARM64 machine or an emulator before it can be considered tested.
 
 **Applied fix.** The `x18` change was made as written above. Unwind codes
-were not added.
+were not added. `FPSR` is stored at `[sp, #176]` next to the existing
+`FPCR` spill. The frame is 192 bytes. `stackman_call` still does not
+spill either register.
 
 ### AArch64 SysV and Apple: keep `x29` attached to the new stack
 
@@ -542,4 +547,6 @@ first.
 
 **Applied fix.** No `fenv` test was added. After the spills above, the
 original mode should also come back on SysV i386 (x87 control word),
-Windows x86 (x87 control word), and Windows x64 (MXCSR).
+Windows x86 (x87 control word), Windows x64 (MXCSR), and the 64-bit ARM
+ABIs (`FPCR`, with `FPSR` restored alongside it). RISC-V `fcsr` is still
+not spilled.

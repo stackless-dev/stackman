@@ -78,8 +78,9 @@ Limits that are easy to fix the wrong way:
   saved value. On RISC-V, `s0` is not a frame chain in
   `stackman_switch`, and `stackman_call` uses `s0` for the previous
   stack pointer. Do not adjust it there.
-- AAPCS64 FPCR and RISC-V `fcsr` are thread state. They are not per-call
-  spills.
+- `stackman_switch` spills `FPCR` and `FPSR` on `aarch64`,
+  `darwin_arm64`, and `win_arm64`. RISC-V `fcsr` is still not a
+  per-call spill.
 
 ## Build and test
 

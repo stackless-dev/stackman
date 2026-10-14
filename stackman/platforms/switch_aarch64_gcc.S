@@ -79,7 +79,12 @@ LABEL(stackman_switch)
 	mov	x3, x0
 	mov	x0, x1
 #APP
-// 59 "../platforms/switch_aarch64_gcc.h" 1
+// 70 "../platforms/switch_aarch64_gcc.h" 1
+	mrs x1, fpcr
+	mrs x2, fpsr
+	stp x1, x2, [sp, #-16]!
+// 0 "" 2
+// 76 "../platforms/switch_aarch64_gcc.h" 1
 	mov x2, sp
 // 0 "" 2
 #NO_APP
@@ -89,7 +94,7 @@ LABEL(stackman_switch)
 	blr	x3
 	mov	x2, x0
 #APP
-// 67 "../platforms/switch_aarch64_gcc.h" 1
+// 84 "../platforms/switch_aarch64_gcc.h" 1
 	sub x1, sp, x0
 	mov sp, x0
 	sub x29, x29, x1
@@ -98,6 +103,13 @@ LABEL(stackman_switch)
 	mov	w1, 1
 	mov	x0, x20
 	blr	x19
+#APP
+// 93 "../platforms/switch_aarch64_gcc.h" 1
+	ldp x1, x2, [sp], #16
+	msr fpcr, x1
+	msr fpsr, x2
+// 0 "" 2
+#NO_APP
 	ldp	x19, x20, [sp, 16]
 	ldp	x21, x22, [sp, 32]
 	ldp	x23, x24, [sp, 48]

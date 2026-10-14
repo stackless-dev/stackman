@@ -3,6 +3,11 @@
  * and additional information for gcc inline arm assembly:
  * http://www.ethernut.de/en/documents/arm-inline-asm.html
  *
+ * stackman_switch stores FPCR and FPSR in the stack image and writes
+ * them back after the restore callback. A thread switch saves both,
+ * including the caller-saved status bits. stackman_call does not
+ * change them and does not spill them.
+ *
  */
 /* clang cannot perform inline assembly using specific __attr__
  * instructions, and so it may use a base pointer and other
@@ -55,6 +60,18 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 #ifdef FP_PRESERVE
 	__asm__ volatile ("" : : : FP_PRESERVE);
 #endif
+	/* FPCR and FPSR are one thread context on Linux and macOS.
+	 * Park both in a 16-byte slot and pass that sp to the callback,
+	 * so the copied image carries them. Sixteen bytes keeps the
+	 * AAPCS64 alignment. x1 and x2 are free until the compiler
+	 * assigns the saved stack pointer. The reload clobbers the
+	 * same registers after the restore callback returns.
+	 */
+	__asm__ volatile (
+		"mrs x1, fpcr\n\t"
+		"mrs x2, fpsr\n\t"
+		"stp x1, x2, [sp, #-16]!"
+		::: "x1", "x2", "memory");
 	/* sp = get stack pointer from assembly code */
 	__asm__ ("mov %[result], sp" : [result] "=r" (sp));
 	/* store stack */
@@ -70,6 +87,14 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 		"sub x29, x29, x1"
 		: : [result] "r" (sp) : "x1");
 	sp = callback(context, STACKMAN_OP_RESTORE, sp);
+	/* Reload FPCR and FPSR from the stack now current, then release
+	 * the slot before the epilogue pops the callee-saved registers.
+	 */
+	__asm__ volatile (
+		"ldp x1, x2, [sp], #16\n\t"
+		"msr fpcr, x1\n\t"
+		"msr fpsr, x2"
+		::: "x1", "x2", "memory");
 	return sp;
 }
 
