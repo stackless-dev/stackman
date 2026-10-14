@@ -47,7 +47,7 @@ Per-platform comments, checked against the code:
 | `switch_aarch64_gcc.h` | `x19`–`x28`, `x29` via the frame, `d8`–`d15` | Yes for the base AAPCS64 set. Silent on `x18` and SME. |
 | `switch_arm_gcc.h` | `r4`–`r11`, and `d8`–`d15` unless Thumb. `FPSCR` is not saved. | The integer list matches `switch_arm_gcc.S`. That `.S` is soft-float and does not save `d8`–`d15`, so `CP_REGISTERS` describes the inline path only. |
 | `switch_riscv64_gcc.S` | `s0`–`s11`, `fs0`–`fs11`, `ra` for `stackman_switch` | Yes for that function. `stackman_call` skips a null stack and passes the previous stack pointer. |
-| `switch_x64_msvc.asm` | "all registers that the x64 ABI specifies as non-volatile", plus xmm | The GPRs and `xmm6`–`xmm15` match. MXCSR[6:15] is non-volatile on Windows and is not saved, so the comment overclaims. |
+| `switch_x64_msvc.asm` | non-volatile GPRs, `xmm6`–`xmm15`, and MXCSR | Yes. The control bits of MXCSR are saved with the xmm frame. Upper ymm/zmm bits stay volatile. |
 | `switch_arm64_msvc.asm` | `x18`–`x28`, `d8`–`d15`, `FPCR` are pushed | The spill matches the comment. `x18` is spilled and restored, and neither routine writes the live register. The callback is held in `x20`. `stackman_call` holds the old stack pointer in `x19`. |
 
 `lib/README.md` is about prebuilt archives, not the API or the register sets.
@@ -118,7 +118,7 @@ not run it.
 | File | What it spills | Result |
 | --- | --- | --- |
 | `switch_x86_64_gcc.S` | `rbx`, `rbp`, `r12`–`r15`, x87 control word, MXCSR | Complete for SysV AMD64. XMM registers are volatile there. The frame pointer is adjusted with the stack delta. |
-| `switch_x64_msvc.asm` | `rbx`, `rbp`, `rdi`, `rsi`, `r12`–`r15`, `xmm6`–`xmm15` | Those registers match the Windows x64 ABI. MXCSR[6:15] is non-volatile on Windows and is not spilled, so a changed rounding mode does not travel with the stack. The SysV file does save MXCSR. |
+| `switch_x64_msvc.asm` | `rbx`, `rbp`, `rdi`, `rsi`, `r12`–`r15`, `xmm6`–`xmm15`, MXCSR | Those registers match the Windows x64 ABI. MXCSR is stored at `[rsp+160]`, the pad in the 168-byte xmm frame, and loaded back before that frame is released. `stackman_call` does not spill it. |
 | `switch_x86_gcc.S` | `ebx`, `esi`, `edi`, `ebp` | Integer set is complete. There is no callee-saved XMM on i386 SysV. The x87 control word is callee-saved in that ABI and is not saved. |
 | `switch_x86_msvc.asm` | `ebx`, `esi`, `edi`, `ebp`, plus the C wrapper saves `fs:[0]` | Integer set is complete for cdecl. Same x87 control-word gap. |
 | `switch_arm_gcc.S` | `r4`–`r11`, `lr` | Complete for the soft-float `arm-linux-gnueabi` ABI this tree ships (`.arch armv5t`, `.fpu softvfp`). `d8`–`d15` are absent. The inline header clobbers them, so a hard-float or softfp build of this `.S` would drop callee-saved VFP state. `armhf` is not a configured ABI. The live frame pointer is not adjusted. |
@@ -161,21 +161,6 @@ requires of `setjmp` / `longjmp`: commit the lazy ZA buffer and clear
 spill the ZA array in this file. `FPMR`, `FFR`, and `ZT0` stay
 caller-saved. Skip the call on the Windows ARM64 file; this helper is the
 AAPCS64 one. This can wait until a supported target actually enables SME.
-
-### Windows x64: spill MXCSR with the xmm frame
-
-File: `stackman/platforms/switch_x64_msvc.asm`, `stackman_switch` only.
-
-`alloc_stack 168` covers `xmm6`–`xmm15` (160 bytes) plus an 8-byte pad at
-`[rsp+160]`. After `alloc_stack` and before the `push_reg`s, `stmxcsr`
-that dword. After the epilogue pops the GPRs and before `add rsp, 168`,
-`ldmxcsr` the same slot. Restoring the whole register also restores the
-volatile status flags, which is what `switch_x86_64_gcc.S` already does.
-`stackman_call` does not need this: it returns to the same caller, and a
-conforming callback restores MXCSR itself.
-
-Narrow the comment that says every non-volatile register is saved, once
-MXCSR is included, or the comment stays ahead of the code.
 
 ### i386: spill the x87 control word
 

@@ -20,10 +20,11 @@ endm
 ;arguments callback, context, are passed in rcx, rdx, respectively
 ;stackman_switch PROC FRAME
 NESTED_ENTRY stackman_switch, _TEXT$00
-	; save all registers that the x64 ABI specifies as non-volatile.
-	; This includes some mmx registers.  May not always be necessary,
-	; unless our application is doing 3D, but better safe than sorry.
-	alloc_stack 168; 10 * 16 bytes, plus 8 bytes to make stack 16 byte aligned
+	; Save the non-volatile GPRs, xmm6-xmm15, and MXCSR.
+	; Upper ymm/zmm bits are volatile. MXCSR status flags are volatile
+	; too; saving the whole register matches the SysV file.
+	alloc_stack 168; xmm6-xmm15 (160 bytes) plus an 8-byte MXCSR slot
+	stmxcsr dword ptr [rsp+160]
 	save_xmm128 xmm15, 144
 	save_xmm128 xmm14, 128
 	save_xmm128 xmm13, 112
@@ -94,6 +95,7 @@ NESTED_ENTRY stackman_switch, _TEXT$00
 	load_xmm128 xmm8,  32
 	load_xmm128 xmm7,  16
 	load_xmm128 xmm6,  0
+	ldmxcsr dword ptr [rsp+160]
 	add rsp, 168
 	ret
 	
