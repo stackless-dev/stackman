@@ -81,8 +81,9 @@ Limits that are easy to fix the wrong way:
   `stackman_switch`, and `stackman_call` uses `s0` for the previous
   stack pointer. Do not adjust it there.
 - `stackman_switch` spills `FPCR` and `FPSR` on `aarch64`,
-  `darwin_arm64`, and `win_arm64`. RISC-V `fcsr` is still not a
-  per-call spill.
+  `darwin_arm64`, and `win_arm64`, and spills `fcsr` on `riscv64`.
+  The RISC-V slot is the existing 8-byte pad at the published stack
+  pointer. `stackman_call` does not touch these registers.
 
 ## Build and test
 

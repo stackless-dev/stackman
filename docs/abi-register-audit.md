@@ -196,9 +196,12 @@ file and does not run it.
   the `_M_ARM` branch in `platform.h`, the Debug|ARM configurations in
   vs2017, vs2019, and vs2022, and `lib/win_arm/stackman.lib`. The
   alignment alternative was not used. Windows ARM64 stays.
-- The RISC-V register spill was already complete. The optional `s0` frame
-  delta was left unchanged: `s0` is not a frame chain in `stackman_switch`,
-  and `stackman_call` uses it to hold the previous stack pointer.
+- The RISC-V integer and `fs0`–`fs11` spill was already complete. The
+  optional `s0` frame delta was left unchanged: `s0` is not a frame chain
+  in `stackman_switch`, and `stackman_call` uses it to hold the previous
+  stack pointer. `fcsr` is stored at `0(sp)`, the pad below `fs11`, and
+  written back after `STACKMAN_OP_RESTORE`. A thread switch saves the
+  whole register. `stackman_call` still does not spill it.
 
 ### RISC-V `stackman_call`
 
@@ -552,6 +555,5 @@ first.
 
 **Applied fix.** No `fenv` test was added. After the spills above, the
 original mode should also come back on SysV i386 (x87 control word),
-Windows x86 (x87 control word), Windows x64 (MXCSR), and the 64-bit ARM
-ABIs (`FPCR`, with `FPSR` restored alongside it). RISC-V `fcsr` is still
-not spilled.
+Windows x86 (x87 control word), Windows x64 (MXCSR), the 64-bit ARM
+ABIs (`FPCR`, with `FPSR` restored alongside it), and RISC-V (`fcsr`).
