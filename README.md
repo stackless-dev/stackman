@@ -59,7 +59,7 @@ platforms so that no assembly steps are required by users.
     straightforward implementation on most platforms.
   - Complex logic and branching is delegated to the C callback.
   - Custom platform assembly code must only do three things:
-    1. Save and restore volatile registers and stack state on the stack
+    1. Save and restore callee-saved (non-volatile) registers and stack state on the stack
     2. Call the callback twice with the current stack pointer
     3. Set the stack pointer to the value returned by the first callback.
 
@@ -157,7 +157,9 @@ use.
 
 1. It saves the current CPU stack pointer.  If `stack` is non-zero, it will replace the stackpointer
 with that value.
-2. It calls the callback function with the opcode `STACKMAN_OP_CALL`.
+2. It calls the callback function with the opcode `STACKMAN_OP_CALL`. The
+   stack pointer argument is the previous stack pointer, the one in use before
+   this call. A null `stack` leaves that pointer unchanged.
 3. It replaces the stack pointer with the previously saved value and returns the return value from the callback.
 
 This function is useful for at least three things:

@@ -51,7 +51,7 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 {
 	void *stack_pointer, *stack_pointer2;
 	ptrdiff_t diff;
-	/* assembly to save non-volatile registers, including x87 and mmx */
+	/* assembly to save non-volatile registers, including the x87 control word and MXCSR */
 	int mxcsr; short x87cw;
 	__asm__ volatile (
 		"fstcw %[cw]\n\t"
