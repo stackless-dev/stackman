@@ -105,6 +105,9 @@ calling convention, plus archive format:
  - **FreeBSD, OpenBSD, NetBSD (System V ABI)**
    - sysv_amd64 (64-bit x86_64)
 
+The 64-bit ARM ABIs (`aarch64`, `darwin_arm64`, and `win_arm64`) do not
+preserve SME ZA context across `stackman_switch`.
+
 All platforms are automatically built and tested by GitHub Actions CI on every commit.
 
 The BSDs share the `sysv_amd64` ABI with Linux and therefore need no separate
