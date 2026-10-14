@@ -272,9 +272,9 @@ For compatibility, `win_aarch64` is also accepted and normalized to `win_arm64`.
 Examples:
 
 - `make STACKMAN_ABI=sysv_i386 PLATFORMFLAGS=-m32 test`
-- `make STACKMAN_ABI=arm32 PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-arm test`
-- `make STACKMAN_ABI=armhf PLATFORM_PREFIX=arm-linux-gnueabihf- EMULATOR=qemu-arm test`
-- `make STACKMAN_ABI=win_arm64 PLATFORM_PREFIX=aarch64-w64-mingw32- all`
+- `make STACKMAN_ABI=arm32 PLATFORM_PREFIX=arm-linux-gnueabi EMULATOR=qemu-arm test`
+- `make STACKMAN_ABI=armhf PLATFORM_PREFIX=arm-linux-gnueabihf EMULATOR=qemu-arm test`
+- `make STACKMAN_ABI=win_arm64 PLATFORM_PREFIX=aarch64-w64-mingw32 all`
 
 #### Cross compiling for x86 (32 bit) on Linux
 
@@ -287,21 +287,21 @@ Examples:
  - install __gcc-arm-linux-gnueabi__ and __g++-arm-linux-gnueabi__
  - install __qemu-user__ for hardware emulation 
  - *compile* **gen_asm.c** using `arm-linux-gnueabi-gcc`
- - *make* using  `make PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-arm test`
+ - *make* using  `make PLATFORM_PREFIX=arm-linux-gnueabi EMULATOR=qemu-arm test`
 
 #### Cross compiling for ARM hard-float (32 bit) on Linux
 
  - install __gcc-arm-linux-gnueabihf__ and __g++-arm-linux-gnueabihf__
  - install __qemu-user__ for hardware emulation
  - *compile* **gen_asm.c** using `arm-linux-gnueabihf-gcc -marm`
- - *make* using  `make PLATFORM_PREFIX=arm-linux-gnueabihf- EMULATOR=qemu-arm test`
+ - *make* using  `make PLATFORM_PREFIX=arm-linux-gnueabihf EMULATOR=qemu-arm test`
 
 #### Cross compiling for Arm64 on Linux
 
  - install **gcc-aarch64-linux-gnu** and **g++-aarch64-linux-gnu**
  - install __qemu-user__ for hardware emulation 
  - *compile* using `aarch64-linux-gnu-gcc`
- - *make* using `make PLATFORM_PREFIX=aarch64-linux-gnu- EMULATOR=qemu-aarch64 test`
+ - *make* using `make PLATFORM_PREFIX=aarch64-linux-gnu EMULATOR=qemu-aarch64 test`
 
 ## A note about Intel CET
 

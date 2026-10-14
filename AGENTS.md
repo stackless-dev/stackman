@@ -87,8 +87,8 @@ Limits that are easy to fix the wrong way:
 make test          # native ABI. Builds lib/$(ABI)/libstackman.a and runs the tests.
 make abiname
 make PLATFORMFLAGS=-m32 test
-make PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-arm test
-make PLATFORM_PREFIX=arm-linux-gnueabihf- EMULATOR=qemu-arm test
+make PLATFORM_PREFIX=arm-linux-gnueabi EMULATOR=qemu-arm test
+make PLATFORM_PREFIX=arm-linux-gnueabihf EMULATOR=qemu-arm test
 ```
 
 `make clean` only when switching `PLATFORMFLAGS` or `PLATFORM_PREFIX`.
