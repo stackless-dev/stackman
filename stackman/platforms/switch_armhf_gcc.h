@@ -5,9 +5,13 @@
  * so a copied stack image carries them. stackman_call does not touch
  * them and does not spill them.
  *
- * FPSCR is not spilled. AAPCS keeps the AHP, DN, FZ, and RMode bits
- * across a call. Do not adjust r11: stackman_switch is built with
- * omit-frame-pointer, so r11 is not this frame.
+ * stackman_switch also stores the whole FPSCR in that image and writes
+ * it back after the restore callback. A thread switch does the same.
+ * The store includes the caller-saved flag bits. stackman_call does
+ * not change FPSCR and does not spill it.
+ *
+ * Do not adjust r11: stackman_switch is built with omit-frame-pointer,
+ * so r11 is not this frame.
  *
  * Softfp (-mfloat-abi=softfp) does not define __ARM_PCS_VFP, so it
  * does not use this file.
@@ -72,6 +76,14 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
          * those, according to abi, that functions must save/restore if they
          * intend to use them
 	*/
+	/* Park the whole FPSCR below sp. The eight-byte slot keeps the
+	 * AAPCS alignment, and it is inside the image the callback copies.
+	 * r2 is free until the compiler assigns the saved stack pointer.
+	 */
+	__asm__ volatile (
+		"vmrs r2, fpscr\n\t"
+		"str r2, [sp, #-8]!"
+		::: "r2", "memory");
 	/* sp = get stack pointer from assembly code */
 	__asm__ ("mov %[result], sp" : [result] "=r" (sp));
 	/* store stack */
@@ -79,6 +91,13 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 	/* set stack pointer from sp using assembly */
 	__asm__ ("mov sp, %[result]" : : [result] "r" (sp));
 	sp = callback(context, STACKMAN_OP_RESTORE, sp);
+	/* Reload FPSCR from the stack now current, then release the slot
+	 * before the epilogue pops d8-d15.
+	 */
+	__asm__ volatile (
+		"ldr r2, [sp], #8\n\t"
+		"vmsr fpscr, r2"
+		::: "r2", "memory");
 	/* restore registers */
 	return sp;
 }

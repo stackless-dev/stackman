@@ -60,7 +60,7 @@ Limits that are easy to fix the wrong way:
   `.fpu softvfp`). It does not spill `d8`–`d15`, and `__ARM_PCS_VFP` is
   a compile error in that header. `armhf` (`switch_armhf_gcc.S`) is the
   hard-float port and is what `__ARM_PCS_VFP` selects. It spills
-  `d8`–`d15` in `stackman_switch`. It does not spill `FPSCR`. Softfp
+  `d8`–`d15` and the whole `FPSCR` in `stackman_switch`. Softfp
   does not define `__ARM_PCS_VFP` and still builds as `arm32`.
 - `aarch64`, `darwin_arm64`, and `win_arm64` do not preserve SME ZA
   across `stackman_switch`. Do not call `__arm_za_disable`. That helper

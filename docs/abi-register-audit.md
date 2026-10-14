@@ -408,7 +408,7 @@ build cannot use that file by mistake.
 
 `switch_armhf_gcc.h` is the hard-float port. `platform.h` selects it,
 and the ABI name `armhf`, when `__ARM_PCS_VFP` is set. `stackman_switch`
-spills `d8`–`d15`. `FPSCR` is not spilled. Softfp is not this port: it
+spills `d8`–`d15` and the whole `FPSCR`. Softfp is not this port: it
 does not define `__ARM_PCS_VFP`, and the compiler can still use
 `d8`–`d15` while building `arm32`.
 

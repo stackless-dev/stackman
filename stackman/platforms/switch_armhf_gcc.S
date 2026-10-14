@@ -34,7 +34,11 @@ stackman_switch:
 	mov	r3, r0
 	mov	r0, r1
 	.syntax divided
-@ 91 "../platforms/switch_armhf_gcc.h" 1
+@ 98 "../platforms/switch_armhf_gcc.h" 1
+	vmrs r2, fpscr
+	str r2, [sp, #-8]!
+@ 0 "" 2
+@ 103 "../platforms/switch_armhf_gcc.h" 1
 	mov r2, sp
 @ 0 "" 2
 	.arm
@@ -45,7 +49,7 @@ stackman_switch:
 	blx	r3
 	mov	r2, r0
 	.syntax divided
-@ 95 "../platforms/switch_armhf_gcc.h" 1
+@ 107 "../platforms/switch_armhf_gcc.h" 1
 	mov sp, r0
 @ 0 "" 2
 	.arm
@@ -53,6 +57,13 @@ stackman_switch:
 	mov	r1, #1
 	mov	r0, r5
 	blx	r4
+	.syntax divided
+@ 112 "../platforms/switch_armhf_gcc.h" 1
+	ldr r2, [sp], #8
+	vmsr fpscr, r2
+@ 0 "" 2
+	.arm
+	.syntax unified
 	vldm	sp!, {d8-d15}
 	pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, pc}
 	.size	stackman_switch, .-stackman_switch
@@ -70,10 +81,10 @@ stackman_call:
 	mov	r0, r1
 	mov	r3, r2
 	.syntax divided
-@ 111 "../platforms/switch_armhf_gcc.h" 1
+@ 130 "../platforms/switch_armhf_gcc.h" 1
 	mov r4, sp
 @ 0 "" 2
-@ 112 "../platforms/switch_armhf_gcc.h" 1
+@ 131 "../platforms/switch_armhf_gcc.h" 1
 	mov r2, sp
 @ 0 "" 2
 	.arm
@@ -81,7 +92,7 @@ stackman_call:
 	cmp	r3, #0
 	beq	.L4
 	.syntax divided
-@ 116 "../platforms/switch_armhf_gcc.h" 1
+@ 135 "../platforms/switch_armhf_gcc.h" 1
 	mov sp, r3
 @ 0 "" 2
 	.arm
@@ -90,7 +101,7 @@ stackman_call:
 	mov	r1, #2
 	blx	r5
 	.syntax divided
-@ 120 "../platforms/switch_armhf_gcc.h" 1
+@ 139 "../platforms/switch_armhf_gcc.h" 1
 	mov sp, r4
 @ 0 "" 2
 	.arm
