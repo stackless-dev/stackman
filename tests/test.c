@@ -192,21 +192,30 @@ void test_03(void *stack_marker)
 #define TEST_04
 #endif
 #ifdef TEST_04
+/* Sentinel returned by stackman_call. The epilogue must leave it intact. */
+static void *const stackman_call_result = (void *)(intptr_t)0x1234;
+
 /* test retrieval of stack pointer */
 void *test_04_cb(void* context, int _opcode, void *old_sp)
 {
+	unsigned char scratch[256];
 
 	assert_align(old_sp);
 	ctxt01 *c = (ctxt01*)context;
 	stackman_op_t opcode = (stackman_op_t)_opcode;
 	assert(opcode == STACKMAN_OP_CALL || opcode == 100);
-	/* one level of recursion here so that we actually use some of the new stack */
-	if (opcode == STACKMAN_OP_CALL)
+	/* Write the stack the callback is running on. The caller's locals
+	 * must still be intact when stackman_call returns. */
+	if (opcode == STACKMAN_OP_CALL) {
+		memset(scratch, 0xa5, sizeof scratch);
+		assert(scratch[0] == 0xa5 && scratch[sizeof scratch - 1] == 0xa5);
+		/* one level of recursion here so that we actually use some of the new stack */
 		test_04_cb(context, 100, old_sp);
+	}
 
 	c->sp[0] = &c;
 	c->sp[1] = old_sp;
-	return 0;
+	return stackman_call_result;
 }
 
 /* test stackman_call() with a non-null stack pointer */
@@ -215,6 +224,8 @@ void test_04(void)
 	char *block, *stack, *stack2;
 	intptr_t stacksize=1024;
 	int i, cnt;
+	int caller_local = 0x51a7;
+	void *result;
 	ctxt01 ctxt;
 
 	assert(STACKMAN_STACK_FULL_DESCENDING);
@@ -232,14 +243,20 @@ void test_04(void)
 	stack2 = stack-64;
 
 	/* perform the call */
-	stackman_call(test_04_cb, &ctxt, stack2);
+	result = stackman_call(test_04_cb, &ctxt, stack2);
+	assert(result == stackman_call_result);
+	assert(caller_local == 0x51a7);
 
 	/* verify that the called function saw stack in the right range */
 	assert(STACKMAN_SP_LE(block, ctxt.sp[0]));
 	assert(STACKMAN_SP_LS(ctxt.sp[0], stack2));
 
-	/* verify that old stack was outside the stack we allocated */
-	assert(STACKMAN_SP_LE(stack2, ctxt.sp[1]) || STACKMAN_SP_LS(ctxt.sp[1], block));
+	/* The pointer passed to the callback is the previous stack pointer.
+	 * It is not the stack given to stackman_call, and it does not fall
+	 * inside the new block [block, stack). */
+	assert(ctxt.sp[1] != (void *)stack2);
+	assert(STACKMAN_SP_LS(ctxt.sp[1], block) ||
+	       STACKMAN_SP_LE((void *)stack, ctxt.sp[1]));
 
 	/* verify that the guard memory is correct */
 	cnt = 0;
@@ -257,17 +274,21 @@ void test_04(void)
 void test_05(void)
 {
 	ctxt01 ctxt;
+	int caller_local = 0x51a7;
+	void *result;
 
 	assert(STACKMAN_STACK_FULL_DESCENDING);
 
 	/* perform the call */
-	stackman_call(test_04_cb, &ctxt, 0);
+	result = stackman_call(test_04_cb, &ctxt, 0);
+	assert(result == stackman_call_result);
+	assert(caller_local == 0x51a7);
 
-	/* verify that it was passed a stack */
+	/* A null stack leaves the caller in place. The callback receives
+	 * that live stack pointer, which is at or below the caller's locals. */
 	assert(ctxt.sp[1]);
 	assert(STACKMAN_SP_LE(ctxt.sp[0], ctxt.sp[1]));
-
-	/* and that it was passed valid lower stack pointer */
+	assert(STACKMAN_SP_LE(ctxt.sp[1], (void *)&caller_local));
 	assert(STACKMAN_SP_LE(ctxt.sp[1], &ctxt));
 }
 
