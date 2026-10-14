@@ -43,7 +43,7 @@ stackman_switch:
 	blx	r3
 	mov	r2, r0
 	.syntax divided
-@ 88 "../platforms/switch_arm_gcc.h" 1
+@ 93 "../platforms/switch_arm_gcc.h" 1
 	mov sp, r0
 @ 0 "" 2
 	.arm

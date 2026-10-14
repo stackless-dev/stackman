@@ -10,16 +10,19 @@
 #define STACKMAN_ASSEMBLY_SRC "platforms/switch_riscv64_gcc.S"
 #endif
 
+/* Visible to tests and other callers of stackman.h, not only to the
+ * translation unit that defines STACKMAN_SWITCH_IMPL. stackman.h
+ * otherwise leaves STACKMAN_STACK_ALIGN at 4 and tests/test.c compiles
+ * out test_04 and test_05. */
+#ifndef STACKMAN_HAVE_CALL
+#define STACKMAN_HAVE_CALL 1
+#define STACKMAN_STACK_ALIGN 16
+#endif
+
 #ifndef STACKMAN_SWITCH_IMPL
 /* Just check if platform is supported */
 #define STACKMAN_SWITCH_INCLUDED
 #else
-
-#ifndef STACKMAN_HAVE_CALL
-#define STACKMAN_HAVE_CALL 1
-#undef STACKMAN_STACK_ALIGN
-#define STACKMAN_STACK_ALIGN 16
-#endif
 
 #if __ASSEMBLER__ && defined(STACKMAN_ASSEMBLY_SRC)
 /* Include pre-generated assembly code */

@@ -5,6 +5,13 @@
  *
  */
 
+/* The checked-in assembly is armv5t soft-float and does not spill d8-d15.
+ * __ARM_PCS_VFP is the hard-float (gnueabihf) ABI. Softfp does not define it.
+ */
+#if defined(__ARM_PCS_VFP)
+#error The checked-in ARM32 assembly does not spill d8-d15. Hard-float (__ARM_PCS_VFP) is not supported.
+#endif
+
 /* clang cannot perform inline assembly using specific __attr__
  * instructions, and so it may use a base pointer and other
  * things.  We must force it to use the pre-build assembler
@@ -56,12 +63,10 @@
  */
 #define NV_REGISTERS "r4", "r5","r6", "r7", "r8", "r9", "r10" , "r11"
 
-/* These are the floating point extension registers. Same applies, we must preserve them in
- * case the calling function was doing any floating point logic.
- * it may be optionally disabled to store these floating point registers by not
- * defining them here.
- * Note that we do not
- * preserve the FPSCR and VPR registers since they have complex rules about preservation.
+/* Inline assembly only. switch_arm_gcc.S is .fpu softvfp and does not
+ * spill these. A hard-float build is rejected above.
+ * FPSCR and VPR are not preserved; their preservation rules are more
+ * specific than a blanket spill.
  */
 #ifndef __thumb__
 #define CP_REGISTERS "d8","d9","d10","d11","d12","d13","d14","d15"

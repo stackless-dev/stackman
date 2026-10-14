@@ -11,6 +11,11 @@ stackman_switch_raw PROC callback:DWORD, context:DWORD
   push ebx
   push esi
   push edi
+  ; x87 control word sits at the pointer passed to the callback,
+  ; so the copied stack image carries it. Not in the C wrapper:
+  ; that frame does not travel with a real switch.
+  sub esp, 4
+  fstcw word ptr [esp]
   
   mov esi, callback ;      /* save 'callback' for later */
   mov edi, context ;       /* save 'context' for later         */
@@ -34,6 +39,9 @@ stackman_switch_raw PROC callback:DWORD, context:DWORD
   push edi ;               /* arg 1: context                     */
   call esi ;               /* call callback()                    */
   add esp, 12
+
+  fldcw word ptr [esp]
+  add esp, 4
 
   pop  edi
   pop  esi

@@ -30,11 +30,12 @@ stackman_switch:
 	movl	8(%ebp), %eax
 	movl	12(%ebp), %edx
 #APP
-# 50 "../platforms/switch_x86_gcc.h" 1
+# 53 "../platforms/switch_x86_gcc.h" 1
 	subl $0x1c, %esp
 movl %eax, %esi
 movl %edx, %edi
 leal 0x10(%esp), %ebx
+fstcw 0x10(%esp)
 movl %ebx, 8(%esp)
 movl $0, 4(%esp)
 movl %edi, 0(%esp)
@@ -48,6 +49,7 @@ movl $1, 4(%esp)
 movl %edi, 0(%esp)
 call *%esi
 movl %eax, %eax
+fldcw 0x10(%esp)
 addl $0x1c, %esp
 
 # 0 "" 2

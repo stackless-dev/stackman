@@ -98,7 +98,8 @@ typedef enum stackman_op_t {
 	STACKMAN_OP_RESTORE = 1,
 
 	/* The callback is being invoked from a stackman_call() invocation.
-	 * Stack_pointer is the pointer that was provided to stackman_call()
+	 * stack_pointer is the stack pointer from before the call. A null
+	 * stack argument to stackman_call() leaves that pointer unchanged.
 	 */
 	STACKMAN_OP_CALL = 2,
 	
