@@ -69,11 +69,13 @@ Limits that are easy to fix the wrong way:
 - On Windows ARM64, `x18` is the TEB for the whole time user code runs.
   Spill and restore the saved value. Do not write the live register.
   Do not invent `.seh_*` names for this file.
-- A live frame pointer (`x29` on AArch64, `r11` on ARM32) is adjusted by
-  the stack delta inside the asm. Do not list that register as a
-  clobber. On RISC-V, `s0` is not a frame chain in `stackman_switch`,
-  and `stackman_call` uses `s0` for the previous stack pointer. Do not
-  adjust it there.
+- A live frame pointer (`x29` on AArch64) is adjusted by the stack delta
+  inside the asm. Do not list `x29` as a clobber. Do not adjust ARM32
+  `r11` there: `stackman_switch` is built with `omit-frame-pointer`, the
+  prologue pushes `r11` and never sets it, and the epilogue reloads the
+  saved value. On RISC-V, `s0` is not a frame chain in
+  `stackman_switch`, and `stackman_call` uses `s0` for the previous
+  stack pointer. Do not adjust it there.
 - AAPCS64 FPCR and RISC-V `fcsr` are thread state. They are not per-call
   spills.
 

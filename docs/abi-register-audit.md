@@ -179,9 +179,13 @@ file and does not run it.
   to the callback. The C wrapper still restores `fs:[0]`.
 - `switch_arm_gcc.h` is a compile error when `__ARM_PCS_VFP` is set.
   `d8`–`d15` were not added. `CP_REGISTERS` is marked as the inline-only
-  clobber. `stackman_switch` applies the stack delta to live `r11`
-  (`sub r1, sp, r0` / `mov sp, r0` / `sub r11, r11, r1`) in the `.S` and
-  in the header. The epilogue still pops the saved `r11`.
+  clobber. An `r11` stack delta was added and then removed.
+  `stackman_switch` is compiled with `omit-frame-pointer`, and the
+  prologue pushes `fp` without setting it, so live `r11` is not this
+  frame. The epilogue pops the saved value. An inline build can also
+  keep the callback or the new stack pointer in `r11` across that asm.
+  AArch64 still adjusts `x29`, which the prologue sets with
+  `mov x29, sp`.
 - Windows ARM32 was removed: `switch_arm_msvc.asm`, `switch_arm_msvc.h`,
   the `_M_ARM` branch in `platform.h`, the Debug|ARM configurations in
   vs2017, vs2019, and vs2022, and `lib/win_arm/stackman.lib`. The
@@ -272,8 +276,10 @@ uses `s0` to hold the previous stack pointer across the callback, so do not
 adjust it there.
 
 **Applied fix.** The `x29` delta is in `switch_aarch64_gcc.S` and in
-`switch_aarch64_gcc.h`. The `r11` delta is in `switch_arm_gcc.S` and in
-`switch_arm_gcc.h`. The RISC-V `s0` delta was left unchanged.
+`switch_aarch64_gcc.h`. The `r11` delta was added to `switch_arm_gcc.S`
+and `switch_arm_gcc.h`, then removed: that function omits the frame
+pointer, so the delta does not land on this frame. The RISC-V `s0` delta
+was left unchanged.
 
 ### AArch64 SME lazy save
 
@@ -348,9 +354,9 @@ The live `r11` adjustment in the AArch64 section above is optional here.
 The shipped integer set (`r4`–`r11`, `lr`) needs no new stores.
 
 **Applied fix.** `__ARM_PCS_VFP` is a compile error, and `CP_REGISTERS` is
-commented as inline-only. The optional `r11` adjustment was applied as
-well. `d8`–`d15` were not added. A separate hard-float port is on the
-roadmap.
+commented as inline-only. The optional `r11` adjustment was applied and
+then removed. See the frame-pointer applied fix above. `d8`–`d15` were
+not added. A separate hard-float port is on the roadmap.
 
 ### Windows ARM32: delete it, or align `sp` before `vpush`
 

@@ -89,16 +89,8 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 	__asm__ ("mov %[result], sp" : [result] "=r" (sp));
 	/* store stack */
 	sp = callback(context, STACKMAN_OP_SAVE, sp);
-	/* Keep the caller's frame pointer attached to the new stack.
-	 * r1 is free until the compiler assigns the RESTORE opcode.
-	 * r11 is not an asm clobber: a clobber would make gcc save
-	 * and restore it around this block and undo the delta.
-	 */
-	__asm__ (
-		"sub r1, sp, %[result]\n\t"
-		"mov sp, %[result]\n\t"
-		"sub r11, r11, r1"
-		: : [result] "r" (sp) : "r1");
+	/* set stack pointer from sp using assembly */
+	__asm__ ("mov sp, %[result]" : : [result] "r" (sp));
 	sp = callback(context, STACKMAN_OP_RESTORE, sp);
 	/* restore registers */
 	return sp;
