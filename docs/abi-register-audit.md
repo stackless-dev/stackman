@@ -45,7 +45,7 @@ Per-platform comments, checked against the code:
 | `switch_x86_64_gcc.h` | `rbx`, `rbp`, `r12`–`r15`, x87 control word, MXCSR | Yes. The comment used to say "mmx"; the instruction is `stmxcsr`. |
 | `switch_x86_gcc.h` | `ebx`, `esi`, `edi`, `ebp` via the frame, x87 control word | Yes. The control word is stored with `fstcw` at the pointer passed to the callback. |
 | `switch_aarch64_gcc.h` | `x19`–`x28`, `x29` via the frame, `d8`–`d15` | Yes for the base AAPCS64 set. Silent on `x18` and SME. |
-| `switch_arm_gcc.h` | `r4`–`r11`, and `d8`–`d15` unless Thumb. `FPSCR` is not saved. | The integer list matches `switch_arm_gcc.S`. That `.S` is soft-float and does not save `d8`–`d15`, so `CP_REGISTERS` describes the inline path only. |
+| `switch_arm_gcc.h` | `r4`–`r11`, and `d8`–`d15` unless Thumb. `FPSCR` is not saved. | The integer list matches `switch_arm_gcc.S`. `CP_REGISTERS` is the inline clobber only; that `.S` is soft-float and does not save `d8`–`d15`. `__ARM_PCS_VFP` is a compile error. |
 | `switch_riscv64_gcc.S` | `s0`–`s11`, `fs0`–`fs11`, `ra` for `stackman_switch` | Yes for that function. `stackman_call` skips a null stack and passes the previous stack pointer. |
 | `switch_x64_msvc.asm` | non-volatile GPRs, `xmm6`–`xmm15`, and MXCSR | Yes. The control bits of MXCSR are saved with the xmm frame. Upper ymm/zmm bits stay volatile. |
 | `switch_arm64_msvc.asm` | `x18`–`x28`, `d8`–`d15`, `FPCR` are pushed | The spill matches the comment. `x18` is spilled and restored, and neither routine writes the live register. The callback is held in `x20`. `stackman_call` holds the old stack pointer in `x19`. |
@@ -121,9 +121,9 @@ not run it.
 | `switch_x64_msvc.asm` | `rbx`, `rbp`, `rdi`, `rsi`, `r12`–`r15`, `xmm6`–`xmm15`, MXCSR | Those registers match the Windows x64 ABI. MXCSR is stored at `[rsp+160]`, the pad in the 168-byte xmm frame, and loaded back before that frame is released. `stackman_call` does not spill it. |
 | `switch_x86_gcc.S` | `ebx`, `esi`, `edi`, `ebp`, x87 control word | Integer set is complete. There is no callee-saved XMM on i386 SysV. `fstcw` stores the control word at `0x10(%esp)`, the pointer passed to the callback, and `fldcw` loads it after the restore callback. |
 | `switch_x86_msvc.asm` | `ebx`, `esi`, `edi`, `ebp`, x87 control word, plus the C wrapper saves `fs:[0]` | Integer set is complete for cdecl. `stackman_switch_raw` stores the control word in a slot below the callee-saved pushes, at the pointer passed to the callback. The C wrapper still restores `fs:[0]`. |
-| `switch_arm_gcc.S` | `r4`–`r11`, `lr` | Complete for the soft-float `arm-linux-gnueabi` ABI this tree ships (`.arch armv5t`, `.fpu softvfp`). `d8`–`d15` are absent. The inline header clobbers them, so a hard-float or softfp build of this `.S` would drop callee-saved VFP state. `armhf` is not a configured ABI. The live frame pointer is not adjusted. |
+| `switch_arm_gcc.S` | `r4`–`r11`, `lr` | Complete for the soft-float `arm-linux-gnueabi` ABI this tree ships (`.arch armv5t`, `.fpu softvfp`). `d8`–`d15` are not spilled, and `__ARM_PCS_VFP` is a compile error. The live `r11` is adjusted with the stack delta before `STACKMAN_OP_RESTORE`; the epilogue still pops the saved value. |
 | `switch_arm_msvc.asm` | `r4`–`r11`, `lr`, `q4`–`q7` (`d8`–`d15`), `FPSCR` | The set matches 32-bit Windows ARM. Alignment does not. `push {r4-r10, fp, lr}` is 9 words, so `sp` is 4-byte aligned for `vpush {q4-q7}`. A doubleword `VPUSH` requires 8-byte alignment. `stackman_call` pushes 3 registers and then `blx`s with `sp` still 4 mod 8. The changelog records this ABI as dropped; the file is still wrong if it is built. |
-| `switch_riscv64_gcc.S` | `ra`, `s0`–`s11`, `fs0`–`fs11` | `stackman_switch` is complete for LP64D. `gp` and `tp` are left alone. `fcsr` is thread `fenv` state, not a per-call spill. |
+| `switch_riscv64_gcc.S` | `ra`, `s0`–`s11`, `fs0`–`fs11` | `stackman_switch` is complete for LP64D. `gp` and `tp` are left alone. `fcsr` is thread `fenv` state, not a per-call spill. The optional `s0` frame delta is not applied: `s0` is not a frame chain there, and `stackman_call` uses it to hold the previous stack pointer. |
 
 ### RISC-V `stackman_call`
 
@@ -142,16 +142,6 @@ Each item is a local edit. The spill lists that already match the ABI stay
 as they are. `stackman_call` only needs a new spill when the fix starts
 using a callee-saved register it does not already save.
 
-### ARM32 and RISC-V live frame pointer
-
-The AArch64 delta also applies to `switch_arm_gcc.S`
-(`sub r1, sp, r0` / `mov sp, r0` / `sub r11, r11, r1`). That adjustment is
-optional: the shipped integer set (`r4`–`r11`, `lr`) needs no new stores.
-On RISC-V `s0` is just a saved register in `stackman_switch`, not a frame
-chain, so the integer spill is already complete and the delta is skipped.
-`stackman_call` uses `s0` to hold the previous stack pointer across the
-callback, so do not adjust it there.
-
 ### AArch64 SME lazy save
 
 On entry to `stackman_switch`, before `sp` changes, call `__arm_za_disable`
@@ -161,19 +151,6 @@ requires of `setjmp` / `longjmp`: commit the lazy ZA buffer and clear
 spill the ZA array in this file. `FPMR`, `FFR`, and `ZT0` stay
 caller-saved. Skip the call on the Windows ARM64 file; this helper is the
 AAPCS64 one. This can wait until a supported target actually enables SME.
-
-### ARM32 soft-float: refuse a hard-float build
-
-`switch_arm_gcc.S` is `.arch armv5t` and `.fpu softvfp`, which matches
-`arm-linux-gnueabi`. Do not add `d8`–`d15` until there is an `armhf` ABI.
-Do stop a hard-float compile from silently using this file. In
-`switch_arm_gcc.h`, `#error` when `__ARM_PCS_VFP` is set, with a line that
-says the checked-in assembly does not spill `d8`–`d15`. Leave
-`CP_REGISTERS` as the inline-only clobber, or drop it, so it cannot be read
-as a description of `switch_arm_gcc.S`.
-
-The live `r11` adjustment in the section above is optional here.
-The shipped integer set (`r4`–`r11`, `lr`) needs no new stores.
 
 ### Windows ARM32: delete it, or align `sp` before `vpush`
 
