@@ -59,9 +59,15 @@
 #define _STACKMAN_PLATFORM x86_clang
 #define _STACKMAN_ABI sysv_i386
 #elif defined(__arm__)
-#include "switch_arm_gcc.h" /* gcc using arm */
+#if defined(__ARM_PCS_VFP)
+#include "switch_armhf_gcc.h" /* hard-float AAPCS-VFP */
+#define _STACKMAN_PLATFORM armhf_clang
+#define _STACKMAN_ABI armhf
+#else
+#include "switch_arm_gcc.h" /* soft-float AAPCS */
 #define _STACKMAN_PLATFORM arm32_clang
 #define _STACKMAN_ABI arm32
+#endif
 #elif defined(__ARM_ARCH_ISA_A64)
 #include "switch_aarch64_gcc.h" /* gcc using arm aarch64*/
 #define _STACKMAN_PLATFORM aarch64_clang
@@ -92,9 +98,15 @@
 #define _STACKMAN_PLATFORM x86_gcc
 #define _STACKMAN_ABI sysv_i386
 #elif defined(__arm__)
-#include "switch_arm_gcc.h" /* gcc using arm */
+#if defined(__ARM_PCS_VFP)
+#include "switch_armhf_gcc.h" /* hard-float AAPCS-VFP */
+#define _STACKMAN_PLATFORM armhf_gcc
+#define _STACKMAN_ABI armhf
+#else
+#include "switch_arm_gcc.h" /* soft-float AAPCS */
 #define _STACKMAN_PLATFORM arm32_gcc
 #define _STACKMAN_ABI arm32
+#endif
 #elif defined(__ARM_ARCH_ISA_A64)
 #include "switch_aarch64_gcc.h" /* gcc using arm aarch64*/
 #define _STACKMAN_PLATFORM aarch64_gcc

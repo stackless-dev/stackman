@@ -31,8 +31,9 @@ and the stack direction.
 
 ## Platforms
 
-Linux: `sysv_i386`, `sysv_amd64`, `arm32` (soft-float AAPCS), `aarch64`,
-`riscv64` (LP64D). macOS: `darwin_x86_64`, `darwin_arm64`. Windows:
+Linux: `sysv_i386`, `sysv_amd64`, `arm32` (soft-float AAPCS), `armhf`
+(AAPCS-VFP), `aarch64`, `riscv64` (LP64D). macOS: `darwin_x86_64`,
+`darwin_arm64`. Windows:
 `win_x86`, `win_x64`, `win_arm64`. `win_aarch64` is accepted and
 normalized to `win_arm64`. FreeBSD, OpenBSD, and NetBSD use the Linux
 `sysv_amd64` sources. Their workflow runs `gmake`.
@@ -55,11 +56,12 @@ preserved.
 Details and the original audit are in `docs/abi-register-audit.md`.
 Limits that are easy to fix the wrong way:
 
-- ARM32 hard-float is unsupported. `switch_arm_gcc.S` is `.arch armv5t`
-  and `.fpu softvfp`, and it does not spill `d8`–`d15`. `__ARM_PCS_VFP`
-  is a compile error. A hard-float port is a new assembly file with its
-  own ABI name. Softfp does not define `__ARM_PCS_VFP`, and the compiler
-  can still use `d8`–`d15`.
+- `arm32` is the soft-float assembly (`switch_arm_gcc.S`, `.arch armv5t`,
+  `.fpu softvfp`). It does not spill `d8`–`d15`, and `__ARM_PCS_VFP` is
+  a compile error in that header. `armhf` (`switch_armhf_gcc.S`) is the
+  hard-float port and is what `__ARM_PCS_VFP` selects. It spills
+  `d8`–`d15` in `stackman_switch`. It does not spill `FPSCR`. Softfp
+  does not define `__ARM_PCS_VFP` and still builds as `arm32`.
 - `aarch64`, `darwin_arm64`, and `win_arm64` do not preserve SME ZA
   across `stackman_switch`. Do not call `__arm_za_disable`. That helper
   commits the outgoing caller's ZA and turns ZA off. Nothing in the
@@ -86,6 +88,7 @@ make test          # native ABI. Builds lib/$(ABI)/libstackman.a and runs the te
 make abiname
 make PLATFORMFLAGS=-m32 test
 make PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-arm test
+make PLATFORM_PREFIX=arm-linux-gnueabihf- EMULATOR=qemu-arm test
 ```
 
 `make clean` only when switching `PLATFORMFLAGS` or `PLATFORM_PREFIX`.
@@ -118,8 +121,9 @@ major version. `commit-artifacts` in
 
 `.github/workflows/buildcommit.yml`, on pull requests to `master`:
 
-- `build-linux-gnu`: AMD64, i386 (`-m32`), arm (`qemu-arm`), aarch64
-  (`qemu-aarch64`), riscv64 (`qemu-riscv64`). Each runs `make test`.
+- `build-linux-gnu`: AMD64, i386 (`-m32`), arm (`qemu-arm`), armhf
+  (`qemu-arm`), aarch64 (`qemu-aarch64`), riscv64 (`qemu-riscv64`).
+  Each runs `make test`.
 - `build-macos`: `macos-15-intel` (`darwin_x86_64`) and `macos-latest`
   (`darwin_arm64`).
 - `build-windows`: VS2022 `x86`, `x64`, and `arm64`. Tests run only

@@ -393,20 +393,20 @@ alternative was not used.
 
 ## Roadmap
 
-Two items from the audit are still open.
+SME lazy save is still open. The ARM32 hard-float port is `armhf`.
 
 ### ARM32 hard-float
 
-The shipped `switch_arm_gcc.S` is soft-float (`arm-linux-gnueabi`,
+The soft-float file `switch_arm_gcc.S` is unchanged (`arm-linux-gnueabi`,
 `.arch armv5t`, `.fpu softvfp`) and does not spill `d8`–`d15`.
-`__ARM_PCS_VFP` is a compile error, so a hard-float build cannot use that
-file by mistake.
+`__ARM_PCS_VFP` is still a compile error in that header, so a hard-float
+build cannot use that file by mistake.
 
-A hard-float port is a new assembly, alongside the soft-float file. It
-spills `d8`–`d15` in `stackman_switch`, has its own ABI name, and is what
-a `__ARM_PCS_VFP` build selects. The `#error` stays until that port
-exists. Softfp is not that port: it does not define `__ARM_PCS_VFP`, and
-the compiler can still use `d8`–`d15`.
+`switch_armhf_gcc.h` is the hard-float port. `platform.h` selects it,
+and the ABI name `armhf`, when `__ARM_PCS_VFP` is set. `stackman_switch`
+spills `d8`–`d15`. `FPSCR` is not spilled. Softfp is not this port: it
+does not define `__ARM_PCS_VFP`, and the compiler can still use
+`d8`–`d15` while building `arm32`.
 
 ### AArch64 SME lazy save
 

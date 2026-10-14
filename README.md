@@ -12,7 +12,7 @@
 ║                                                              ║
 ║  Do you have a stack? Stackman is here to help.              ║
 ║                                                              ║
-║  v1.2.5 • 10 platforms • Stack switching simplified          ║
+║  v1.2.5 • 11 platforms • Stack switching simplified          ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
@@ -92,7 +92,8 @@ calling convention, plus archive format:
  - **Linux (System V ABI)**
    - sysv_i386 (32-bit x86)
    - sysv_amd64 (64-bit x86_64)
-   - arm32 (32-bit ARM, AAPCS)
+   - arm32 (32-bit ARM, AAPCS soft-float)
+   - armhf (32-bit ARM, AAPCS-VFP hard-float)
    - aarch64 (64-bit ARM, AAPCS64)
    - riscv64 (64-bit RISC-V, LP64D ABI)
  - **macOS (Darwin)**
@@ -206,7 +207,7 @@ assembly files is generally preferred for reliability and compatibility.
 **Platforms with inline assembly support:**
 - x86 (sysv_i386)
 - x86_64 (sysv_amd64) 
-- ARM32 (arm32)
+- ARM32 soft-float (arm32) and hard-float (armhf)
 - ARM64 (aarch64)
 
 Only when compiled with GCC and `STACKMAN_INLINE_ASM` is not disabled. Clang, RISC-V, macOS, and Windows 
@@ -250,7 +251,8 @@ Linux on x86-64 can be used to cross compile for x86 and ARM targets.  This is m
 stackman/platform/gen_asm.c
 
  - x86 requires the -m32 flag to compilers and linkers.
- - arm32 requires to use the arm-linux-gnueabi-* tools, including cc and linker
+ - arm32 requires the arm-linux-gnueabi-* tools, including cc and linker
+ - armhf requires the arm-linux-gnueabihf-* tools, including cc and linker
  - aarch64 requires the aarch64-linux-gnu-* tools.
 
 The x86 tools require the **gcc-multilib** and **g++-multilib** packages to be installed.  They, however, can't co-exist with the **gcc-arm-linux-gnueabi** or
@@ -264,13 +266,14 @@ target intent may not be fully visible to that probe. Set `STACKMAN_ABI` to forc
 library ABI deterministically.
 
 Supported values match the ABI names in this document (for example: `sysv_i386`, `sysv_amd64`, `arm32`,
-`aarch64`, `riscv64`, `darwin_x86_64`, `darwin_arm64`, `win_x86`, `win_x64`, `win_arm64`).
+`armhf`, `aarch64`, `riscv64`, `darwin_x86_64`, `darwin_arm64`, `win_x86`, `win_x64`, `win_arm64`).
 For compatibility, `win_aarch64` is also accepted and normalized to `win_arm64`.
 
 Examples:
 
 - `make STACKMAN_ABI=sysv_i386 PLATFORMFLAGS=-m32 test`
 - `make STACKMAN_ABI=arm32 PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-arm test`
+- `make STACKMAN_ABI=armhf PLATFORM_PREFIX=arm-linux-gnueabihf- EMULATOR=qemu-arm test`
 - `make STACKMAN_ABI=win_arm64 PLATFORM_PREFIX=aarch64-w64-mingw32- all`
 
 #### Cross compiling for x86 (32 bit) on Linux
@@ -285,6 +288,13 @@ Examples:
  - install __qemu-user__ for hardware emulation 
  - *compile* **gen_asm.c** using `arm-linux-gnueabi-gcc`
  - *make* using  `make PLATFORM_PREFIX=arm-linux-gnueabi- EMULATOR=qemu-arm test`
+
+#### Cross compiling for ARM hard-float (32 bit) on Linux
+
+ - install __gcc-arm-linux-gnueabihf__ and __g++-arm-linux-gnueabihf__
+ - install __qemu-user__ for hardware emulation
+ - *compile* **gen_asm.c** using `arm-linux-gnueabihf-gcc -marm`
+ - *make* using  `make PLATFORM_PREFIX=arm-linux-gnueabihf- EMULATOR=qemu-arm test`
 
 #### Cross compiling for Arm64 on Linux
 

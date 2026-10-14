@@ -49,6 +49,7 @@ abi_from_target_triple() {
 		*x86_64*linux*) printf '%s\n' "sysv_amd64" ;;
 		*i?86*linux*) printf '%s\n' "sysv_i386" ;;
 		*aarch64*linux*) printf '%s\n' "aarch64" ;;
+		*arm*linux*gnueabihf*) printf '%s\n' "armhf" ;;
 		*arm*linux*gnueabi*|*armv7*linux*|*armv6*linux*) printf '%s\n' "arm32" ;;
 		*riscv64*linux*) printf '%s\n' "riscv64" ;;
 		*aarch64*w64*mingw*|*arm64*windows*|*aarch64*windows*) printf '%s\n' "win_arm64" ;;
