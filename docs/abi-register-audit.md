@@ -81,16 +81,17 @@ caller-saved.
 never writes `x18`. `stackman_call` spills `x29`, `x30`, and `x19`, and holds
 the old stack pointer in `x19`.
 
-Two gaps that are not missing base registers:
+`stackman_switch` applies the stack delta to the live `x29` before
+`STACKMAN_OP_RESTORE` (`sub x1, sp, x0` / `mov sp, x0` / `sub x29, x29, x1`).
+The same three instructions are in `switch_aarch64_gcc.h`, so regenerating
+the `.S` from `gen_asm.c` keeps them. The epilogue still reloads the saved
+`x29`, so the caller receives the stacked value. The adjustment matters only
+during `STACKMAN_OP_RESTORE`. A callback that relocates a stack still has to
+rewrite saved frame-pointer slots in the copied bytes.
 
-- After `mov sp, x0` the live `x29` is left pointing at the old stack. The
-  Windows ARM64 and SysV x86-64 routines add the same delta to the frame
-  pointer. The epilogue still reloads the saved `x29`, so the caller receives
-  the stacked value. The frame chain is wrong only during
-  `STACKMAN_OP_RESTORE`.
-- A stack switch is an asynchronous transfer of control. AAPCS64 says
-  `setjmp` / `longjmp` call `__arm_za_disable` so the SME lazy-save buffer
-  (`TPIDR2_EL0`) is not left aimed at the wrong stack. This file does not.
+SME lazy save is not called. AAPCS64 says `setjmp` / `longjmp` call
+`__arm_za_disable` so the ZA buffer (`TPIDR2_EL0`) is not left aimed at the
+wrong stack. That can wait until a supported target enables SME.
 
 ### `switch_arm64_msvc.asm` (Windows `win_arm64`)
 
@@ -106,7 +107,7 @@ and reload stay, so a restored context gets the value it spilled.
 `stackman_call` spills `x19` at `[sp, #16]` and keeps the old stack pointer
 there. It does not read or write `x18`.
 
-The file adjusts `fp` across the switch, which the SysV file does not.
+The file adjusts `fp` across the switch, as `switch_aarch64_gcc.S` does for `x29`.
 It has no SEH unwind opcodes. The x64 MASM uses `NESTED_ENTRY` and
 `.pushreg` / `save_xmm128`. That is an unwinding gap, separate from the
 register values. The Windows ARM64 test job compiles this file and does
@@ -141,40 +142,15 @@ Each item is a local edit. The spill lists that already match the ABI stay
 as they are. `stackman_call` only needs a new spill when the fix starts
 using a callee-saved register it does not already save.
 
-### AArch64 SysV and Apple: keep `x29` attached to the new stack
+### ARM32 and RISC-V live frame pointer
 
-File: `stackman/platforms/switch_aarch64_gcc.S`, in `stackman_switch`,
-immediately after the first `blr` and before `mov w1, 1`.
-
-`x0` is the new stack pointer. `x19` is the callback and `x20` is the
-context. `x1` is free until it becomes the opcode:
-
-```asm
-sub x1, sp, x0
-mov sp, x0
-sub x29, x29, x1
-```
-
-That is the same delta the Windows ARM64 file applies to `fp`. The epilogue
-still reloads `x29` from the stack, so the caller receives the saved value,
-not this adjusted one. The adjustment matters only while
-`STACKMAN_OP_RESTORE` runs. A callback that relocates a stack still has to
-rewrite saved frame-pointer slots in the copied bytes; this edit does not do
-that.
-
-The checked-in `.S` is what default builds use (`STACKMAN_INLINE_ASM` is
-unset). The inline sequence in `switch_aarch64_gcc.h` is the generator. Put
-the same three instructions in that header if the `.S` is regenerated from
-`gen_asm.c`, or the next regeneration will drop the delta.
-
-The same three-instruction pattern applies to `switch_arm_gcc.S`
-(`sub r1, sp, r0` / `mov sp, r0` / `sub r11, r11, r1`) and to
-`switch_riscv64_gcc.S` (`sub t0, sp, a0` before `mv sp, a0`, then add that
-delta to `s0` only when `s0` is the live frame pointer). On RISC-V `s0` is
-just a saved register in `stackman_switch`, not a frame chain, so the
-integer spill is already complete and the delta is optional. `stackman_call`
-uses `s0` to hold the previous stack pointer across the callback, so do not
-adjust it there.
+The AArch64 delta also applies to `switch_arm_gcc.S`
+(`sub r1, sp, r0` / `mov sp, r0` / `sub r11, r11, r1`). That adjustment is
+optional: the shipped integer set (`r4`–`r11`, `lr`) needs no new stores.
+On RISC-V `s0` is just a saved register in `stackman_switch`, not a frame
+chain, so the integer spill is already complete and the delta is skipped.
+`stackman_call` uses `s0` to hold the previous stack pointer across the
+callback, so do not adjust it there.
 
 ### AArch64 SME lazy save
 
@@ -234,7 +210,7 @@ says the checked-in assembly does not spill `d8`–`d15`. Leave
 `CP_REGISTERS` as the inline-only clobber, or drop it, so it cannot be read
 as a description of `switch_arm_gcc.S`.
 
-The live `r11` adjustment in the AArch64 section above is optional here.
+The live `r11` adjustment in the section above is optional here.
 The shipped integer set (`r4`–`r11`, `lr`) needs no new stores.
 
 ### Windows ARM32: delete it, or align `sp` before `vpush`

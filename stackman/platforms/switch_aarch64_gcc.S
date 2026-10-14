@@ -89,8 +89,10 @@ LABEL(stackman_switch)
 	blr	x3
 	mov	x2, x0
 #APP
-// 63 "../platforms/switch_aarch64_gcc.h" 1
+// 67 "../platforms/switch_aarch64_gcc.h" 1
+	sub x1, sp, x0
 	mov sp, x0
+	sub x29, x29, x1
 // 0 "" 2
 #NO_APP
 	mov	w1, 1
