@@ -35,7 +35,8 @@ The API is described in two places:
   `stackman_call` comment says the third argument is the previous stack
   pointer. The `STACKMAN_OP_CALL` enumerator comment said the opposite (the
   pointer passed into `stackman_call`). It now matches the function comment.
-  RISC-V still implements the old enumerator text.
+  `switch_riscv64_gcc.S` now follows it: a null stack is left unchanged,
+  and the callback receives the previous stack pointer.
 
 Per-platform comments, checked against the code:
 
@@ -45,7 +46,7 @@ Per-platform comments, checked against the code:
 | `switch_x86_gcc.h` | `ebx`, `esi`, `edi`, and `ebp` via the frame | Yes for what it saves. It does not mention the x87 control word. |
 | `switch_aarch64_gcc.h` | `x19`–`x28`, `x29` via the frame, `d8`–`d15` | Yes for the base AAPCS64 set. Silent on `x18` and SME. |
 | `switch_arm_gcc.h` | `r4`–`r11`, and `d8`–`d15` unless Thumb. `FPSCR` is not saved. | The integer list matches `switch_arm_gcc.S`. That `.S` is soft-float and does not save `d8`–`d15`, so `CP_REGISTERS` describes the inline path only. |
-| `switch_riscv64_gcc.S` | `s0`–`s11`, `fs0`–`fs11`, `ra` for `stackman_switch` | Yes for that function. The `stackman_call` comments describe always switching and passing the new stack, which is the bug. |
+| `switch_riscv64_gcc.S` | `s0`–`s11`, `fs0`–`fs11`, `ra` for `stackman_switch` | Yes for that function. `stackman_call` skips a null stack and passes the previous stack pointer. |
 | `switch_x64_msvc.asm` | "all registers that the x64 ABI specifies as non-volatile", plus xmm | The GPRs and `xmm6`–`xmm15` match. MXCSR[6:15] is non-volatile on Windows and is not saved, so the comment overclaims. |
 | `switch_arm64_msvc.asm` | `x18`–`x28`, `d8`–`d15`, `FPCR` are pushed | The spill matches the comment. The routine then uses `x18` as a scratch register, which the Windows ABI does not allow. |
 
@@ -133,30 +134,16 @@ register values.
 | `switch_arm_msvc.asm` | `r4`–`r11`, `lr`, `q4`–`q7` (`d8`–`d15`), `FPSCR` | The set matches 32-bit Windows ARM. Alignment does not. `push {r4-r10, fp, lr}` is 9 words, so `sp` is 4-byte aligned for `vpush {q4-q7}`. A doubleword `VPUSH` requires 8-byte alignment. `stackman_call` pushes 3 registers and then `blx`s with `sp` still 4 mod 8. The changelog records this ABI as dropped; the file is still wrong if it is built. |
 | `switch_riscv64_gcc.S` | `ra`, `s0`–`s11`, `fs0`–`fs11` | `stackman_switch` is complete for LP64D. `gp` and `tp` are left alone. `fcsr` is thread `fenv` state, not a per-call spill. |
 
-### RISC-V `stackman_call` control bugs
+### RISC-V `stackman_call`
 
 The register spill in `stackman_call` (`ra` and `s0`) is enough for the
-registers that routine writes. The control flow is not.
-
-```asm
-mv t0, a0
-mv t1, a2
-mv sp, a2       ; runs even when a2 is 0
-...
-mv a2, t1       ; third argument is the new stack, not the old one
-jalr t0
-```
-
-Every other port skips a null stack pointer and passes the previous stack
-pointer. The function comment on `stackman_call` in
-`stackman/stackman_switch.h` says the third argument is the previous stack
-pointer. The `STACKMAN_OP_CALL` enumerator comment used to say the pointer
-that was provided to `stackman_call`; it now matches the function comment.
-The implementations other than RISC-V follow that comment.
-
-A null stack on RISC-V sets `sp` to zero and then calls the callback. That
-faults inside the callback prologue. The return value itself is left in `a0`
-and would survive the epilogue on a non-null stack.
+registers that routine writes. It used to switch `sp` even when the
+requested stack was null, and it passed that new pointer as the third
+argument. `test_04` then accepted `passed == stack2`, and `test_05` faulted
+in the callback prologue. It now matches the other ports: a null stack is
+left in place, and the callback receives the previous stack pointer (`s0`,
+captured after the 16-byte frame allocation). The return value stays in
+`a0`.
 
 ## Suggested fixes
 
@@ -216,9 +203,10 @@ The same three-instruction pattern applies to `switch_arm_gcc.S`
 (`sub r1, sp, r0` / `mov sp, r0` / `sub r11, r11, r1`) and to
 `switch_riscv64_gcc.S` (`sub t0, sp, a0` before `mv sp, a0`, then add that
 delta to `s0` only when `s0` is the live frame pointer). On RISC-V `s0` is
-just a saved register in this function, not a frame chain, so the integer
-spill is already complete and the delta is optional. Do not spend the
-RISC-V edit on `s0` until the `stackman_call` control fix below is in.
+just a saved register in `stackman_switch`, not a frame chain, so the
+integer spill is already complete and the delta is optional. `stackman_call`
+uses `s0` to hold the previous stack pointer across the callback, so do not
+adjust it there.
 
 ### AArch64 SME lazy save
 
@@ -229,30 +217,6 @@ requires of `setjmp` / `longjmp`: commit the lazy ZA buffer and clear
 spill the ZA array in this file. `FPMR`, `FFR`, and `ZT0` stay
 caller-saved. Skip the call on the Windows ARM64 file; this helper is the
 AAPCS64 one. This can wait until a supported target actually enables SME.
-
-### RISC-V `stackman_call`
-
-File: `stackman/platforms/switch_riscv64_gcc.S`. `s0` already holds the
-stack pointer after the 16-byte allocation, and it is spilled. Replace the
-unconditional switch with:
-
-```asm
-mv   t0, a0       # callback
-mv   t1, a2       # requested stack, or zero
-mv   a0, a1       # context
-li   a1, 2
-mv   a2, s0       # previous stack pointer
-beqz t1, 1f
-mv   sp, t1
-1:
-jalr t0
-mv   sp, s0
-```
-
-Set up `a0`–`a2` before `sp` changes so the arguments do not depend on the
-new stack. `t0` is only needed for `jalr`. Update the comments that say
-`a2` is the new stack. `test_04` should then assert a pass, and `test_05`
-should return instead of faulting, under `qemu-riscv64`.
 
 ### Windows x64: spill MXCSR with the xmm frame
 
@@ -347,11 +311,10 @@ have to be preserved beyond the pop.
   the callback sits on the new block, and that the pointer argument is not
   the stack passed to `stackman_call` and does not fall inside
   `[block, stack)`. The old `STACKMAN_SP_LE(stack2, passed)` check was true
-  when `passed == stack2`, so the RISC-V bug satisfied it.
+  when `passed == stack2`, which is what the old RISC-V `stackman_call` did.
 - `test_05` calls `stackman_call(..., 0)` and checks the same return value
   and caller local. The pointer argument must be non-null and at or below a
-  caller local. On RISC-V this still faults: `sp` is set to zero before the
-  callback runs, so the failure is a crash rather than an assertion.
+  caller local. The old RISC-V code set `sp` to zero and faulted here.
 - `test_07` / `test_08` do floating-point and integer work around a no-op
   `stackman_switch`. They hope the compiler keeps values in callee-saved
   registers. If it keeps them in volatile registers or in memory, the test
@@ -377,10 +340,9 @@ binary. `STACKMAN_HAVE_CALL` lived inside the `STACKMAN_SWITCH_IMPL` branch
 of `switch_riscv64_gcc.h`, so a normal `#include "stackman.h"` never defined
 it and `tests/test.c` compiled the calls out. The macro is now set on that
 include, with `STACKMAN_STACK_ALIGN` 16, matching the other platform headers.
-After that, `qemu-riscv64` fails until `switch_riscv64_gcc.S` skips a null
-stack and passes the previous stack pointer: `test_04` asserts, and
-`test_05` faults. The `STACKMAN_OP_CALL` enumerator comment already matches
-that contract.
+The following `qemu-riscv64` run failed in `test_04` and `test_05`.
+`switch_riscv64_gcc.S` now skips a null stack and passes the previous stack
+pointer, which is the contract those tests check.
 
 Do not add a per-register assembly harness yet.
 

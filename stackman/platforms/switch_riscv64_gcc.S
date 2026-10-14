@@ -166,15 +166,20 @@ LABEL(stackman_switch)
 .LFE0:
 	SIZE_FUNCTION(stackman_switch)
 
-/* 
+/*
  * void *stackman_call(stackman_cb_t callback, void *context, void *new_stack)
- * 
- * Similar to stackman_switch but uses explicitly provided stack pointer.
- * 
+ *
+ * Calls callback(context, STACKMAN_OP_CALL, old_sp). A non-zero new_stack
+ * replaces sp for that call. Zero leaves the current stack in place.
+ * The third argument is the stack pointer from before the switch.
+ *
  * Register usage:
- * - a0: callback function pointer
- * - a1: context pointer
- * - a2: new stack pointer
+ * - a0: callback function pointer, then context
+ * - a1: context pointer, then opcode
+ * - a2: requested stack pointer, then the previous stack pointer
+ * - s0: previous stack pointer (callee-saved)
+ * - t0: callback
+ * - t1: requested stack pointer
  */
 	.align	1
 	FUNCTION(stackman_call)
@@ -195,15 +200,20 @@ LABEL(stackman_call)
 	/* Save old stack pointer in s0 (callee-saved register) */
 	mv	s0, sp
 	
-	/* Setup args for callback and switch to new stack */
+	/* Preserve the callback and the requested stack. Both are
+	 * caller-saved, and both are consumed before jalr. */
 	mv	t0, a0			/* t0 = callback */
-	mv	t1, a2			/* t1 = new_stack (for arg) */
-	mv	sp, a2			/* switch to new stack */
+	mv	t1, a2			/* t1 = requested stack, or zero */
 	
-	/* Call callback(context, opcode, sp) */
+	/* callback(context, STACKMAN_OP_CALL, previous sp) */
 	mv	a0, a1			/* a0 = context */
 	li	a1, 2			/* a1 = STACKMAN_OP_CALL */
-	mv	a2, t1			/* a2 = new_stack */
+	mv	a2, s0			/* a2 = previous stack pointer */
+	
+	/* A null stack means "keep the current one". */
+	beqz	t1, .Lcall_keep_sp
+	mv	sp, t1
+.Lcall_keep_sp:
 	jalr	t0			/* call callback */
 	
 	/* Restore old stack pointer from s0 */
