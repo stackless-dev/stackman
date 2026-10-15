@@ -13,10 +13,10 @@ stackman_switch_raw PROC callback:DWORD, context:DWORD
   push esi
   push edi
   ; x87 control word at [esp], MXCSR at [esp+4]. The published pointer
-  ; is this slot, so a copied stack image carries both. MSVC's
-  ; fegetround reads MXCSR; restoring the x87 word alone leaves that
-  ; mode behind. Not in the C wrapper: that frame does not travel
-  ; with a real switch.
+  ; is this slot, so a copied stack image carries both. Older 32-bit
+  ; compilers emit x87, so their rounding mode lives in the control
+  ; word. Current MSVC emits SSE2, so its mode lives in MXCSR.
+  ; Not in the C wrapper: that frame does not travel with a real switch.
   sub esp, 8
   fstcw word ptr [esp]
   stmxcsr dword ptr [esp+4]

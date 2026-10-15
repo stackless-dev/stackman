@@ -149,8 +149,10 @@ Vector CSRs (`vcsr`, `vl`, `vtype`, `vxrm`, `vxsat`) are not spilled.
 `stackman_switch_raw` spills `ebx`, `esi`, `edi`, `ebp`, the x87
 control word (`fstcw` / `fldcw`), and MXCSR (`stmxcsr` / `ldmxcsr`).
 The published pointer is that 8-byte slot: the control word at `[esp]`,
-MXCSR at `[esp+4]`. MSVC's `fegetround` reads MXCSR. The C wrapper
-around the raw routine saves and restores `fs:[0]`, the SEH chain.
+MXCSR at `[esp+4]`. Both are spilled so older compilers, which emit
+x87, and current MSVC, which emits SSE2, each keep their rounding mode.
+The C wrapper around the raw routine saves and restores `fs:[0]`, the
+SEH chain.
 
 `stackman_call` does not spill the x87 control word or MXCSR. The SEH
 save is only on `stackman_switch`.
