@@ -66,12 +66,14 @@ Limits that are easy to fix the wrong way:
   (`-mfloat-abi=softfp`) is not a supported platform. It still builds
   as `arm32` and runs, and that assembly does not preserve `FPSCR`.
   Do not add an `FPSCR` spill to `switch_arm_gcc.S` to cover it.
-- `aarch64`, `darwin_arm64`, and `win_arm64` do not preserve SME ZA
-  across `stackman_switch`. Do not call `__arm_za_disable`. That helper
-  commits the outgoing caller's ZA and turns ZA off. Nothing in the
-  switch installs the incoming stack's ZA. `stackman_call` returns to
-  the same caller and does not need it. Windows ARM64 is a different
-  runtime. Do not call the AAPCS64 helper there.
+- `aarch64` and `darwin_arm64` keep dormant or off SME ZA across
+  `stackman_switch`. The scheme is `docs/scalable-matrix-extension.md`.
+  `stackman_sme_suspend` runs before the save callback and
+  `stackman_sme_resume` runs after the new stack pointer is installed.
+  Do not restore ZA with `__arm_sme_save` / `__arm_sme_restore`. Do not
+  read `TPIDR2_EL0` with `mrs`. `stackman_call` does not touch ZA.
+  Windows ARM64 is a different runtime. Do not call the AAPCS64 helpers
+  there, and do not pretend `win_arm64` preserves ZA.
 - On Windows ARM64, `x18` is the TEB for the whole time user code runs.
   Spill and restore the saved value. Do not write the live register.
   Do not invent `.seh_*` names for this file.

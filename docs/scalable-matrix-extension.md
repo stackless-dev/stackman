@@ -2,7 +2,8 @@
 
 SME is the Scalable Matrix Extension. It is an optional AArch64 feature,
 `FEAT_SME`, published by Arm in 2021 as part of the Armv9-A architecture.
-This note is the plan for keeping its ZA state across `stackman_switch`.
+This note is how `stackman_switch` keeps its ZA state on `aarch64` and
+`darwin_arm64`.
 The register spills for the other ABIs stay in `platform-abi.md`.
 
 ## Where it comes from
