@@ -7,6 +7,51 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+/* Name of the test currently running, so a fault names itself.
+ * stdout from a crashed process is lost when it is fully buffered. */
+static const char *current_test;
+
+static LONG WINAPI test_crash(EXCEPTION_POINTERS *info)
+{
+	EXCEPTION_RECORD *rec = info->ExceptionRecord;
+
+	fprintf(stderr, "exception 0x%08lx at %p during %s",
+		rec->ExceptionCode, rec->ExceptionAddress,
+		current_test ? current_test : "startup");
+	if (rec->ExceptionCode == EXCEPTION_ACCESS_VIOLATION &&
+	    rec->NumberParameters >= 2) {
+		fprintf(stderr, " %s %p",
+			rec->ExceptionInformation[0] ? "write" : "read",
+			(void *)rec->ExceptionInformation[1]);
+	}
+	fprintf(stderr, "\n");
+	fflush(stderr);
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+#endif
+
+static void test_startup(void)
+{
+	setvbuf(stdout, NULL, _IONBF, 0);
+	setvbuf(stderr, NULL, _IONBF, 0);
+#ifdef _WIN32
+	SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+	AddVectoredExceptionHandler(1, test_crash);
+#endif
+}
+
+static void test_enter(const char *name)
+{
+#ifdef _WIN32
+	current_test = name;
+#endif
+	printf("%s\n", name);
+}
+
 /* Soft-float arm32 does not spill FPSCR. Softfp selects that assembly. */
 #if defined(__arm__) && !defined(__aarch64__) && !defined(__ARM_PCS_VFP)
 #define STACKMAN_ROUND_ISOLATED 0
@@ -567,25 +612,36 @@ void test_09(void *stack_marker)
 int main(int argc, char*argv[])
 {
 	int stack_marker = 0;
+
+	test_startup();
+	test_enter("test_01");
 	test_01();
 	printf("test_01 ok\n");
+	test_enter("test_02");
 	test_02((void*)&stack_marker);
 	printf("test_02 ok\n");
 
+	test_enter("test_03");
 	test_03((void*)&stack_marker);
 	printf("test_03 ok\n");
 #ifdef TEST_04
+	test_enter("test_04");
 	test_04();
 	printf("test_04 ok\n");
+	test_enter("test_05");
 	test_05();
 	printf("test_05 ok\n");
 #endif
+	test_enter("test_06");
 	test_06();
 	printf("test_06 ok\n");
+	test_enter("test_07");
 	test_07();
 	printf("test_07 ok\n");
+	test_enter("test_08");
 	test_08();
 	printf("test_08 ok\n");
+	test_enter("test_09");
 	test_09((void*)&stack_marker);
 	printf("test_09 ok\n");
 	return 0;

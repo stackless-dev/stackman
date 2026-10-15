@@ -12,7 +12,7 @@
 ║                                                              ║
 ║  Do you have a stack? Stackman is here to help.              ║
 ║                                                              ║
-║  v1.2.5 • 11 platforms • Stack switching simplified          ║
+║  v1.3.0 • 11 platforms • Stack switching simplified          ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 ```

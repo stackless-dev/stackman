@@ -7,11 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-15
+
 ### Added
-- FreeBSD, OpenBSD and NetBSD (amd64, `sysv_amd64` ABI) are built and tested on every commit by a new `build and test bsd` workflow.
+- `armhf`, a 32-bit ARM hard-float ABI (AAPCS-VFP). `__ARM_PCS_VFP` selects it. Soft-float stays `arm32`. CI and the release archive include `lib/armhf`.
+- `docs/platform-abi.md`, the current contract for switching and register spills. `docs/abi-register-audit.md` remains the historical record of that audit.
+- `test_09` checks that the caller's rounding mode survives `stackman_switch`, including a switch onto a saved stack. Soft-float `arm32` does not spill `FPSCR`, and the test expects the callback's mode to remain.
+- FreeBSD, OpenBSD and NetBSD (amd64, `sysv_amd64` ABI) are built and tested on every commit by a `build and test bsd` workflow.
+
+### Changed
+- `stackman_switch` spills floating-point control and status state and reloads it after the restore callback. `stackman_call` does not touch those registers.
+- `armhf` spills the whole `FPSCR`.
+- `aarch64` and `darwin_arm64` spill `FPCR` and `FPSR`.
+- `win_arm64` spills `FPSR` as well as `FPCR`.
+- `riscv64` spills the whole `fcsr`.
+- `sysv_i386` spills the x87 control word. `win_x64` spills `MXCSR`.
+- `win_x86` spills the x87 control word and `MXCSR`, so older compilers that emit x87 and current MSVC, which emits SSE2, each keep their rounding mode.
+- Softfp (`-mfloat-abi=softfp`) is not a supported platform. That build selects `arm32` and does not preserve `FPSCR`.
+- CI test steps stop after one minute.
 
 ### Fixed
+- `test_04` allocates 8KB for the `stackman_call` stack. Two MSVC Debug (`/ZI`) frames of the recursive callback overflowed a 1KB block into the heap header, so the x64 test failed intermittently.
+- RISC-V `stackman_call` leaves a null stack unchanged and passes the previous stack pointer to the callback.
+- Windows ARM64 no longer uses the live TEB register `x18` as a scratch in `stackman_switch` or `stackman_call`.
+- AArch64 `stackman_switch` keeps the frame pointer attached across a stack switch, and the unwind info covers the `FPCR` slot.
 - ABI detection now works on the BSDs: `tools/abiname.sh` used a `mktemp` template with three `X`s, which BSD `mktemp(1)` rejects.
+
+### Removed
+- Leftover Windows ARM32 sources, Visual Studio configurations, and `lib/win_arm`. Version 1.0.0 had already dropped that platform.
 
 ## [1.2.5] - 2026-06-23
 
@@ -142,7 +165,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI for automated building and testing
 - Visual Studio project files (VS2017, VS2019, VS2022)
 
-[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.2.5...HEAD
+[Unreleased]: https://github.com/stackless-dev/stackman/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/stackless-dev/stackman/releases/tag/v1.3.0
 [1.2.5]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.5
 [1.2.4]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.4
 [1.2.3]: https://github.com/stackless-dev/stackman/releases/tag/v1.2.3

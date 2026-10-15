@@ -163,7 +163,12 @@ jobs:
       - name: test
         if: ${{ matrix.native == 'yes' }}
         timeout-minutes: 1
-        run: vs2022\${{matrix.folder}}\Debug\test.exe
+        shell: cmd
+        run: |
+          vs2022\${{matrix.folder}}\Debug\test.exe
+          set RC=%ERRORLEVEL%
+          echo test.exe exit %RC%
+          exit /b %RC%
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7.0.0
         with:
