@@ -132,6 +132,11 @@ LABEL(stackman_switch)
 	cbz	x0, .Lsme_resume_skip
 	bl	SME_RESUME
 .Lsme_resume_skip:
+	/* stackman_sme_resume is a normal call, so x2 does not
+	 * survive it. The restore callback's third argument is the
+	 * stack just installed. Reload that on both paths.
+	 */
+	mov	x2, sp
 	mov	w1, 1
 	mov	x0, x20
 	blr	x19
