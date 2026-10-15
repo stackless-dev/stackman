@@ -1,10 +1,18 @@
 #include "stackman.h"
 
 #include <assert.h>
+#include <fenv.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+
+/* Soft-float arm32 does not spill FPSCR. Softfp selects that assembly. */
+#if defined(__arm__) && !defined(__aarch64__) && !defined(__ARM_PCS_VFP)
+#define STACKMAN_ROUND_ISOLATED 0
+#else
+#define STACKMAN_ROUND_ISOLATED 1
+#endif
 
 
 #define assert_align(p) assert((intptr_t)(p) == STACKMAN_SP_ALIGN(p))
@@ -491,6 +499,69 @@ void test_08(void)
 	assert(xor1 == xor2);
 }
 
+/* The caller's rounding mode comes back from stackman_switch when the
+ * ABI spills the floating-point control register. The callback's change
+ * is still visible on STACKMAN_OP_RESTORE: the reload happens after
+ * that callback returns. stackman_call does not spill the register.
+ * Soft-float arm32 keeps the callback's mode.
+ */
+void *test_09_cb(void *context, int opcode, void *sp)
+{
+	int *saw = (int *)context;
+
+	assert_align(sp);
+	if (opcode == (int)STACKMAN_OP_SAVE) {
+		assert(fegetround() == FE_DOWNWARD);
+		assert(fesetround(FE_TOWARDZERO) == 0);
+		*saw = 1;
+		return sp;
+	}
+	assert(opcode == (int)STACKMAN_OP_RESTORE);
+	assert(fegetround() == FE_TOWARDZERO);
+	return sp;
+}
+
+void test_09(void *stack_marker)
+{
+	static jmp *saved;
+	int previous = fegetround();
+	int saw = 0;
+	jmp *created;
+
+	assert(fesetround(FE_DOWNWARD) == 0);
+	assert(fegetround() == FE_DOWNWARD);
+	stackman_switch(&test_09_cb, &saw);
+	assert(saw == 1);
+	if (STACKMAN_ROUND_ISOLATED)
+		assert(fegetround() == FE_DOWNWARD);
+	else
+		assert(fegetround() == FE_TOWARDZERO);
+
+	/* The saved stack carries FE_DOWNWARD. This activation then
+	 * switches away with FE_UPWARD live. Resuming the copy must
+	 * see the mode that was saved with it. */
+	assert(fesetround(FE_DOWNWARD) == 0);
+	created = jmp_save(stack_marker);
+	if (created) {
+		saved = created;
+		assert(fegetround() == FE_DOWNWARD);
+		assert(fesetround(FE_UPWARD) == 0);
+		jmp_jmp(saved);
+		assert(0);
+	}
+
+	if (STACKMAN_ROUND_ISOLATED)
+		assert(fegetround() == FE_DOWNWARD);
+	else
+		assert(fegetround() == FE_UPWARD);
+	assert(fesetround(previous) == 0);
+	if (saved) {
+		free(saved->buf);
+		free(saved);
+		saved = 0;
+	}
+}
+
 int main(int argc, char*argv[])
 {
 	int stack_marker = 0;
@@ -513,5 +584,7 @@ int main(int argc, char*argv[])
 	printf("test_07 ok\n");
 	test_08();
 	printf("test_08 ok\n");
+	test_09((void*)&stack_marker);
+	printf("test_09 ok\n");
 	return 0;
 }

@@ -26,6 +26,9 @@ stored, including caller-saved flag bits. The store is in the frame
 before that stack pointer is published to the callback. The reload is
 after `STACKMAN_OP_RESTORE` and before the epilogue pops callee-saved
 registers. `stackman_call` does not touch these registers.
+`tests/test.c` `test_09` checks the caller's rounding mode. It comes
+back on every ABI below except soft-float `arm32`, where the test
+expects the callback's mode to remain.
 
 `STACKMAN_SP_ALIGN` follows `STACKMAN_STACK_ALIGN` below.
 

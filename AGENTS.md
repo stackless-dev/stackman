@@ -101,10 +101,14 @@ make PLATFORM_PREFIX=arm-linux-gnueabihf EMULATOR=qemu-arm test
 Success ends with `*** All test suites passed ***`.
 
 Four programs: `bin/test`, `bin/test_cc`, `bin/test_static`,
-`bin/test_asm`. `tests/test.c` is `test_01` through `test_08`. `test_04`
+`bin/test_asm`. `tests/test.c` is `test_01` through `test_09`. `test_04`
 and `test_05` are the `stackman_call` contract. `test_07` and `test_08`
 pressure the compiler. They pass even when a callee-saved register is
-dropped, if the compiler kept the values in memory.
+dropped, if the compiler kept the values in memory. `test_09` checks
+that `stackman_switch` restores the caller's rounding mode, including
+across a stack switch. Soft-float `arm32` does not, and that test
+expects the callback's mode to stick. The test programs link `-lm`
+for `fesetround`.
 
 The linker warning `missing .note.GNU-stack section` on
 `tests/test_asm_s.o` is expected.
