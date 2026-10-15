@@ -78,13 +78,13 @@ tests: bin/test_asm
 tests: LDLIBS := -lstackman
 
 bin/test: tests/test.o $(LIB)/libstackman.a
-	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $< ${DEBUG} $(LDLIBS)
+	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $< ${DEBUG} $(LDLIBS) -lm
 
 bin/test_cc: tests/test_cc.o $(LIB)/libstackman.a
-	$(CXX) $(LDFLAGS) $(STATIC_FLAG) -o $@ $< ${DEBUG} $(LDLIBS)
+	$(CXX) $(LDFLAGS) $(STATIC_FLAG) -o $@ $< ${DEBUG} $(LDLIBS) -lm
 
 bin/test_static: tests/test_static.o
-	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $^ ${DEBUG}
+	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $^ ${DEBUG} -lm
 
 bin/test_asm: tests/test_asm.o tests/test_asm_s.o
-	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $^ ${DEBUG}
+	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $^ ${DEBUG} -lm

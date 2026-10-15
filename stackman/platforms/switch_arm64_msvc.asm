@@ -12,12 +12,15 @@
 	; args "callback", "context" are in x0, x1
 	; push non-volatile x18-x28 registers, in addition to fp,rl pair.
 	; x29 is fp, x30 is lr.
-	stp	x29, x30, [sp, #-176]!	; store fp,lr pair, allocate stack space
+	stp	x29, x30, [sp, #-192]!	; store fp,lr pair, allocate stack space
 	mov	x29, sp					; and set fp pointing to old fp on stack
 	; push non-volatile registers 18-x28 and fp regs d8-d15)
-	; also  fpcr (fp control register)
+	; also fpcr and fpsr. A thread switch saves both. The status
+	; bits in fpsr are caller-saved for a normal call.
 	mrs    x2,fpcr
+	mrs    x3,fpsr
 	stp	x2,  x18, [sp, #16]
+	str    x3, [sp, #176]
 	stp	x19, x20, [sp, #32]
 	stp	x21, x22, [sp, #48]
 	stp	x23, x24, [sp, #64]
@@ -62,9 +65,11 @@
 	ldp	d10, d11, [sp, #128]
 	ldp	d12, d13, [sp, #144]
 	ldp	d14, d15, [sp, #160]
+	ldr    x3, [sp, #176]
 	msr    fpcr, x2
+	msr    fpsr, x3
 	;return
-	ldp	x29, x30, [sp], #176
+	ldp	x29, x30, [sp], #192
 	ret
 	ENDP
 

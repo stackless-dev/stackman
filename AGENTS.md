@@ -53,15 +53,19 @@ those comments unless you are regenerating the file.
 Volatile registers may change. Do not add a test that treats them as
 preserved.
 
-Details and the original audit are in `docs/abi-register-audit.md`.
+Current spills are in `docs/platform-abi.md`.
+`docs/abi-register-audit.md` is the audit from when those gaps were
+found and fixed. Do not edit the audit for a later port or spill.
 Limits that are easy to fix the wrong way:
 
 - `arm32` is the soft-float assembly (`switch_arm_gcc.S`, `.arch armv5t`,
   `.fpu softvfp`). It does not spill `d8`–`d15`, and `__ARM_PCS_VFP` is
   a compile error in that header. `armhf` (`switch_armhf_gcc.S`) is the
   hard-float port and is what `__ARM_PCS_VFP` selects. It spills
-  `d8`–`d15` in `stackman_switch`. It does not spill `FPSCR`. Softfp
-  does not define `__ARM_PCS_VFP` and still builds as `arm32`.
+  `d8`–`d15` and the whole `FPSCR` in `stackman_switch`. Softfp
+  (`-mfloat-abi=softfp`) is not a supported platform. It still builds
+  as `arm32` and runs, and that assembly does not preserve `FPSCR`.
+  Do not add an `FPSCR` spill to `switch_arm_gcc.S` to cover it.
 - `aarch64`, `darwin_arm64`, and `win_arm64` do not preserve SME ZA
   across `stackman_switch`. Do not call `__arm_za_disable`. That helper
   commits the outgoing caller's ZA and turns ZA off. Nothing in the
@@ -78,8 +82,10 @@ Limits that are easy to fix the wrong way:
   saved value. On RISC-V, `s0` is not a frame chain in
   `stackman_switch`, and `stackman_call` uses `s0` for the previous
   stack pointer. Do not adjust it there.
-- AAPCS64 FPCR and RISC-V `fcsr` are thread state. They are not per-call
-  spills.
+- `stackman_switch` spills `FPCR` and `FPSR` on `aarch64`,
+  `darwin_arm64`, and `win_arm64`, and spills `fcsr` on `riscv64`.
+  The RISC-V slot is the existing 8-byte pad at the published stack
+  pointer. `stackman_call` does not touch these registers.
 
 ## Build and test
 
@@ -95,10 +101,14 @@ make PLATFORM_PREFIX=arm-linux-gnueabihf EMULATOR=qemu-arm test
 Success ends with `*** All test suites passed ***`.
 
 Four programs: `bin/test`, `bin/test_cc`, `bin/test_static`,
-`bin/test_asm`. `tests/test.c` is `test_01` through `test_08`. `test_04`
+`bin/test_asm`. `tests/test.c` is `test_01` through `test_09`. `test_04`
 and `test_05` are the `stackman_call` contract. `test_07` and `test_08`
 pressure the compiler. They pass even when a callee-saved register is
-dropped, if the compiler kept the values in memory.
+dropped, if the compiler kept the values in memory. `test_09` checks
+that `stackman_switch` restores the caller's rounding mode, including
+across a stack switch. Soft-float `arm32` does not, and that test
+expects the callback's mode to stick. The test programs link `-lm`
+for `fesetround`.
 
 The linker warning `missing .note.GNU-stack section` on
 `tests/test_asm_s.o` is expected.
@@ -131,6 +141,10 @@ major version. `commit-artifacts` in
 
 `.github/workflows/buildbsd.yml` builds and tests FreeBSD, OpenBSD, and
 NetBSD with `gmake` on the `sysv_amd64` sources.
+
+The test steps use `timeout-minutes: 1`. A passing run finishes in a few
+seconds. On Windows an `assert` opens a CRT dialog and does not exit, so
+that limit is what ends a failed `test.exe`.
 
 A green native `make test` says nothing about another ABI. An assembly
 change is checked by the job that builds that file.

@@ -46,9 +46,12 @@ LABEL(stackman_switch)
 .LFB0:
 	CFI_STARTPROC
 
-	/* Allocate stack frame (160 bytes)
-	 * Layout: ra(8) + s0-s11(12*8=96) + fs0-fs11(12*8=96) = 200 bytes
-	 * Round to 208 for 16-byte alignment
+	/* 208 bytes, 16-byte aligned.
+	 * ra, s0-s11, and fs0-fs11 occupy bytes 8 through 207.
+	 * The pad at byte 0 holds fcsr, so the pointer passed to the
+	 * callback includes it. A thread switch saves the whole register
+	 * (rounding mode and accrued exception flags). stackman_call does
+	 * not touch fcsr.
 	 */
 	addi	sp, sp, -208
 	CFI_DEF_CFA_OFFSET(208)
@@ -94,6 +97,12 @@ LABEL(stackman_switch)
 	fsd	fs9, 24(sp)
 	fsd	fs10, 16(sp)
 	fsd	fs11, 8(sp)
+
+	/* frcsr after the first FP spill, so a lazy FP enable has run.
+	 * t0 is free. The eight-byte pad keeps the 16-byte alignment.
+	 */
+	frcsr	t0
+	sd	t0, 0(sp)
 	
 	/* Preserve callback and context in callee-saved registers */
 	mv	s2, a0		/* s2 = callback */
@@ -114,6 +123,12 @@ LABEL(stackman_switch)
 	li	a1, 1		/* a1 = STACKMAN_OP_RESTORE */
 	mv	a2, sp		/* a2 = new sp */
 	jalr	s2		/* call callback */
+
+	/* Reload fcsr from the stack now current, before the epilogue
+	 * pops fs0-fs11. a0 is the callback result and stays there.
+	 */
+	ld	t0, 0(sp)
+	fscsr	t0
 	
 	/* Restore callee-saved floating point registers */
 	fld	fs11, 8(sp)
