@@ -1,6 +1,7 @@
 
 .386
 .model flat, c
+.xmm
 
 .code
 
@@ -11,11 +12,14 @@ stackman_switch_raw PROC callback:DWORD, context:DWORD
   push ebx
   push esi
   push edi
-  ; x87 control word sits at the pointer passed to the callback,
-  ; so the copied stack image carries it. Not in the C wrapper:
-  ; that frame does not travel with a real switch.
-  sub esp, 4
+  ; x87 control word at [esp], MXCSR at [esp+4]. The published pointer
+  ; is this slot, so a copied stack image carries both. MSVC's
+  ; fegetround reads MXCSR; restoring the x87 word alone leaves that
+  ; mode behind. Not in the C wrapper: that frame does not travel
+  ; with a real switch.
+  sub esp, 8
   fstcw word ptr [esp]
+  stmxcsr dword ptr [esp+4]
   
   mov esi, callback ;      /* save 'callback' for later */
   mov edi, context ;       /* save 'context' for later         */
@@ -41,7 +45,8 @@ stackman_switch_raw PROC callback:DWORD, context:DWORD
   add esp, 12
 
   fldcw word ptr [esp]
-  add esp, 4
+  ldmxcsr dword ptr [esp+4]
+  add esp, 8
 
   pop  edi
   pop  esi

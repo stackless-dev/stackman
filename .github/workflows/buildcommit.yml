@@ -94,6 +94,7 @@ jobs:
     - name: make
       run: make all
     - name: test
+      timeout-minutes: 1
       run: make test
     - name: set abi name
       run: echo abiname=$(make abiname) >> $GITHUB_ENV
@@ -126,6 +127,7 @@ jobs:
       run: make all
     
     - name: Run tests
+      timeout-minutes: 1
       run: make test
     
     - name: Upload artifacts
@@ -160,6 +162,7 @@ jobs:
         run: msbuild.exe vs2022\stackman.sln /p:Platform=${{matrix.platform}}
       - name: test
         if: ${{ matrix.native == 'yes' }}
+        timeout-minutes: 1
         run: vs2022\${{matrix.folder}}\Debug\test.exe
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7.0.0

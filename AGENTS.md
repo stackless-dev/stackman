@@ -142,6 +142,10 @@ major version. `commit-artifacts` in
 `.github/workflows/buildbsd.yml` builds and tests FreeBSD, OpenBSD, and
 NetBSD with `gmake` on the `sysv_amd64` sources.
 
+The test steps use `timeout-minutes: 1`. A passing run finishes in a few
+seconds. On Windows an `assert` opens a CRT dialog and does not exit, so
+that limit is what ends a failed `test.exe`.
+
 A green native `make test` says nothing about another ABI. An assembly
 change is checked by the job that builds that file.
 

@@ -146,12 +146,14 @@ Vector CSRs (`vcsr`, `vl`, `vtype`, `vxrm`, `vxsat`) are not spilled.
 
 ### `win_x86`
 
-`stackman_switch_raw` spills `ebx`, `esi`, `edi`, `ebp`, and the x87
-control word (`fstcw` / `fldcw`). The C wrapper around it saves and
-restores `fs:[0]`, the SEH chain. MXCSR is not spilled.
+`stackman_switch_raw` spills `ebx`, `esi`, `edi`, `ebp`, the x87
+control word (`fstcw` / `fldcw`), and MXCSR (`stmxcsr` / `ldmxcsr`).
+The published pointer is that 8-byte slot: the control word at `[esp]`,
+MXCSR at `[esp+4]`. MSVC's `fegetround` reads MXCSR. The C wrapper
+around the raw routine saves and restores `fs:[0]`, the SEH chain.
 
-`stackman_call` does not spill the x87 control word. The SEH save is
-only on `stackman_switch`.
+`stackman_call` does not spill the x87 control word or MXCSR. The SEH
+save is only on `stackman_switch`.
 
 ### `win_x64`
 
