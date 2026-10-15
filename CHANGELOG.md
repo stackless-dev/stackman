@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI test steps stop after one minute.
 
 ### Fixed
+- `test_04` allocates 8KB for the `stackman_call` stack. Two MSVC Debug (`/ZI`) frames of the recursive callback overflowed a 1KB block into the heap header, so the x64 test failed intermittently.
 - RISC-V `stackman_call` leaves a null stack unchanged and passes the previous stack pointer to the callback.
 - Windows ARM64 no longer uses the live TEB register `x18` as a scratch in `stackman_switch` or `stackman_call`.
 - AArch64 `stackman_switch` keeps the frame pointer attached across a stack switch, and the unwind info covers the `FPCR` slot.
