@@ -88,10 +88,10 @@ Hard-float AAPCS-VFP, `arm-linux-gnueabihf`. `__ARM_PCS_VFP` selects
 this ABI. It does not link with `arm32`.
 
 `stackman_switch` spills `r4`–`r11`, `lr`, `d8`–`d15`, and the whole
-`FPSCR`. `FPSCR` sits in an 8-byte slot below the pointer passed to the
-callback, and is written back before `d8`–`d15` are popped. `r3` in the
-integer push is padding. `r11` is not adjusted, for the same reason as
-`arm32`.
+`FPSCR`. The published stack pointer is the 8-byte `FPSCR` slot, below
+the `d8`–`d15` spill. That slot is written back before those registers
+are popped. `r3` in the integer push is padding. `r11` is not adjusted,
+for the same reason as `arm32`.
 
 `stackman_call` does not spill `d8`–`d15` or `FPSCR`.
 
@@ -114,11 +114,13 @@ SME ZA is not preserved. Do not call `__arm_za_disable`.
 ### `win_arm64`
 
 `stackman_switch` spills `x18`–`x28`, `x29`, `x30`, `d8`–`d15`, `FPCR`,
-and `FPSR`. The frame is 192 bytes. `FPSR` is at `[sp, #176]`, next to
-the `FPCR` spill. `x18` is the TEB for the whole time user code runs:
-it is stored and reloaded, and the live register is never written. The
-frame pointer is adjusted by the stack delta. No `.seh_*` unwind codes
-are emitted. The high 64 bits of `v8`–`v15` are not spilled.
+and `FPSR`. The frame is 192 bytes. `FPCR` is stored with `x18` at
+`[sp, #16]`. `FPSR` is the 8-byte slot at `[sp, #176]`, next to `d15`,
+with 8 bytes of padding at `[sp, #184]`. The body does not use `x18`
+as a scratch. The epilogue reloads the spilled value. `x18` is the TEB
+for the whole time user code runs. The frame pointer is adjusted by
+the stack delta. No `.seh_*` unwind codes are emitted. The high 64
+bits of `v8`–`v15` are not spilled.
 
 `stackman_call` uses a 32-byte frame. It does not touch `x18`, `FPCR`,
 or `FPSR`.

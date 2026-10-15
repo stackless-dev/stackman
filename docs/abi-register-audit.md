@@ -2,7 +2,8 @@
 
 This is the historical record of the register audit in
 [pull request 21](https://github.com/stackless-dev/stackman/pull/21).
-It describes the gaps found then and the fixes applied in that change.
+The text below is that pull request's outcome, including gaps a later
+change has closed. It is not a description of the current tree.
 Later ports and spills belong in
 [`platform-abi.md`](platform-abi.md), not here.
 

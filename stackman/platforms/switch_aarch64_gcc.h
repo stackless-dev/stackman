@@ -72,6 +72,15 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 		"mrs x2, fpsr\n\t"
 		"stp x1, x2, [sp, #-16]!"
 		::: "x1", "x2", "memory");
+	/* The compiler's CFI still describes its own frame. This
+	 * adjusts by the slot just pushed. It is not in the stp asm:
+	 * that string is copied into the shared .S, and Darwin
+	 * assembles the copy with no .cfi_startproc. The .S sets the
+	 * CFA with CFI_DEF_CFA_OFFSET instead.
+	 */
+#if !defined(__APPLE__)
+	__asm__ volatile (".cfi_adjust_cfa_offset 16");
+#endif
 	/* sp = get stack pointer from assembly code */
 	__asm__ ("mov %[result], sp" : [result] "=r" (sp));
 	/* store stack */
@@ -95,6 +104,9 @@ void *STACKMAN_SWITCH_INASM_NAME(stackman_cb_t callback, void *context)
 		"msr fpcr, x1\n\t"
 		"msr fpsr, x2"
 		::: "x1", "x2", "memory");
+#if !defined(__APPLE__)
+	__asm__ volatile (".cfi_adjust_cfa_offset -16");
+#endif
 	return sp;
 }
 
