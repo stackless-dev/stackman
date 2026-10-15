@@ -230,7 +230,9 @@ void *test_04_cb(void* context, int _opcode, void *old_sp)
 void test_04(void)
 {
 	char *block, *stack, *stack2;
-	intptr_t stacksize=1024;
+	/* The callback recurses once. An MSVC Debug frame (/ZI) is several
+	 * hundred bytes, so two of them overflow a 1KB block into the heap. */
+	intptr_t stacksize = 8192;
 	int i, cnt;
 	int caller_local = 0x51a7;
 	void *result;
