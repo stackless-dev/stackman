@@ -50,7 +50,9 @@ platforms so that no assembly steps are required by users.
 
 - Simple api
 
-  - `stackman_switch()` and `stackman_call()` are the only functions.
+  - `stackman_switch()` and `stackman_call()` are the switch API.
+  - `stackman_guard.c` is optional and separate. It paints bytes in a
+    caller-owned block. It does not switch, and it is not in `libstackman`.
   - The caller provides a callback and context pointer to customize behaviour.
 
 - Simple implementation
@@ -188,6 +190,51 @@ alignment leaves no usable byte.
 
 The last feature is useful to bypass any in-lining that a compiler may do, when one really wants
 a proper function call with stack, for example, when setting up a new stack entry point.
+
+### Stack paint
+
+`stackman/stackman_guard.h` declares three functions implemented in
+`stackman/stackman_guard.c`. Compile that file into the program that
+wants them. They do not call the C library.
+
+The use is a block you allocated and then hand to `stackman_call`.
+`far` is the pointer you pass as the new stack. `extent` is the bytes
+from there toward near. Paint a band at that near end, run the call,
+and check the band. Paint the whole extent first if you want
+`stackman_stack_unused` to tell you how deep the call actually went.
+
+```c
+void *far;
+size_t extent;
+char *base = malloc(size);             /* low address, as malloc returns it */
+if (stackman_block_call(base, size, &far, &extent) == 0)
+    ; /* alignment left no usable byte */
+
+stackman_guard_paint(far, extent, 64, 0xa5);
+stackman_call(worker, ctx, far);
+if (stackman_guard_check(far, extent, 64, 0xa5) != 1)
+    ; /* the near band was overwritten: this block is too small */
+
+stackman_guard_paint(far, extent, extent, 0xa5);
+stackman_call(worker, ctx, far);
+size_t unused = stackman_stack_unused(far, extent, 0xa5);
+size_t used = extent - unused;
+```
+
+Alignment can make `extent` a few bytes shorter than `size`. The
+sliver outside `far` is not part of the stack.
+
+A `stackman_switch` snapshot is a different range. It is the bytes
+already in use, from the saved near pointer out to `far`, and a copy
+of that range has no untouched tail. The main stack's far is often
+`STACKMAN_SP_FURTHEST`, which is not a paintable address. Extent 0
+is that case: the helpers leave memory alone.
+
+`stackman_stack_unused` takes the same `far` and `extent` as the paint.
+`stackman_block_call` is the conversion from the malloc pair. On a
+descending stack the low address is the near end. On an ascending
+stack the low address is the far end. The paint functions stay in
+`(far, extent)`, the same coordinates as `stackman_call`.
 
 ## Usage
 
