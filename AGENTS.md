@@ -29,6 +29,10 @@ out and CI looks green.
 Align a stack with `STACKMAN_SP_ALIGN`. It follows `STACKMAN_STACK_ALIGN`
 and the stack direction.
 
+`stackman_block_call` turns a malloc block, a low address and a size, into
+the pointer `stackman_call` takes and the byte count toward near. It is a
+`static inline` in `stackman.h`.
+
 ## Platforms
 
 Linux: `sysv_i386`, `sysv_amd64`, `arm32` (soft-float AAPCS), `armhf`
@@ -100,8 +104,10 @@ make PLATFORM_PREFIX=arm-linux-gnueabihf EMULATOR=qemu-arm test
 `make clean` only when switching `PLATFORMFLAGS` or `PLATFORM_PREFIX`.
 Success ends with `*** All test suites passed ***`.
 
-Four programs: `bin/test`, `bin/test_cc`, `bin/test_static`,
-`bin/test_asm`. `tests/test.c` is `test_01` through `test_09`. `test_04`
+Five programs: `bin/test`, `bin/test_cc`, `bin/test_static`,
+`bin/test_asm`, and `bin/test_block_asc`. The last one compiles
+`stackman_block_call` with `STACKMAN_STACK_DIR` set to 1. No supported
+ABI grows upward. `tests/test.c` is `test_01` through `test_09`. `test_04`
 and `test_05` are the `stackman_call` contract. `test_07` and `test_08`
 pressure the compiler. They pass even when a callee-saved register is
 dropped, if the compiler kept the values in memory. `test_09` checks

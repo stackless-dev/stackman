@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `stackman_block_call` turns a malloc block (low address and size) into the pointer `stackman_call` takes and the number of bytes toward near.
+
 ## [1.3.0] - 2026-10-15
 
 ### Added

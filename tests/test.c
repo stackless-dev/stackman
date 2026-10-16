@@ -366,6 +366,44 @@ void test_06()
 
 	assert((void*)STACKMAN_SP_ALIGN(away) == away);
 
+#if STACKMAN_STACK_DIR == 0
+	{
+		unsigned char raw[64 + STACKMAN_STACK_ALIGN * 2];
+		uintptr_t aligned;
+		unsigned char *base;
+		void *call_sp = (void *)(intptr_t)1;
+		size_t extent = 99;
+
+		assert(stackman_block_call(0, 64, &call_sp, &extent) == 0);
+		assert(call_sp == (void *)(intptr_t)1 && extent == 99);
+		assert(stackman_block_call(raw, 0, &call_sp, &extent) == 0);
+		assert(call_sp == (void *)(intptr_t)1 && extent == 99);
+		assert(stackman_block_call(raw, 64, 0, &extent) == 0);
+		assert(extent == 99);
+		assert(stackman_block_call(raw, 64, &call_sp, 0) == 0);
+		assert(call_sp == (void *)(intptr_t)1);
+		assert(stackman_block_call((void *)(uintptr_t)(UINTPTR_MAX - 8),
+			16, &call_sp, &extent) == 0);
+		assert(call_sp == (void *)(intptr_t)1 && extent == 99);
+
+		aligned = ((uintptr_t)raw + STACKMAN_STACK_ALIGN - 1) &
+			~(uintptr_t)(STACKMAN_STACK_ALIGN - 1);
+		base = (unsigned char *)aligned;
+		assert(stackman_block_call(base, 64, &call_sp, &extent) == 1);
+		assert(call_sp == base + 64);
+		assert(extent == 64);
+		assert((void *)STACKMAN_SP_ALIGN(call_sp) == call_sp);
+
+		/* One byte is shorter than an aligned initial stack pointer. */
+		assert(stackman_block_call(base, 1, &call_sp, &extent) == 0);
+
+		/* The odd byte at the high end is the alignment sliver. */
+		assert(stackman_block_call(base + 1, 64, &call_sp, &extent) == 1);
+		assert(call_sp == base + 64);
+		assert(extent == 63);
+		assert((void *)STACKMAN_SP_ALIGN(call_sp) == call_sp);
+	}
+#endif
 }
 
 /* Test floating point register preservation across stack switches.

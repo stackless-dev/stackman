@@ -69,12 +69,14 @@ test: tests
 	$(EMULATOR) bin/test_cc
 	$(EMULATOR) bin/test_static
 	$(EMULATOR) bin/test_asm
+	$(EMULATOR) bin/test_block_asc
 	@echo "*** All test suites passed ***"
 
 tests: bin/test
 tests: bin/test_cc
 tests: bin/test_static
 tests: bin/test_asm
+tests: bin/test_block_asc
 tests: LDLIBS := -lstackman
 
 bin/test: tests/test.o $(LIB)/libstackman.a
@@ -88,3 +90,7 @@ bin/test_static: tests/test_static.o
 
 bin/test_asm: tests/test_asm.o tests/test_asm_s.o
 	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $^ ${DEBUG} -lm
+
+# Header-only. STACKMAN_STACK_DIR is set in the source.
+bin/test_block_asc: tests/test_block_asc.o
+	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $< ${DEBUG}
