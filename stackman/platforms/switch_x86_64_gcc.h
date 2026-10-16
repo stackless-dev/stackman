@@ -16,8 +16,7 @@
 #endif
 #endif
 
-#ifndef STACKMAN_HAVE_CALL
-#define STACKMAN_HAVE_CALL 1
+#ifndef STACKMAN_STACK_ALIGN
 #define STACKMAN_STACK_ALIGN 16
 #endif
 

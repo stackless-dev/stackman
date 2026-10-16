@@ -3,6 +3,5 @@
  */
 #ifndef STACKMAN_ASSEMBLY_SRC
 #define STACKMAN_ASSEMBLY_SRC switch_arm64_msvc.asm
-#define STACKMAN_HAVE_CALL 1
 #define STACKMAN_STACK_ALIGN 16
 #endif

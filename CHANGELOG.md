@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Scheduled for 1.4.0. This does not belong in a 1.3.x patch.
+
+### Removed
+- `STACKMAN_HAVE_CALL`. Every supported ABI provides `stackman_call`, so `test_04` and `test_05` always build. Callers that branched on the macro can call `stackman_call` directly. `STACKMAN_STACK_ALIGN` is unchanged.
+
 ## [1.3.0] - 2026-10-15
 
 ### Added
