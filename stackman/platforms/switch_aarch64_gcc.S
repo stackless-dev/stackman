@@ -36,6 +36,14 @@
 #define CFI_RESTORE(r) .cfi_restore r
 #endif
 
+#ifdef __APPLE__
+#define SME_SUSPEND _stackman_sme_suspend
+#define SME_RESUME _stackman_sme_resume
+#else
+#define SME_SUSPEND stackman_sme_suspend
+#define SME_RESUME stackman_sme_resume
+#endif
+
 	.arch armv8-a
 	.file	"gen_asm.c"
 	.text
@@ -78,22 +86,32 @@ LABEL(stackman_switch)
 	CFI_OFFSET(79,-8)
 	mov	x3, x0
 	mov	x0, x1
+	/* x19 and x20 are already spilled. Hold the callback and the
+	 * context across stackman_sme_suspend. It is a normal call.
+	 */
+	mov	x19, x3
+	mov	x20, x0
+	bl	SME_SUSPEND
+	mov	x4, x0
+	mov	x0, x20
+	mov	x3, x19
 #APP
 // 70 "../platforms/switch_aarch64_gcc.h" 1
 	mrs x1, fpcr
 	mrs x2, fpsr
-	stp x1, x2, [sp, #-16]!
+	stp x1, x2, [sp, #-32]!
+	stp x4, xzr, [sp, #16]
 // 0 "" 2
 // 85 "../platforms/switch_aarch64_gcc.h" 1
 	mov x2, sp
 // 0 "" 2
 #NO_APP
-	/* The 16-byte FPCR/FPSR slot is outside the compiler frame.
-	 * Keep it out of the #APP block: Darwin assembles that block,
-	 * and these macros are empty there. A gcc -S regen does not
-	 * emit this, because the compiler does not see the sp write.
+	/* FPCR/FPSR and the saved TPIDR2 pointer sit below the compiler
+	 * frame. The published sp is the FPCR word. Darwin assembles the
+	 * #APP block with no .cfi_startproc, so the CFA for this slot is
+	 * set here. A gcc -S regen does not emit it.
 	 */
-	CFI_DEF_CFA_OFFSET(176)
+	CFI_DEF_CFA_OFFSET(192)
 	mov	w1, 0
 	mov	x20, x0
 	mov	x19, x3
@@ -106,12 +124,25 @@ LABEL(stackman_switch)
 	sub x29, x29, x1
 // 0 "" 2
 #NO_APP
+	/* Null means ZA was off on entry to this stack's switch.
+	 * A pointer means dormant: turn ZA on, copy the rows back, and
+	 * point TPIDR2_EL0 at the same block. x19 and x20 stay live.
+	 */
+	ldr	x0, [sp, #16]
+	cbz	x0, .Lsme_resume_skip
+	bl	SME_RESUME
+.Lsme_resume_skip:
+	/* stackman_sme_resume is a normal call, so x2 does not
+	 * survive it. The restore callback's third argument is the
+	 * stack just installed. Reload that on both paths.
+	 */
+	mov	x2, sp
 	mov	w1, 1
 	mov	x0, x20
 	blr	x19
 #APP
 // 102 "../platforms/switch_aarch64_gcc.h" 1
-	ldp x1, x2, [sp], #16
+	ldp x1, x2, [sp], #32
 	msr fpcr, x1
 	msr fpsr, x2
 // 0 "" 2

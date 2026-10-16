@@ -104,15 +104,20 @@ for the same reason as `arm32`.
 of `v8`–`v15` (`d8`–`d15`). The high 64 bits of `v8`–`v15` are
 caller-saved and are not spilled. `x18` is left alone.
 
-`FPCR` and `FPSR` are stored in a 16-byte slot at the pointer passed to
-the callback and written back after `STACKMAN_OP_RESTORE`. `x29` is
+`FPCR` and `FPSR` are stored in a 32-byte slot at the pointer passed to
+the callback and written back after `STACKMAN_OP_RESTORE`. The slot is
+`FPCR`, `FPSR`, the saved TPIDR2 block pointer, and 8 bytes of padding.
+A null pointer means ZA was off on entry. A non-null pointer is a
+dormant ZA state. `stackman_sme_suspend` commits it with
+`__arm_za_disable` before the save callback, and `stackman_sme_resume`
+restores it after the new stack pointer is installed, before the
+restore callback. The helpers are weak. See
+[`scalable-matrix-extension.md`](scalable-matrix-extension.md). `x29` is
 adjusted by the stack delta. The prologue sets `x29` from `sp`, so the
 delta is computed from the lowered stack pointer. Do not list `x29` as
 an asm clobber.
 
-`stackman_call` does not spill `FPCR`, `FPSR`, or `d8`–`d15`.
-
-SME ZA is not preserved. Do not call `__arm_za_disable`.
+`stackman_call` does not spill `FPCR`, `FPSR`, `d8`–`d15`, or ZA.
 
 ### `win_arm64`
 

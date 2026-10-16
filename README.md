@@ -109,8 +109,9 @@ calling convention, plus archive format:
 Which registers each ABI spills is listed in
 [`docs/platform-abi.md`](docs/platform-abi.md).
 
-The 64-bit ARM ABIs (`aarch64`, `darwin_arm64`, and `win_arm64`) do not
-preserve SME ZA context across `stackman_switch`.
+`aarch64` and `darwin_arm64` preserve a dormant or off SME ZA state
+across `stackman_switch`. `win_arm64` does not. See
+[`docs/scalable-matrix-extension.md`](docs/scalable-matrix-extension.md).
 
 Softfp (`-mfloat-abi=softfp`) is not a supported platform, and it is not
 clear how widely it is used. In practice that build does not define
