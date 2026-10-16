@@ -50,7 +50,9 @@ platforms so that no assembly steps are required by users.
 
 - Simple api
 
-  - `stackman_switch()` and `stackman_call()` are the only functions.
+  - `stackman_switch()` and `stackman_call()` are the switch API.
+  - `stackman_guard.c` is optional and separate. It paints bytes in a
+    caller-owned block. It does not switch, and it is not in `libstackman`.
   - The caller provides a callback and context pointer to customize behaviour.
 
 - Simple implementation
@@ -188,6 +190,24 @@ alignment leaves no usable byte.
 
 The last feature is useful to bypass any in-lining that a compiler may do, when one really wants
 a proper function call with stack, for example, when setting up a new stack entry point.
+
+### Stack paint
+
+`stackman/stackman_guard.h` declares three functions implemented in
+`stackman/stackman_guard.c`. Compile that file into the program that
+wants them. They do not call the C library.
+
+`stackman_guard_paint` writes a pattern into `guard_bytes` at the near
+end of a block. `far` is the far boundary, the same pointer you would
+pass to `stackman_call`. `extent` is the number of bytes toward near.
+`stackman_guard_check` reads that band back. `stackman_stack_unused`
+counts how many bytes from the near end still hold the pattern, after
+the whole extent was painted.
+
+The near end is the overflow side. Code that only knows `far` passes
+extent 0, and the functions leave memory alone. A block handed to
+`stackman_call` has both ends, so the extent is
+`STACKMAN_SP_DIFF(far, near)`.
 
 ## Usage
 

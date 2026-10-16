@@ -17,6 +17,12 @@ same caller. A null stack is left unchanged. The pointer passed to the
 callback is the previous stack pointer. It only needs to preserve
 registers it modifies.
 
+`stackman_guard.c` is optional and is not part of the switch. It is
+plain C, with no library calls. `far` is the far boundary. `extent` is
+the byte count toward near. Extent 0 means that bound is unknown, and
+the helpers do not touch memory. A `stackman_call` block knows both
+ends, so the extent is known and the guard sits at the near end.
+
 User code includes `stackman.h`. The library implementation includes
 `stackman_impl.h` once. `platforms/platform.h` selects
 `switch_<abi>_<compiler>`.
@@ -104,10 +110,12 @@ make PLATFORM_PREFIX=arm-linux-gnueabihf EMULATOR=qemu-arm test
 `make clean` only when switching `PLATFORMFLAGS` or `PLATFORM_PREFIX`.
 Success ends with `*** All test suites passed ***`.
 
-Five programs: `bin/test`, `bin/test_cc`, `bin/test_static`,
+Five switch programs: `bin/test`, `bin/test_cc`, `bin/test_static`,
 `bin/test_asm`, and `bin/test_block_asc`. The last one compiles
 `stackman_block_call` with `STACKMAN_STACK_DIR` set to 1. No supported
-ABI grows upward. `tests/test.c` is `test_01` through `test_09`. `test_04`
+ABI grows upward. `bin/test_guard` paints the optional guard unit, and
+`bin/test_guard_up` rebuilds that unit with `STACKMAN_STACK_DIR=1`.
+`tests/test.c` is `test_01` through `test_09`. `test_04`
 and `test_05` are the `stackman_call` contract. `test_07` and `test_08`
 pressure the compiler. They pass even when a callee-saved register is
 dropped, if the compiler kept the values in memory. `test_09` checks

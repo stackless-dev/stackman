@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `stackman_block_call` turns a malloc block (low address and size) into the pointer `stackman_call` takes and the number of bytes toward near.
+- Optional `stackman/stackman_guard.c`. Plain C, no library calls, and not part of the switch. Given a far boundary and a byte count toward near, it paints and checks a band at the near end. Extent 0 means the near bound is unknown and the memory is left alone. A `stackman_call` block knows both ends.
 
 ## [1.3.0] - 2026-10-15
 

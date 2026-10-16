@@ -70,6 +70,8 @@ test: tests
 	$(EMULATOR) bin/test_static
 	$(EMULATOR) bin/test_asm
 	$(EMULATOR) bin/test_block_asc
+	$(EMULATOR) bin/test_guard
+	$(EMULATOR) bin/test_guard_up
 	@echo "*** All test suites passed ***"
 
 tests: bin/test
@@ -77,6 +79,8 @@ tests: bin/test_cc
 tests: bin/test_static
 tests: bin/test_asm
 tests: bin/test_block_asc
+tests: bin/test_guard
+tests: bin/test_guard_up
 tests: LDLIBS := -lstackman
 
 bin/test: tests/test.o $(LIB)/libstackman.a
@@ -94,3 +98,17 @@ bin/test_asm: tests/test_asm.o tests/test_asm_s.o
 # Header-only. STACKMAN_STACK_DIR is set in the source.
 bin/test_block_asc: tests/test_block_asc.o
 	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $< ${DEBUG}
+
+bin/test_guard: tests/test_guard.o stackman/stackman_guard.o $(LIB)/libstackman.a
+	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ tests/test_guard.o stackman/stackman_guard.o -lstackman
+
+# No supported ABI grows upward. This rebuilds the guard unit with that
+# direction so the other branch of the address arithmetic is executed.
+tests/test_guard_up.o: tests/test_guard.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DSTACKMAN_STACK_DIR=1 -c -o $@ $<
+
+stackman/stackman_guard_up.o: stackman/stackman_guard.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -DSTACKMAN_STACK_DIR=1 -c -o $@ $<
+
+bin/test_guard_up: tests/test_guard_up.o stackman/stackman_guard_up.o
+	$(CC) $(LDFLAGS) $(STATIC_FLAG) -o $@ $^
