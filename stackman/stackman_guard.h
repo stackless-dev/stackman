@@ -9,16 +9,21 @@
  * No library calls. The bytes are ordinary stores. Nothing is registered
  * with the operating system, and nothing programs a hardware limit.
  *
- * `far` is the far boundary, in the same sense as the pointer passed to
- * stackman_call: the initial stack pointer. The block lies strictly
- * nearer than `far`. `extent` is how many bytes that is.
- *
- * The near bound is the overflow side. It is often unknown. Pass
- * extent 0 in that case. The functions then do not read or write memory.
- * stackman_call usually targets a block the caller allocated, and then
- * both ends are known:
+ * The use is a pre-allocated block passed to stackman_call. `far` is
+ * that block's far boundary, the pointer passed as the new stack.
+ * `extent` is the byte count toward near, the overflow side:
  *
  *   extent = STACKMAN_SP_DIFF(far, near);
+ *
+ * Paint the near band, call, then check it. Paint the whole extent
+ * and stackman_stack_unused reports how much of that block the call
+ * left untouched, so the next allocation can be sized from a real run.
+ *
+ * A stackman_switch snapshot is the other shape. It is the used range
+ * between the saved near pointer and far. There is no unused tail
+ * inside it. The main stack's far is often STACKMAN_SP_FURTHEST,
+ * which is not a paintable address. Pass extent 0 when the near bound
+ * is unknown. The functions then do not read or write memory.
  *
  * The direction comes from STACKMAN_STACK_DIR. On a descending stack the
  * bytes are [far - extent, far). On an ascending stack they are
@@ -47,6 +52,7 @@ int stackman_guard_check(void *far, size_t extent, size_t guard_bytes,
 			 unsigned char pattern);
 
 /* How many bytes from the near end toward far still hold pattern.
+ * Same coordinates as paint: far, then extent toward near.
  * extent 0 returns 0.
  */
 size_t stackman_stack_unused(void *far, size_t extent, unsigned char pattern);

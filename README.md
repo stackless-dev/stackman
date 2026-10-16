@@ -197,17 +197,49 @@ a proper function call with stack, for example, when setting up a new stack entr
 `stackman/stackman_guard.c`. Compile that file into the program that
 wants them. They do not call the C library.
 
-`stackman_guard_paint` writes a pattern into `guard_bytes` at the near
-end of a block. `far` is the far boundary, the same pointer you would
-pass to `stackman_call`. `extent` is the number of bytes toward near.
-`stackman_guard_check` reads that band back. `stackman_stack_unused`
-counts how many bytes from the near end still hold the pattern, after
-the whole extent was painted.
+The use is a block you allocated and then hand to `stackman_call`.
+`far` is the pointer you pass as the new stack. `extent` is the bytes
+from there toward near. Paint a band at that near end, run the call,
+and check the band. Paint the whole extent first if you want
+`stackman_stack_unused` to tell you how deep the call actually went.
 
-The near end is the overflow side. Code that only knows `far` passes
-extent 0, and the functions leave memory alone. A block handed to
-`stackman_call` has both ends, so the extent is
-`STACKMAN_SP_DIFF(far, near)`.
+```c
+char *base = malloc(size);             /* low address, as malloc returns it */
+char *limit = base + size;             /* one past the high address */
+#if STACKMAN_STACK_DIR == 0
+char *far = (char *)STACKMAN_SP_ALIGN(limit);
+char *near = base;
+#else
+char *far = (char *)STACKMAN_SP_ALIGN(base);
+char *near = limit;
+#endif
+size_t extent = STACKMAN_SP_DIFF(far, near);
+
+stackman_guard_paint(far, extent, 64, 0xa5);
+stackman_call(worker, ctx, far);
+if (stackman_guard_check(far, extent, 64, 0xa5) != 1)
+    ; /* the near band was overwritten: this block is too small */
+
+stackman_guard_paint(far, extent, extent, 0xa5);
+stackman_call(worker, ctx, far);
+size_t unused = stackman_stack_unused(far, extent, 0xa5);
+size_t used = extent - unused;
+```
+
+Alignment can make `extent` a few bytes shorter than `size`. The
+sliver outside `far` is not part of the stack.
+
+A `stackman_switch` snapshot is a different range. It is the bytes
+already in use, from the saved near pointer out to `far`, and a copy
+of that range has no untouched tail. The main stack's far is often
+`STACKMAN_SP_FURTHEST`, which is not a paintable address. Extent 0
+is that case: the helpers leave memory alone.
+
+`stackman_stack_unused` takes the same `far` and `extent` as the paint.
+A low address plus a size is how `malloc` speaks, and on a descending
+stack that low address is the near end, but on an ascending stack it
+is the far end. The switch API does not use that pair. The call site
+above already had to compute `far` for `stackman_call`.
 
 ## Usage
 
