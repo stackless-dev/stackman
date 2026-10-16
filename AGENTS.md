@@ -19,9 +19,10 @@ registers it modifies.
 
 `stackman_guard.c` is optional and is not part of the switch. It is
 plain C, with no library calls. `far` is the far boundary. `extent` is
-the byte count toward near. Extent 0 means that bound is unknown, and
-the helpers do not touch memory. A `stackman_call` block knows both
-ends, so the extent is known and the guard sits at the near end.
+the byte count toward near. `stackman_block_call` produces that pair
+from a malloc block. Extent 0 means that bound is unknown, and the
+helpers do not touch memory. A `stackman_call` block knows both ends,
+so the extent is known and the guard sits at the near end.
 
 User code includes `stackman.h`. The library implementation includes
 `stackman_impl.h` once. `platforms/platform.h` selects

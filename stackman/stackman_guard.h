@@ -9,11 +9,11 @@
  * No library calls. The bytes are ordinary stores. Nothing is registered
  * with the operating system, and nothing programs a hardware limit.
  *
- * The use is a pre-allocated block passed to stackman_call. `far` is
- * that block's far boundary, the pointer passed as the new stack.
- * `extent` is the byte count toward near, the overflow side:
- *
- *   extent = STACKMAN_SP_DIFF(far, near);
+ * The use is a pre-allocated block passed to stackman_call.
+ * stackman_block_call turns the malloc pair into `far` and `extent`.
+ * `far` is the pointer passed as the new stack. `extent` is the byte
+ * count toward near. For a range already held as two pointers,
+ * extent = STACKMAN_SP_DIFF(far, near).
  *
  * Paint the near band, call, then check it. Paint the whole extent
  * and stackman_stack_unused reports how much of that block the call

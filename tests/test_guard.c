@@ -96,13 +96,11 @@ static void
 test_call_block(void)
 {
 	unsigned char raw[4096 + 16];
-	unsigned char *far;
+	void *far;
 	size_t extent;
 	unsigned char pattern = 0x5a;
 
-	far = (unsigned char *)STACKMAN_SP_ALIGN((char *)raw + sizeof raw);
-	assert(far > raw && far <= raw + sizeof raw);
-	extent = (size_t)STACKMAN_SP_DIFF(far, raw);
+	assert(stackman_block_call(raw, sizeof raw, &far, &extent) == 1);
 	assert(extent > 256 + 64);
 
 	assert(stackman_guard_paint(far, extent, 64, pattern) == 64);
@@ -119,6 +117,22 @@ main(void)
 	test_call_block();
 	printf("test_guard ok\n");
 #else
+	{
+		unsigned char raw[128 + STACKMAN_STACK_ALIGN];
+		uintptr_t aligned;
+		unsigned char *base;
+		void *far;
+		size_t extent;
+
+		aligned = ((uintptr_t)raw + STACKMAN_STACK_ALIGN - 1) &
+			~(uintptr_t)(STACKMAN_STACK_ALIGN - 1);
+		base = (unsigned char *)aligned;
+		assert(stackman_block_call(base, 128, &far, &extent) == 1);
+		assert(far == (void *)base);
+		assert(extent == 128);
+		assert(stackman_guard_paint(far, extent, GUARD, 0xa5) == GUARD);
+		assert(stackman_guard_check(far, extent, GUARD, 0xa5) == 1);
+	}
 	printf("test_guard ascending ok\n");
 #endif
 	return 0;

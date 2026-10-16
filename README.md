@@ -204,16 +204,11 @@ and check the band. Paint the whole extent first if you want
 `stackman_stack_unused` to tell you how deep the call actually went.
 
 ```c
+void *far;
+size_t extent;
 char *base = malloc(size);             /* low address, as malloc returns it */
-char *limit = base + size;             /* one past the high address */
-#if STACKMAN_STACK_DIR == 0
-char *far = (char *)STACKMAN_SP_ALIGN(limit);
-char *near = base;
-#else
-char *far = (char *)STACKMAN_SP_ALIGN(base);
-char *near = limit;
-#endif
-size_t extent = STACKMAN_SP_DIFF(far, near);
+if (stackman_block_call(base, size, &far, &extent) == 0)
+    ; /* alignment left no usable byte */
 
 stackman_guard_paint(far, extent, 64, 0xa5);
 stackman_call(worker, ctx, far);
@@ -236,10 +231,10 @@ of that range has no untouched tail. The main stack's far is often
 is that case: the helpers leave memory alone.
 
 `stackman_stack_unused` takes the same `far` and `extent` as the paint.
-A low address plus a size is how `malloc` speaks, and on a descending
-stack that low address is the near end, but on an ascending stack it
-is the far end. The switch API does not use that pair. The call site
-above already had to compute `far` for `stackman_call`.
+`stackman_block_call` is the conversion from the malloc pair. On a
+descending stack the low address is the near end. On an ascending
+stack the low address is the far end. The paint functions stay in
+`(far, extent)`, the same coordinates as `stackman_call`.
 
 ## Usage
 
