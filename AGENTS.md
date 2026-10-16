@@ -21,10 +21,10 @@ User code includes `stackman.h`. The library implementation includes
 `stackman_impl.h` once. `platforms/platform.h` selects
 `switch_<abi>_<compiler>`.
 
-`STACKMAN_HAVE_CALL` and `STACKMAN_STACK_ALIGN` must be visible from a
-normal `#include "stackman.h"`. If they sit under
-`#ifdef STACKMAN_SWITCH_IMPL`, `tests/test.c` compiles `stackman_call`
-out and CI looks green.
+`STACKMAN_STACK_ALIGN` must be visible from a normal
+`#include "stackman.h"`. If it sits under `#ifdef STACKMAN_SWITCH_IMPL`,
+`stackman.h` leaves it at 4. `stackman_call` is part of every supported
+ABI, and `test_04` and `test_05` always build.
 
 Align a stack with `STACKMAN_SP_ALIGN`. It follows `STACKMAN_STACK_ALIGN`
 and the stack direction.

@@ -241,10 +241,6 @@ void test_03(void *stack_marker)
 }
 
 
-#if defined(STACKMAN_HAVE_CALL)
-#define TEST_04
-#endif
-#ifdef TEST_04
 /* Sentinel returned by stackman_call. The epilogue must leave it intact. */
 static void *const stackman_call_result = (void *)(intptr_t)0x1234;
 
@@ -346,8 +342,6 @@ void test_05(void)
 	assert(STACKMAN_SP_LE(ctxt.sp[1], (void *)&caller_local));
 	assert(STACKMAN_SP_LE(ctxt.sp[1], &ctxt));
 }
-
-#endif
 
 /* Test our various macros */
 void test_06()
@@ -624,14 +618,12 @@ int main(int argc, char*argv[])
 	test_enter("test_03");
 	test_03((void*)&stack_marker);
 	printf("test_03 ok\n");
-#ifdef TEST_04
 	test_enter("test_04");
 	test_04();
 	printf("test_04 ok\n");
 	test_enter("test_05");
 	test_05();
 	printf("test_05 ok\n");
-#endif
 	test_enter("test_06");
 	test_06();
 	printf("test_06 ok\n");
