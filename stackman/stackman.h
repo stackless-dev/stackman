@@ -33,6 +33,9 @@
  * "stackman_impl.h" instead.
  */ 
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include "platforms/platform.h"
 #include "stackman_switch.h"
 
@@ -120,5 +123,47 @@
 #define STACKMAN_SP_DIFF(a, b)    ((b) - (a))                   /* to subtract stack pointers */
 #define STACKMAN_SP_ALIGN(a)      STACKMAN_SP_ALIGN_UP(a)
 #endif
+
+/* Turn a malloc block into the pointer stackman_call takes.
+ *
+ * base is the low address and size the byte count. *call_sp is the far
+ * end of that block, aligned for the stack direction. *extent is how many
+ * bytes of the block lie toward near from that pointer:
+ * [call_sp - extent, call_sp) when the stack grows down, and
+ * [call_sp, call_sp + extent) when it grows up. Bytes dropped while
+ * aligning the pointer are not part of extent.
+ *
+ * Returns 1 on success. Returns 0, and writes nothing, when base or
+ * either out-pointer is null, size is 0, base + size would wrap, or
+ * alignment leaves no usable byte.
+ */
+static inline int
+stackman_block_call(void *base, size_t size, void **call_sp, size_t *extent)
+{
+	uintptr_t low, high, sp;
+
+	if (base == 0 || size == 0 || call_sp == 0 || extent == 0)
+		return 0;
+	low = (uintptr_t)base;
+	if (low > UINTPTR_MAX - size)
+		return 0;
+	high = low + size;
+#if STACKMAN_STACK_DIR == 0
+	sp = (uintptr_t)STACKMAN_SP_ALIGN(high);
+	if (sp <= low || sp > high)
+		return 0;
+	*extent = (size_t)STACKMAN_SP_DIFF(sp, low);
+#else
+	/* Aligning up adds STACKMAN_STACK_ALIGN - 1. */
+	if (low > UINTPTR_MAX - (STACKMAN_STACK_ALIGN - 1))
+		return 0;
+	sp = (uintptr_t)STACKMAN_SP_ALIGN(low);
+	if (sp < low || sp >= high)
+		return 0;
+	*extent = (size_t)STACKMAN_SP_DIFF(sp, high);
+#endif
+	*call_sp = (void *)sp;
+	return 1;
+}
 
 #endif /* STACKMAN_H */

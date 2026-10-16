@@ -180,6 +180,12 @@ This function is useful for at least three things:
 - To query the current stack pointer
 - To enforce an actual function call with stack pointer information.
 
+A heap block from `malloc` is a low address and a size. `stackman_block_call()`
+turns that pair into the aligned pointer `stackman_call` takes and the number
+of bytes from there toward near. On a descending stack that pointer is the
+high end of the block. The function returns 0 when the block is empty or
+alignment leaves no usable byte.
+
 The last feature is useful to bypass any in-lining that a compiler may do, when one really wants
 a proper function call with stack, for example, when setting up a new stack entry point.
 
